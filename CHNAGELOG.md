@@ -1,5 +1,11 @@
+### 1.1.01
+package.json에 type module 삭제 
 
-### 1.0.9 ( Stable )
+### 1.1.0 
+bootpay-backend-nodejs 로 패키지 네임 변경 
+package.json에 type module 추가 
+
+### 1.0.9 
 bootpay로 alias 변경 
 주석 추가 
 @bootpay/backend-nodejs 로 패키지 네임 변경 
