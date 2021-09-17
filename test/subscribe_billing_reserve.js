@@ -1,15 +1,14 @@
 (async () => {
-    const RestClient = require('../dist/bootpay').RestClient
-    RestClient.setConfig(
-        '59bfc738e13f337dbd6ca48a',
-        'pDc0NwlkEX3aSaHTp/PPL/i8vn5E/CqRChgyEp/gHD0=',
-        'development'
+    const Bootpay = require('../dist/bootpay').Bootpay
+    Bootpay.setConfig(
+        '5b8f6a4d396fa665fdc2b5ea',
+        'rm6EYECr6aroQVG2ntW0A6LpWnkTgP4uQ3H18sDDUYw='
     )
-    let token = await RestClient.getAccessToken()
+    let token = await Bootpay.getAccessToken()
     if (token.status === 200) {
         let response
         try {
-            response = await RestClient.reserveSubscribeBilling({
+            response = await Bootpay.reserveSubscribeBilling({
                 billingKey: '5f97b8a40f606f03e8ab32a0',
                 itemName: '테스트',
                 price: 1000,

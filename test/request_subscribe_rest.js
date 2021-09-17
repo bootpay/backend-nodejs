@@ -1,15 +1,14 @@
 (async () => {
-    const RestClient = require('../dist/bootpay').RestClient
-    RestClient.setConfig(
-        '59bfc738e13f337dbd6ca48a',
-        'pDc0NwlkEX3aSaHTp/PPL/i8vn5E/CqRChgyEp/gHD0=',
-        'development'
+    const Bootpay = require('../dist/bootpay').Bootpay
+    Bootpay.setConfig(
+        '5b8f6a4d396fa665fdc2b5ea',
+        'rm6EYECr6aroQVG2ntW0A6LpWnkTgP4uQ3H18sDDUYw='
     )
-    let token = await RestClient.getAccessToken()
+    let token = await Bootpay.getAccessToken()
     if (token.status === 200) {
         let response
         try {
-            response = await RestClient.requestSubscribeBillingKey({
+            response = await Bootpay.requestSubscribeBillingKey({
                 orderId: (new Date()).getTime(),
                 pg: 'nicepay',
                 itemName: '정기결제 30일권',

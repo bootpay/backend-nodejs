@@ -1,10 +1,8 @@
 var BootpayRest = require('../lib/bootpay');
 
 BootpayRest.setConfig(
-    '5b9f51264457636ab9a07cde',
-    'sfilSOSVakw+PZA+PRux4Iuwm7a//9CXXudCq9TMDHk=',
-    'development'
-);
+    '5b8f6a4d396fa665fdc2b5ea',
+    'rm6EYECr6aroQVG2ntW0A6LpWnkTgP4uQ3H18sDDUYw='
 
 BootpayRest.remoteForm(
     {

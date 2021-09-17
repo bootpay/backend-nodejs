@@ -1,6 +1,6 @@
-var BootpayRest = require('../lib/bootpay');
+const Bootpay = require('../lib/bootpay');
 
-BootpayRest.setConfig(
+Bootpay.setConfig(
     "[[ REST용 Application ID]]",
     "[[ Private Key ]]"
 );
@@ -17,16 +17,16 @@ switch (params.act) {
         // params.message로 데이터 전달
         break;
     case 'confirm':
-        BootpayRest.getAccessToken().then(function (tokenData) {
+        Bootpay.getAccessToken().then(function (tokenData) {
             // 부트페이 서버에서 토큰값을 제대로 가져온 경우
             if (tokenData.status === 200) {
-                BootpayRest.verify(params.receipt_id).then(
+                Bootpay.verify(params.receipt_id).then(
                     function (verify) {
                         // 원래 요청했던 금액과 일치하거나
                         // 결제 승인 전 상태라면 결제 승인 요청을 한다. ( 승인전 상태는 status 값이 2 입니다. )
                         if (verify.status === 200 && verify.price == originPrice && verify.data.status === 2) {
                             // 결제 승인한다.
-                            BootpayRest.submit(params.receipt_id).then(
+                            Bootpay.submit(params.receipt_id).then(
                                 function (response) {
                                     // 서버에서 REST API로 승인 후 200 OK를 받았다면
                                     // 결제가 완료 처리를 한다.

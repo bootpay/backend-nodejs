@@ -1,9 +1,8 @@
 (async () => {
-    const RestClient = require('../dist/bootpay').RestClient
+    const RestClient = require('../dist/bootpay').Bootpay
     RestClient.setConfig(
-        '59bfc738e13f337dbd6ca48a',
-        'pDc0NwlkEX3aSaHTp/PPL/i8vn5E/CqRChgyEp/gHD0=',
-        'development'
+        '5b8f6a4d396fa665fdc2b5ea',
+        'rm6EYECr6aroQVG2ntW0A6LpWnkTgP4uQ3H18sDDUYw='
     )
     let token = await RestClient.getAccessToken()
     if (token.status === 200) {
