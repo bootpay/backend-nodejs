@@ -8,7 +8,8 @@
         private_key: 'WwDv0UjfwFa04wYG0LJZZv1xwraQnlhnHE375n52X0U='
     })
     try {
-        let response = await Bootpay.getAccessToken()
+        await Bootpay.getAccessToken()
+        const response = await Bootpay.receiptPayment('61b009aaec81b4057e7f6ecd')
         console.log(response)
     } catch (e) {
         console.log(e)

@@ -1,17 +1,14 @@
 (async () => {
-    const RestClient = require('../dist/bootpay').Bootpay
-    RestClient.setConfig(
-        '5b8f6a4d396fa665fdc2b5ea',
-        'rm6EYECr6aroQVG2ntW0A6LpWnkTgP4uQ3H18sDDUYw='
-    )
-    let token = await RestClient.getAccessToken()
-    if (token.status === 200) {
-        let response
-        try {
-            response = await RestClient.certificate('1234')
-        } catch (e) {
-            return console.log(e)
-        }
+    const Bootpay = require('../dist/bootpay.js').Bootpay
+    Bootpay.setConfiguration({
+        application_id: '59b731f084382614ebf72215',
+        private_key: 'WwDv0UjfwFa04wYG0LJZZv1xwraQnlhnHE375n52X0U='
+    })
+    try {
+        await Bootpay.getAccessToken()
+        const response = await Bootpay.certificate('625783a6cf9f6d001d0aed19')
         console.log(response)
+    } catch (e) {
+        console.log(e)
     }
 })()

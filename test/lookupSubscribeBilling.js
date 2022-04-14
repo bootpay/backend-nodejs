@@ -1,6 +1,3 @@
-// import { Bootpay } from "../dist/bootpay"
-
-
 (async () => {
     const Bootpay = require('../dist/bootpay.js').Bootpay
     Bootpay.setConfiguration({
@@ -8,7 +5,8 @@
         private_key: 'WwDv0UjfwFa04wYG0LJZZv1xwraQnlhnHE375n52X0U='
     })
     try {
-        let response = await Bootpay.getAccessToken()
+        await Bootpay.getAccessToken()
+        const response = await Bootpay.lookupSubscribeBillingKey('6257989ecf9f6d001d0aed1b')
         console.log(response)
     } catch (e) {
         console.log(e)
