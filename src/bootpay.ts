@@ -18,9 +18,7 @@ class BootpayBackendNodejs extends BootpayBackendNodejsResource {
     /**
      * Get Access Token
      * Comment by GOSOMI
-     * @date: 2022-04-12
-     * @param
-     * @returns
+     * @returns Promise<AccessTokenResponseParameters>
      */
     async getAccessToken(): Promise<AccessTokenResponseParameters> {
         try {
@@ -40,7 +38,6 @@ class BootpayBackendNodejs extends BootpayBackendNodejsResource {
     /**
      * Lookup Receipt
      * Comment by GOSOMI
-     * @date: 2022-04-13
      * @param receiptId: string
      */
     async receiptPayment(receiptId: string): Promise<ReceiptResponseParameters> {
@@ -55,7 +52,6 @@ class BootpayBackendNodejs extends BootpayBackendNodejsResource {
     /**
      * Cancel Payment
      * Comment by GOSOMI
-     * @date: 2022-04-13
      * @param cancelPayment: CancelPaymentParameters
      * @returns Promise<CancelPaymentParameters>
      */
@@ -73,7 +69,6 @@ class BootpayBackendNodejs extends BootpayBackendNodejsResource {
     /**
      * Lookup Certificate Data
      * Comment by GOSOMI
-     * @date: 2022-04-14
      * @param receiptId: string
      * @returns Promise<CertificateResponseParameters>
      */
@@ -89,7 +84,6 @@ class BootpayBackendNodejs extends BootpayBackendNodejsResource {
     /**
      * ConfirmPayment
      * Comment by GOSOMI
-     * @date: 2022-04-14
      * @param receiptId: string
      * @returns Promise<ReceiptResponseParameters>
      */
@@ -107,7 +101,6 @@ class BootpayBackendNodejs extends BootpayBackendNodejsResource {
     /**
      * lookupSubscribeBillingKey
      * Comment by GOSOMI
-     * @date: 2022-04-14
      * @param receiptId: string
      * @returns Promise<SubscriptionBillingResponseParameters>
      */
@@ -123,7 +116,6 @@ class BootpayBackendNodejs extends BootpayBackendNodejsResource {
     /**
      * requestSubscribeBillingKey
      * Comment by GOSOMI
-     * @date: 2022-04-14
      * @param subscriptionBillingRequest: SubscriptionBillingRequestParameters
      * @returns Promise<SubscriptionBillingResponseParameters>
      */
@@ -141,7 +133,6 @@ class BootpayBackendNodejs extends BootpayBackendNodejsResource {
     /**
      * requestSubscribeCardPayment
      * Comment by GOSOMI
-     * @date: 2022-04-14
      * @param subscriptionCardRequest: SubscriptionCardPaymentRequestParameters
      * @returns Promise<ReceiptResponseParameters>
      */
@@ -159,7 +150,6 @@ class BootpayBackendNodejs extends BootpayBackendNodejsResource {
     /**
      * destroyBillingKey
      * Comment by GOSOMI
-     * @date: 2022-04-14
      * @param billingKey:string
      * @returns Promise<DestroySubscribeResponseParameters>
      */
@@ -175,7 +165,6 @@ class BootpayBackendNodejs extends BootpayBackendNodejsResource {
     /**
      * requestUserToken
      * Comment by GOSOMI
-     * @date: 2022-04-14
      * @param userTokenRequest:UserTokenRequestParameters
      * @returns Promise<UserTokenResponseParameters>
      */
