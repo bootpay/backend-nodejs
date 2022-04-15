@@ -124,6 +124,7 @@ export interface AuthenticateData {
 
 export interface SubscriptionBillingRequestParameters {
     pg: string
+    method?: string
     order_name: string
     subscription_id: string
     card_no: string
