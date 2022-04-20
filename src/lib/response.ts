@@ -183,3 +183,18 @@ export interface UserTokenResponseParameters {
     user_token: string
     expired_at: Date
 }
+
+export interface SubscribePaymentReserveParameters {
+    billing_key: string
+    order_name: string
+    price: number
+    tax_free?: number
+    user?: UserModel
+    items?: ItemModel
+    reserve_execute_at: string
+}
+
+export interface SubscribePaymentReserveResponse {
+    reserve_id: string
+    reserve_execute_at: string
+}
