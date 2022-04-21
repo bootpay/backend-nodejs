@@ -9,7 +9,8 @@ import {
     SubscriptionBillingResponseParameters,
     SubscriptionCardPaymentRequestParameters, UserTokenRequestParameters, UserTokenResponseParameters,
     SubscribePaymentReserveParameters,
-    SubscribePaymentReserveResponse
+    SubscribePaymentReserveResponse,
+    CancelSubscribeReserveResponse
 } from './lib/response'
 
 class BootpayBackendNodejs extends BootpayBackendNodejsResource {
@@ -184,7 +185,6 @@ class BootpayBackendNodejs extends BootpayBackendNodejsResource {
     /**
      * subscribePaymentReserve
      * Comment by GOSOMI
-     * @date: 2022-04-20
      * @param subscribePaymentReserveRequest:SubscribePaymentReserveParameters
      * @returns Promise<SubscribePaymentReserveResponse>
      */
@@ -193,6 +193,21 @@ class BootpayBackendNodejs extends BootpayBackendNodejsResource {
             const response: SubscribePaymentReserveResponse = await this.post<SubscribePaymentReserveResponse>('subscribe/payment/reserve', {
                 ...subscribePaymentReserveRequest
             })
+            return Promise.resolve(response)
+        } catch (e) {
+            return Promise.reject(e)
+        }
+    }
+
+    /**
+     * cancelSubscribeReserve
+     * Comment by GOSOMI
+     * @param reserveId:string
+     * @returns Promise<CancelSubscribeReserveResponse>
+     */
+    async cancelSubscribeReserve(reserveId: string) {
+        try {
+            const response: CancelSubscribeReserveResponse = await this.delete<CancelSubscribeReserveResponse>(`subscribe/payment/reserve/${ reserveId }`)
             return Promise.resolve(response)
         } catch (e) {
             return Promise.reject(e)

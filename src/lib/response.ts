@@ -198,3 +198,8 @@ export interface SubscribePaymentReserveResponse {
     reserve_id: string
     reserve_execute_at: string
 }
+
+export interface CancelSubscribeReserveResponse {
+    reserve_id: string
+    success: boolean
+}
