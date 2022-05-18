@@ -1,3 +1,1 @@
-import Bootpay from "./bootpay";
-
-export { Bootpay };
+module.exports = require('./bootpay')

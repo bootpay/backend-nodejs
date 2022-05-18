@@ -1,5 +1,5 @@
-// import { Bootpay } from "../dist/bootpay"
-
+// import { Bootpay } from "../dist/index.js";
+//
 
 (async () => {
     const Bootpay = require('../dist/bootpay.js').Bootpay
