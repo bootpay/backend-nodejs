@@ -6,7 +6,7 @@
   "types": "dist/bootpay.d.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "rm -rf ./dist && NODE_ENV=build ./node_modules/.bin/webpack --output-path=./dist --mode=production && tsc --declaration && cp ./package.json dist/package.json && cp ./src/index.js ./dist/index.js && mv ./dist/src/* ./dist && rm -rf ./dist/src && cp ./README.md dist/",
+    "build": "rm -rf ./dist && tsc --build && cp ./package.json dist/package.json && cp ./src/index.js ./dist/index.js && rm -rf ./dist/src && cp ./README.md dist/",
     "clear": "tsc --build --clean"
   },
   "dependencies": {

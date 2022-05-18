@@ -1,3 +1,3 @@
-import { Bootpay } from "./bootpay";
+import Bootpay from "./bootpay";
 
 export { Bootpay };
