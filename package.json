@@ -1,12 +1,12 @@
 {
   "name": "@bootpay/backend-js",
-  "version": "2.0.0",
+  "version": "2.0.0-beta.1",
   "description": "Bootpay Server Side Package for Node.js",
   "main": "dist/bootpay.js",
   "types": "dist/bootpay.d.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "tsc --build",
+    "build": "rm -rf ./dist && NODE_ENV=build ./node_modules/.bin/webpack --output-path=./dist --mode=production && tsc --declaration && cp ./package.json dist/package.json && cp ./src/index.js ./dist/index.js && mv ./dist/src/* ./dist && rm -rf ./dist/src && cp ./README.md dist/",
     "clear": "tsc --build --clean"
   },
   "dependencies": {
