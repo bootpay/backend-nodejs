@@ -16,10 +16,11 @@ export interface BootpayCommonResponse<T = any> {
 }
 
 export interface BootpayCancelData {
-    receiptId: string, // 부트페이에서 발급한 영수증 id
-    price?: number, // (선택사항) 부분취소 요청시 금액을 지정, 미지정시 전액 취소 (부분취소가 가능한 PG사, 결제수단에 한해 적용됨)
-    name?: string, // 취소 요청자 이름
-    reason?: string, // 취소 요청 사유
+    receiptId: string // 부트페이에서 발급한 영수증 id
+    price?: number // (선택사항) 부분취소 요청시 금액을 지정, 미지정시 전액 취소 (부분취소가 가능한 PG사, 결제수단에 한해 적용됨)
+    taxFree?: number
+    name?: string // 취소 요청자 이름
+    reason?: string // 취소 요청 사유
     refund?: BootpayRefundData
 }
 
@@ -76,7 +77,8 @@ export interface BootpayReserveSubscribeBillingData {
 
 export interface BootpayRequestPaymentData {
     pg?: string, // [PG 결제] 사용하고자 하는 PG사의 Alias를 입력. ex) danal, kcp, inicis등, 미 지정시 통합결제창이 오픈
-    method?: string, //card:카드, phone: 휴대폰, bank: 실시간 계좌이체, vbank: 가상계좌, auth: 본인인증, card_rebill: 정기결제, easy: 카카오,페이코,네이버페이 등의 간편결제, 미지정시 통합결제창 오픈
+    method?: string, //card:카드, phone: 휴대폰, bank: 실시간 계좌이체, vbank: 가상계좌, auth: 본인인증, card_rebill: 정기결제, easy:
+                     // 카카오,페이코,네이버페이 등의 간편결제, 미지정시 통합결제창 오픈
     methods?: Array<string>, // 통합결제시 사용할 method 배열 형태
     orderId: string, // 개발사에서 관리하는 고유결제번호
     price: number,  // 결제금액
@@ -120,7 +122,7 @@ export interface BootpayUserInfoData {
     phone?: string, //01012341234
     gender?: number, //0:여자, 1:남자
     area?: string, // 서울|인천|대구|광주|부산|울산|경기|강원|충청북도|충북|충청남도|충남|전라북도|전북|전라남도|전남|경상북도|경북|경상남도|경남|제주|세종|대전 중 택 1
-    birth?: string 
+    birth?: string
 }
 
 
@@ -191,7 +193,7 @@ class BootpayRestClient extends BootpaySingleton {
     }
 
     /**
-     * 1. 토큰 발급 
+     * 1. 토큰 발급
      * getting access token
      * Comment by rumi
      * @date: 2020-10-27
@@ -216,7 +218,7 @@ class BootpayRestClient extends BootpaySingleton {
     }
 
     /**
-     * 2. 결제 검증 
+     * 2. 결제 검증
      * receipt verify
      * Comment by rumi
      * @date: 2020-10-27
@@ -251,6 +253,7 @@ class BootpayRestClient extends BootpaySingleton {
                 {
                     receipt_id: data.receiptId,
                     price: data.price,
+                    tax_free: data.taxFree,
                     name: data.name,
                     reason: data.reason,
                     refund: data.refund
@@ -263,7 +266,7 @@ class BootpayRestClient extends BootpaySingleton {
     }
 
     /**
-     * 4. 빌링키 발급 
+     * 4. 빌링키 발급
      * Request Subscribe Card Billing Key
      * Comment by rumi
      * @date: 2020-10-27
@@ -296,7 +299,7 @@ class BootpayRestClient extends BootpaySingleton {
 
 
     /**
-     * 4-1. 발급된 빌링키로 결제 승인 요청 
+     * 4-1. 발급된 빌링키로 결제 승인 요청
      * subscribe payment by billing key
      * Comment by rumi
      * @date: 2020-10-27
@@ -363,7 +366,7 @@ class BootpayRestClient extends BootpaySingleton {
     }
 
     /**
-     * 4-2-1. 발급된 빌링키로 결제 예약 - 취소 요청 
+     * 4-2-1. 발급된 빌링키로 결제 예약 - 취소 요청
      * Cancel Reserve Subscribe Billing
      * Comment by rumi
      * @date: 2020-10-27
@@ -384,14 +387,14 @@ class BootpayRestClient extends BootpaySingleton {
 
 
     /**
-     * 4-3. 빌링키 삭제 
+     * 4-3. 빌링키 삭제
      * destroy billing key
      * Comment by rumi
      * @date: 2020-10-27
      * @param billingKey: string
      * @returns Promise<BootpayCommonResponse>
      */
-     async destroySubscribeBillingKey(billingKey: string) {
+    async destroySubscribeBillingKey(billingKey: string) {
         let response: BootpayCommonResponse
         try {
             response = await this.$http.delete(
@@ -405,14 +408,14 @@ class BootpayRestClient extends BootpaySingleton {
 
 
     /**
-     * 5. (부트페이 단독 - 간편결제창, 생체인증 기반의 사용자를 위한) 사용자 토큰 발급 
+     * 5. (부트페이 단독 - 간편결제창, 생체인증 기반의 사용자를 위한) 사용자 토큰 발급
      * get user token
      * Comment by rumi
      * @date: 2020-10-27
      * @param data: BootpayRequestUserTokenData
      * @returns Promise<BootpayCommonResponse>
      */
-     async requestUserToken(data: BootpayRequestUserTokenData) {
+    async requestUserToken(data: BootpayRequestUserTokenData) {
         let response: BootpayCommonResponse
         try {
             response = await this.$http.post(
@@ -433,14 +436,14 @@ class BootpayRestClient extends BootpaySingleton {
     }
 
     /**
-     * 6. 결제링크 생성 
+     * 6. 결제링크 생성
      * REST API로 결제 요청을 합니다
      * Comment by rumi
      * @date: 2020-10-27
      * @param data: any
      * @returns Promise<BootpayCommonResponse>
      */
-     async requestPayment(data: BootpayRequestPaymentData) {
+    async requestPayment(data: BootpayRequestPaymentData) {
         let response: BootpayCommonResponse
         try {
             response = await this.$http.post(
@@ -468,14 +471,14 @@ class BootpayRestClient extends BootpaySingleton {
 
 
     /**
-     * 7. 서버 승인 요청 
+     * 7. 서버 승인 요청
      * Server Submit method
      * Comment by rumi
      * @date: 2020-10-27
      * @param receiptId
      * @returns Promise<BootpayCommonResponse>
      */
-     async submit(receiptId: string): Promise<BootpayCommonResponse> {
+    async submit(receiptId: string): Promise<BootpayCommonResponse> {
         let response: BootpayCommonResponse
         try {
             response = await this.$http.post(
@@ -490,7 +493,7 @@ class BootpayRestClient extends BootpaySingleton {
 
 
     /**
-     * 8. 본인 인증 결과 검증 
+     * 8. 본인 인증 결과 검증
      * Certificate Data
      * Comment by rumi
      * @date: 2020-10-27
@@ -507,7 +510,7 @@ class BootpayRestClient extends BootpaySingleton {
             return Promise.reject(e)
         }
         return Promise.resolve(response)
-    } 
+    }
 
     private getApiUrl(uri: string) {
         return [API_URL[this.mode], uri].join('/')
