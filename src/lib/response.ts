@@ -213,6 +213,8 @@ export interface ShippingRequestParameters {
     receipt_id: string
     tracking_number: string
     delivery_corp: string
+    shipping_prepayment?: boolean
+    shipping_day?: number
     user?: UserModel
     company?: CompanyModel
 }
