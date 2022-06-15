@@ -10,7 +10,8 @@ import {
     SubscriptionCardPaymentRequestParameters, UserTokenRequestParameters, UserTokenResponseParameters,
     SubscribePaymentReserveParameters,
     SubscribePaymentReserveResponse,
-    CancelSubscribeReserveResponse
+    CancelSubscribeReserveResponse,
+    ShippingRequestParameters
 } from './lib/response'
 
 class BootpayBackendNodejs extends BootpayBackendNodejsResource {
@@ -208,6 +209,20 @@ class BootpayBackendNodejs extends BootpayBackendNodejsResource {
     async cancelSubscribeReserve(reserveId: string) {
         try {
             const response: CancelSubscribeReserveResponse = await this.delete<CancelSubscribeReserveResponse>(`subscribe/payment/reserve/${ reserveId }`)
+            return Promise.resolve(response)
+        } catch (e) {
+            return Promise.reject(e)
+        }
+    }
+
+    /**
+     * 배송시작 REST API 시작
+     * Comment by GOSOMI
+     * @date: 2022-06-14
+     */
+    async shippingStart(shippingRequest: ShippingRequestParameters): Promise<ReceiptResponseParameters | any> {
+        try {
+            const response: ReceiptResponseParameters = await this.put<ReceiptResponseParameters>(`escrow/shipping/start/${ shippingRequest.receipt_id }`, shippingRequest)
             return Promise.resolve(response)
         } catch (e) {
             return Promise.reject(e)

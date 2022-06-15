@@ -21,12 +21,12 @@ export interface ReceiptResponseParameters {
     purchased_at?: Date
     requested_at: Date
     cancelled_at?: Date
-    escrow_status?: string
     status: number
     card_data?: CardData,
     phone_data?: PhoneData,
     bank_data?: BankData
     vbank_data?: BankData
+    escrow_data?: EscrowData
 }
 
 export interface ExtraModel {
@@ -34,17 +34,25 @@ export interface ExtraModel {
 }
 
 export interface UserModel {
-    id: string
-    username: string
-    phone: string
-    email: string
+    id?: string
+    username?: string
+    phone?: string
+    email?: string
+}
+
+export interface CompanyModel {
+    name?: string
+    phone?: string
+    zipcode?: string
+    addr1?: string
+    addr2?: string
 }
 
 export interface ItemModel {
-    id: string
-    name: string
-    qty: number
-    price: number
+    id?: string
+    name?: string
+    qty?: number
+    price?: number
 }
 
 export interface BillingData {
@@ -52,7 +60,7 @@ export interface BillingData {
     card_company: string
     card_company_code: string
     card_type: string
-    card_hash: string
+    card_hash?: string
 }
 
 export interface CardData {
@@ -86,6 +94,13 @@ export interface BankData {
     cash_receipt_tid?: string
     cash_receipt_type?: string
     cash_receipt_no?: string
+}
+
+export interface EscrowData {
+    status: number
+    status_locale: string
+    shipping_started_at: Date
+    receipt_confirmed_at: Date | null
 }
 
 export interface CancelPaymentParameters {
@@ -192,6 +207,14 @@ export interface SubscribePaymentReserveParameters {
     user?: UserModel
     items?: ItemModel
     reserve_execute_at: string
+}
+
+export interface ShippingRequestParameters {
+    receipt_id: string
+    tracking_number: string
+    delivery_corp: string
+    user?: UserModel
+    company?: CompanyModel
 }
 
 export interface SubscribePaymentReserveResponse {

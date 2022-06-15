@@ -6,7 +6,7 @@
     })
     try {
         await Bootpay.getAccessToken()
-        const response = await Bootpay.destroyBillingKey('62579f4bcf9f6d001d0aed21')
+        const response = await Bootpay.destroyBillingKey('628b2579d01c7e00219b6076')
         console.log(response)
     } catch (e) {
         console.log(e)
