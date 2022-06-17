@@ -17,7 +17,9 @@ export interface ReceiptResponseParameters {
     sandbox: boolean
     pg: string
     method: string
+    method_symbol: string // legacy method alias
     method_origin: string
+    method_origin_symbol: string // legacy method origin alias
     purchased_at?: Date
     requested_at: Date
     cancelled_at?: Date
