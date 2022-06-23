@@ -275,9 +275,9 @@ REST API 방식으로 고객으로부터 카드 정보를 전달하여, PG사에
 
 ## 4-6. 빌링키 조회
 (빌링키 발급 완료시 리턴받았던 receipt_id에 한정) 어떤 빌링키였는지 조회합니다. 
-```python
+```javascript
 (async () => {
-    const Bootpay = require('../dist/bootpay.js').Bootpay
+    const Bootpay = require('@bootpay/backend-js').Bootpay
     Bootpay.setConfiguration({
         application_id: '5b8f6a4d396fa665fdc2b5ea',
         private_key: 'rm6EYECr6aroQVG2ntW0A6LpWnkTgP4uQ3H18sDDUYw='
