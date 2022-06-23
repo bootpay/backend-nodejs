@@ -1,3 +1,4 @@
+// import { Bootpay } from "../dist/bootpay"
 (async () => {
     const Bootpay = require('../dist/bootpay.js').Bootpay
     Bootpay.setConfiguration({
@@ -6,12 +7,7 @@
     })
     try {
         await Bootpay.getAccessToken()
-        const response = await Bootpay.cancelPayment({
-            receipt_id: '628b2206d01c7e00209b6087',
-            cancel_price: 1000,
-            cancel_username: '테스트 사용자',
-            cancel_message: '테스트 취소입니다.'
-        })
+        const response = await Bootpay.confirmPayment('62876963d01c7e00209b6028')
         console.log(response)
     } catch (e) {
         console.log(e)
