@@ -1,4 +1,4 @@
-# Bootpay Server Side Package for Node.js [![alt text](https://cdn.bootpay.co.kr/icon/npm.svg)](https://www.npmjs.com/package/bootpay-backend-nodejs)
+# Bootpay Server Side Package for Node.js [![alt text](https://cdn.bootpay.co.kr/icon/npm.svg)](https://www.npmjs.com/package/@bootpay/backend-js)
 
 ## Bootpay Node.js Server Side Library
 
@@ -44,8 +44,9 @@ npm install --save @bootpay/backend-js
 # 사용하기
 
 ```javascript
-(async () => {
-    const Bootpay = require('@bootpay/backend-js').Bootpay
+import { Bootpay } from "@bootpay/backend-js";
+
+(async () => { 
     Bootpay.setConfiguration({
         application_id: '5b8f6a4d396fa665fdc2b5ea',
         private_key: 'rm6EYECr6aroQVG2ntW0A6LpWnkTgP4uQ3H18sDDUYw='
@@ -72,8 +73,7 @@ npm install --save @bootpay/backend-js
 발급된 토큰은 30분간 유효하며, 최초 발급일로부터 30분이 지날 경우 토큰 발급 함수를 재호출 해주셔야 합니다.
 
 ```javascript
-(async () => {
-    const Bootpay = require('@bootpay/backend-js').Bootpay
+(async () => { 
     Bootpay.setConfiguration({
         application_id: '59b731f084382614ebf72215',
         private_key: 'WwDv0UjfwFa04wYG0LJZZv1xwraQnlhnHE375n52X0U='
@@ -119,8 +119,7 @@ price를 지정하지 않으면 전액취소 됩니다.
 
 간혹 개발사에서 실수로 여러번 부분취소를 보내서 여러번 취소되는 경우가 있기때문에, 부트페이에서는 부분취소 중복 요청을 막기 위해 cancel_id 라는 필드를 추가했습니다. cancel_id를 지정하시면, 해당 건에 대해 중복 요청방지가 가능합니다.  
 ```javascript 
-(async () => {
-    const Bootpay = require('../dist/bootpay.js').Bootpay
+(async () => { 
     Bootpay.setConfiguration({
         application_id: '5b8f6a4d396fa665fdc2b5ea',
         private_key: 'rm6EYECr6aroQVG2ntW0A6LpWnkTgP4uQ3H18sDDUYw='
@@ -145,8 +144,7 @@ REST API 방식으로 고객으로부터 카드 정보를 전달하여, PG사에
 발급받은 빌링키를 저장하고 있다가, 원하는 시점, 원하는 금액에 결제 승인 요청하여 좀 더 자유로운 결제시나리오에 적용이 가능합니다.
 * 비인증 정기결제(REST API) 방식을 지원하는 PG사만 사용 가능합니다. 
 ```javascript
-(async () => {
-    const Bootpay = require('@bootpay/backend-js').Bootpay
+(async () => { 
     Bootpay.setConfiguration({
         application_id: '5b8f6a4d396fa665fdc2b5ea',
         private_key: 'rm6EYECr6aroQVG2ntW0A6LpWnkTgP4uQ3H18sDDUYw='
@@ -178,8 +176,7 @@ REST API 방식으로 고객으로부터 카드 정보를 전달하여, PG사에
 발급된 빌링키로 원하는 시점에 원하는 금액으로 결제 승인 요청을 할 수 있습니다. 잔액이 부족하거나 도난 카드 등의 특별한 건이 아니면 PG사에서 결제를 바로 승인합니다.
 
 ```javascript 
-(async () => {
-    const Bootpay = require('@bootpay/backend-js').Bootpay
+(async () => { 
     Bootpay.setConfiguration({
         application_id: '5b8f6a4d396fa665fdc2b5ea',
         private_key: 'rm6EYECr6aroQVG2ntW0A6LpWnkTgP4uQ3H18sDDUYw='
@@ -202,8 +199,7 @@ REST API 방식으로 고객으로부터 카드 정보를 전달하여, PG사에
 ## 4-3. 발급된 빌링키로 결제 예약 요청
 원하는 시점에 4-1로 결제 승인 요청을 보내도 되지만, 빌링키 발급 이후에 바로 결제 예약 할 수 있습니다. (빌링키당 최대 10건)
 ```javascript
-(async () => {
-    const Bootpay = require('@bootpay/backend-js').Bootpay
+(async () => { 
     Bootpay.setConfiguration({
         application_id: '5b8f6a4d396fa665fdc2b5ea',
         private_key: 'rm6EYECr6aroQVG2ntW0A6LpWnkTgP4uQ3H18sDDUYw='
@@ -228,8 +224,7 @@ REST API 방식으로 고객으로부터 카드 정보를 전달하여, PG사에
 ## 4-4. 발급된 빌링키로 결제 예약 - 취소 요청
 빌링키로 예약된 결제건을 취소합니다.
 ```javascript
-(async () => {
-   const Bootpay = require('@bootpay/backend-js').Bootpay
+(async () => { 
     Bootpay.setConfiguration({
         application_id: '5b8f6a4d396fa665fdc2b5ea',
         private_key: 'rm6EYECr6aroQVG2ntW0A6LpWnkTgP4uQ3H18sDDUYw='
@@ -257,8 +252,7 @@ REST API 방식으로 고객으로부터 카드 정보를 전달하여, PG사에
 ## 4-5. 빌링키 삭제 
 발급된 빌링키로 더 이상 사용되지 않도록, 삭제 요청합니다.
 ```javascript 
-(async () => {
-    const Bootpay = require('@bootpay/backend-js').Bootpay
+(async () => { 
     Bootpay.setConfiguration({
         application_id: '5b8f6a4d396fa665fdc2b5ea',
         private_key: 'rm6EYECr6aroQVG2ntW0A6LpWnkTgP4uQ3H18sDDUYw='
@@ -276,8 +270,7 @@ REST API 방식으로 고객으로부터 카드 정보를 전달하여, PG사에
 ## 4-6. 빌링키 조회
 (빌링키 발급 완료시 리턴받았던 receipt_id에 한정) 어떤 빌링키였는지 조회합니다. 
 ```javascript
-(async () => {
-    const Bootpay = require('@bootpay/backend-js').Bootpay
+(async () => { 
     Bootpay.setConfiguration({
         application_id: '5b8f6a4d396fa665fdc2b5ea',
         private_key: 'rm6EYECr6aroQVG2ntW0A6LpWnkTgP4uQ3H18sDDUYw='
@@ -297,8 +290,7 @@ REST API 방식으로 고객으로부터 카드 정보를 전달하여, PG사에
 (부트페이 단독) 부트페이에서 제공하는 간편결제창, 생체인증 기반의 결제 사용을 위해서는 개발사에서 회원 고유번호를 관리해야하며, 해당 회원에 대한 사용자 토큰을 발급합니다.
 이 토큰값을 기반으로 클라이언트에서 결제요청 하시면 되겠습니다.
 ```javascript
-(async () => {
-    const Bootpay = require('@bootpay/backend-js').Bootpay
+(async () => { 
     Bootpay.setConfiguration({
         application_id: '5b8f6a4d396fa665fdc2b5ea',
         private_key: 'rm6EYECr6aroQVG2ntW0A6LpWnkTgP4uQ3H18sDDUYw='
@@ -326,8 +318,7 @@ REST API 방식으로 고객으로부터 카드 정보를 전달하여, PG사에
 2. 단일 트랜잭션의 개념이 필요할 경우 - 재고파악이 중요한 커머스를 운영할 경우 트랜잭션 개념이 필요할 수 있겠으며, 이를 위해서는 서버 승인을 사용해야 합니다. 
 
 ```javascript
-(async () => {
-    const Bootpay = require('@bootpay/backend-js').Bootpay
+(async () => { 
     Bootpay.setConfiguration({
         application_id: '5b8f6a4d396fa665fdc2b5ea',
         private_key: 'rm6EYECr6aroQVG2ntW0A6LpWnkTgP4uQ3H18sDDUYw='
@@ -346,8 +337,7 @@ REST API 방식으로 고객으로부터 카드 정보를 전달하여, PG사에
 다날 본인인증 후 결과값을 조회합니다. 
 다날 본인인증에서 통신사, 외국인여부, 전화번호 이 3가지 정보는 다날에 추가로 요청하셔야 받으실 수 있습니다.
 ```javascript
-(async () => {
-    const Bootpay = require('@bootpay/backend-js').Bootpay
+(async () => { 
     Bootpay.setConfiguration({
         application_id: '59b731f084382614ebf72215',
         private_key: 'WwDv0UjfwFa04wYG0LJZZv1xwraQnlhnHE375n52X0U='
@@ -368,8 +358,7 @@ REST API 방식으로 고객으로부터 카드 정보를 전달하여, PG사에
 
 PG사로 배송정보( 이니시스, KCP만 지원 )를 보내서 에스크로 상태를 변경하는 API 입니다.
 ```javascript
-(async () => {
-    const Bootpay = require('@bootpay/backend-js').Bootpay
+(async () => { 
     Bootpay.setConfiguration({
         application_id: '59b731f084382614ebf72215',
         private_key: 'WwDv0UjfwFa04wYG0LJZZv1xwraQnlhnHE375n52X0U='
