@@ -177,9 +177,9 @@ REST API 방식으로 고객으로부터 카드 정보를 전달하여, PG사에
 ## 4-2. 발급된 빌링키로 결제 승인 요청
 발급된 빌링키로 원하는 시점에 원하는 금액으로 결제 승인 요청을 할 수 있습니다. 잔액이 부족하거나 도난 카드 등의 특별한 건이 아니면 PG사에서 결제를 바로 승인합니다.
 
-```python 
+```javascript 
 (async () => {
-    const Bootpay = require('../dist/bootpay.js').Bootpay
+    const Bootpay = require('@bootpay/backend-js').Bootpay
     Bootpay.setConfiguration({
         application_id: '5b8f6a4d396fa665fdc2b5ea',
         private_key: 'rm6EYECr6aroQVG2ntW0A6LpWnkTgP4uQ3H18sDDUYw='
@@ -227,9 +227,9 @@ REST API 방식으로 고객으로부터 카드 정보를 전달하여, PG사에
 
 ## 4-4. 발급된 빌링키로 결제 예약 - 취소 요청
 빌링키로 예약된 결제건을 취소합니다.
-```python
+```javascript
 (async () => {
-    const Bootpay = require('../dist/bootpay.js').Bootpay
+   const Bootpay = require('@bootpay/backend-js').Bootpay
     Bootpay.setConfiguration({
         application_id: '5b8f6a4d396fa665fdc2b5ea',
         private_key: 'rm6EYECr6aroQVG2ntW0A6LpWnkTgP4uQ3H18sDDUYw='
@@ -256,9 +256,9 @@ REST API 방식으로 고객으로부터 카드 정보를 전달하여, PG사에
 
 ## 4-5. 빌링키 삭제 
 발급된 빌링키로 더 이상 사용되지 않도록, 삭제 요청합니다.
-```python 
+```javascript 
 (async () => {
-    const Bootpay = require('../dist/bootpay.js').Bootpay
+    const Bootpay = require('@bootpay/backend-js').Bootpay
     Bootpay.setConfiguration({
         application_id: '5b8f6a4d396fa665fdc2b5ea',
         private_key: 'rm6EYECr6aroQVG2ntW0A6LpWnkTgP4uQ3H18sDDUYw='
@@ -319,7 +319,7 @@ REST API 방식으로 고객으로부터 카드 정보를 전달하여, PG사에
 ## 6. 서버 승인 요청 
 결제승인 방식은 클라이언트 승인 방식과, 서버 승인 방식으로 총 2가지가 있습니다.
 
-클라이언트 승인 방식은 pythonscript나 native 등에서 confirm 함수에서 진행하는 일반적인 방법입니다만, 경우에 따라 서버 승인 방식이 필요할 수 있습니다.
+클라이언트 승인 방식은 웹, 앱에서 진행하는 일반적인 방법입니다만, 경우에 따라 서버 승인 방식이 필요할 수 있습니다.
 
 필요한 이유 
 1. 100% 안정적인 결제 후 고객 안내를 위해 - 클라이언트에서 PG결제 진행 후 승인 완료될 때 onDone이 수행되지 않아 (인터넷 환경 등), 결제 이후 고객에게 안내하지 못할 수 있습니다  
