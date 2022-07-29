@@ -1,5 +1,7 @@
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios'
 
+const Package = require('../../package.json')
+
 export interface BootpayRestApiErrorResponse<T = any> {
     error_code?: number
     pg_error_code?: number
@@ -24,6 +26,7 @@ export class BootpayBackendNodejsResource {
     mode: string
     bootpayConfiguration: BootpayConfiguration
     API_ENTRYPOINTS: BootpayEntrypoints
+    apiVersion: string = '4.2.0'
 
     constructor() {
         this.mode = 'production'
@@ -65,6 +68,9 @@ export class BootpayBackendNodejsResource {
                 }
                 config.headers['Content-Type'] = 'application/json'
                 config.headers['Accept'] = 'application/json'
+                config.headers['BOOTPAY-SDK-VERSION'] = `backend-nodejs ${ Package.version }`
+                config.headers['BOOTPAY-API-VERSION'] = this.apiVersion
+
             }
             return config
         }, (error) => {
@@ -84,6 +90,15 @@ export class BootpayBackendNodejsResource {
             configuration.mode = 'production'
         }
         this.bootpayConfiguration = configuration
+    }
+
+    /**
+     * SET API Version
+     * Comment by GOSOMI
+     * @date: 2022-07-29
+     */
+    setApiVersion(version: string) {
+        this.apiVersion = version
     }
 
     /**
