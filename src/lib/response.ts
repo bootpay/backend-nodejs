@@ -230,3 +230,19 @@ export interface CancelSubscribeReserveResponse {
     reserve_id: string
     success: boolean
 }
+
+export interface CashReceiptPublishOnReceiptParameters {
+    receipt_id: string
+    username: string
+    email?: string
+    phone: string
+    identity_no: string
+    cash_receipt_type: '소득공제' | '지출증빙'
+    currency?: string
+}
+
+export interface CashReceiptCancelOnReceiptParameters {
+    receipt_id: string
+    cancel_username?: string
+    cancel_message?: string
+}

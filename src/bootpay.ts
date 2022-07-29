@@ -11,7 +11,7 @@ import {
     SubscribePaymentReserveParameters,
     SubscribePaymentReserveResponse,
     CancelSubscribeReserveResponse,
-    ShippingRequestParameters
+    ShippingRequestParameters, CashReceiptPublishOnReceiptParameters, CashReceiptCancelOnReceiptParameters
 } from './lib/response'
 
 class BootpayBackendNodejs extends BootpayBackendNodejsResource {
@@ -223,6 +223,31 @@ class BootpayBackendNodejs extends BootpayBackendNodejsResource {
     async shippingStart(shippingRequest: ShippingRequestParameters): Promise<ReceiptResponseParameters | any> {
         try {
             const response: ReceiptResponseParameters = await this.put<ReceiptResponseParameters>(`escrow/shipping/start/${ shippingRequest.receipt_id }`, shippingRequest)
+            return Promise.resolve(response)
+        } catch (e) {
+            return Promise.reject(e)
+        }
+    }
+
+    /**
+     * 기존결제 현금영수증 발행 API
+     * Comment by GOSOMI
+     * @date: 2022-07-28
+     */
+    async cashReceiptPublishOnReceipt(cashReceiptPublishRequest: CashReceiptPublishOnReceiptParameters) {
+        try {
+            const response: ReceiptResponseParameters = await this.post<ReceiptResponseParameters>('request/receipt/cash/publish', cashReceiptPublishRequest)
+            return Promise.resolve(response)
+        } catch (e) {
+            return Promise.reject(e)
+        }
+    }
+
+    async cashReceiptCancelOnReceipt(cashReceiptCancelRequest: CashReceiptCancelOnReceiptParameters) {
+        try {
+            const response: null = await this.delete<null>(`request/receipt/cash/cancel/${ cashReceiptCancelRequest.receipt_id }`, {
+                params: cashReceiptCancelRequest
+            })
             return Promise.resolve(response)
         } catch (e) {
             return Promise.reject(e)
