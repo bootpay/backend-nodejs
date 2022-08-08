@@ -17,7 +17,7 @@ interface BootpayEntrypoints {
 interface BootpayConfiguration {
     application_id: string
     private_key: string
-    mode: 'development' | 'production' | 'stage'
+    mode?: 'development' | 'production' | 'stage'
 }
 
 export class BootpayBackendNodejsResource {
@@ -68,8 +68,9 @@ export class BootpayBackendNodejsResource {
                 }
                 config.headers['Content-Type'] = 'application/json'
                 config.headers['Accept'] = 'application/json'
-                config.headers['BOOTPAY-SDK-VERSION'] = `backend-nodejs ${ Package.version }`
+                config.headers['BOOTPAY-SDK-VERSION'] = Package.version
                 config.headers['BOOTPAY-API-VERSION'] = this.apiVersion
+                config.headers['BOOTPAY-SDK-TYPE'] = 301
 
             }
             return config
