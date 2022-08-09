@@ -246,3 +246,22 @@ export interface CashReceiptCancelOnReceiptParameters {
     cancel_username?: string
     cancel_message?: string
 }
+
+export interface RequestCashReceiptParameters {
+    pg: string
+    price: number
+    tax_free?: number
+    order_name: string
+    cash_receipt_type: '소득공제' | '지출증빙'
+    identity_no: string
+    purchased_at: string
+    order_id: string
+    user?: UserModel
+    extra?: ExtraModel
+}
+
+export interface CancelCashReceiptParameters {
+    receipt_id: string
+    cancel_username?: string
+    cancel_message?: string
+}

@@ -11,7 +11,8 @@ import {
     SubscribePaymentReserveParameters,
     SubscribePaymentReserveResponse,
     CancelSubscribeReserveResponse,
-    ShippingRequestParameters, CashReceiptPublishOnReceiptParameters, CashReceiptCancelOnReceiptParameters
+    ShippingRequestParameters, CashReceiptPublishOnReceiptParameters, CashReceiptCancelOnReceiptParameters,
+    RequestCashReceiptParameters, CancelCashReceiptParameters
 } from './lib/response'
 
 class BootpayBackendNodejs extends BootpayBackendNodejsResource {
@@ -243,10 +244,45 @@ class BootpayBackendNodejs extends BootpayBackendNodejsResource {
         }
     }
 
+    /**
+     * 기존 결제 현금영수증 발행 취소 API
+     * Comment by GOSOMI
+     * @date: 2022-08-09
+     */
     async cashReceiptCancelOnReceipt(cashReceiptCancelRequest: CashReceiptCancelOnReceiptParameters) {
         try {
             const response: null = await this.delete<null>(`request/receipt/cash/cancel/${ cashReceiptCancelRequest.receipt_id }`, {
                 params: cashReceiptCancelRequest
+            })
+            return Promise.resolve(response)
+        } catch (e) {
+            return Promise.reject(e)
+        }
+    }
+
+    /**
+     * 별건 현금영수증 발행하기
+     * Comment by GOSOMI
+     * @date: 2022-08-09
+     */
+    async requestCashReceipt(cashReceiptRequest: RequestCashReceiptParameters) {
+        try {
+            const response: ReceiptResponseParameters = await this.post<ReceiptResponseParameters>('request/cash/receipt', cashReceiptRequest)
+            return Promise.resolve(response)
+        } catch (e) {
+            return Promise.reject(e)
+        }
+    }
+
+    /**
+     * 별건 현금영수증 취소하기
+     * Comment by GOSOMI
+     * @date: 2022-08-09
+     */
+    async cancelCashReceipt(cancelCashReceiptRequest: CancelCashReceiptParameters) {
+        try {
+            const response: ReceiptResponseParameters = await this.delete<ReceiptResponseParameters>(`request/cash/receipt/${ cancelCashReceiptRequest.receipt_id }`, {
+                params: cancelCashReceiptRequest
             })
             return Promise.resolve(response)
         } catch (e) {
