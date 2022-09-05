@@ -1,4 +1,8 @@
-### 2.0.5 ( Stable )
+### 2.0.6 ( Stable )
+
+* SubscriptionBillingResponseParameters interface 누락된 값 추가 ( status, status_locale, gateway_url, method_symbol )
+
+### 2.0.5
 
 * typescript에서 TS7016 root에서 import가 되지 않는 문제 해결
 
