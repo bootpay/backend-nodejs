@@ -63,6 +63,7 @@ export interface BillingData {
     card_company_code: string
     card_type: string
     card_hash?: string
+    rtn_key_info?: string // KCP 전용 리턴값
 }
 
 export interface CardData {
@@ -164,10 +165,14 @@ export interface SubscriptionBillingResponseParameters {
     metadata: object
     pg: string
     method: string
+    method_origin?: string
+    method_symbol?: string
     published_at: Date
     requested_at: Date
-    receipt_Data: ReceiptResponseParameters
+    receipt_data: ReceiptResponseParameters
     billing_expire_at: Date
+    status: number
+    status_locale?: string
 }
 
 export interface SubscriptionCardPaymentRequestParameters {
