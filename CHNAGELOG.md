@@ -1,4 +1,8 @@
-### 2.0.4 ( Stable )
+### 2.0.5 ( Stable )
+
+* typescript에서 TS7016 root에서 import가 되지 않는 문제 해결
+
+### 2.0.4
 
 * package.json import가 되지 않는 환경 예외처리
 

@@ -294,3 +294,5 @@ class BootpayBackendNodejs extends BootpayBackendNodejsResource {
 const Bootpay: BootpayBackendNodejs = new BootpayBackendNodejs()
 
 export { Bootpay }
+
+export default Bootpay
