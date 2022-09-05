@@ -24,6 +24,7 @@ export interface ReceiptResponseParameters {
     requested_at: Date
     cancelled_at?: Date
     status: number
+    status_locale: string
     card_data?: CardData,
     phone_data?: PhoneData,
     bank_data?: BankData
@@ -180,7 +181,7 @@ export interface SubscriptionCardPaymentRequestParameters {
     billing_key: string
     order_name: string
     price: number
-    tax_free: number
+    tax_free?: number
     card_quota?: string
     card_interest?: string
     order_id: string
