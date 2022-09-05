@@ -61,7 +61,7 @@ export interface BillingData {
     card_no: string
     card_company: string
     card_company_code: string
-    card_type: string
+    card_type: number
     card_hash?: string
     rtn_key_info?: string // KCP 전용 리턴값
 }
@@ -162,6 +162,7 @@ export interface SubscriptionBillingResponseParameters {
     billing_data: BillingData
     receipt_id: string
     subscription_id: string
+    gateway_url?: string
     metadata: object
     pg: string
     method: string
