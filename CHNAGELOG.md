@@ -1,4 +1,9 @@
-### 2.0.6 ( Stable )
+### 2.0.7  ( Stable )
+
+* inteface model 정의 parameters 누락 및 optional 체크
+* 현금영수증 별건 발행 / 취소 API 추가
+
+### 2.0.6
 
 * SubscriptionBillingResponseParameters interface 누락된 값 추가 ( status, status_locale, gateway_url, method_symbol )
 
