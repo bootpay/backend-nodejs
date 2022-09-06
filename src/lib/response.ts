@@ -154,11 +154,11 @@ export interface SubscriptionBillingRequestParameters {
     card_identity_no: string
     card_expire_year: string
     card_expire_month: string
-    price: number
-    tax_free: number
+    price?: number
+    tax_free?: number
     extra: ExtraModel
     user: UserModel
-    metadata: object
+    metadata?: object
 }
 
 export interface SubscriptionBillingResponseParameters {
@@ -243,9 +243,9 @@ export interface CancelSubscribeReserveResponse {
 
 export interface CashReceiptPublishOnReceiptParameters {
     receipt_id: string
-    username: string
+    username?: string
     email?: string
-    phone: string
+    phone?: string
     identity_no: string
     cash_receipt_type: '소득공제' | '지출증빙'
     currency?: string
