@@ -25,6 +25,7 @@ export interface ReceiptResponseParameters {
     cancelled_at?: Date
     status: number
     status_locale: string
+    receipt_url?: string
     card_data?: CardData,
     phone_data?: PhoneData,
     bank_data?: BankData
@@ -75,7 +76,7 @@ export interface CardData {
     card_company_code: string
     card_company: string
     card_interest: string
-    receipt_url: string
+    receipt_url?: string
     card_type?: string
     card_owner_type?: string
     point?: number
@@ -85,6 +86,7 @@ export interface PhoneData {
     tid: string
     auth_no?: string
     phone?: string
+    receipt_url?: string
 }
 
 export interface BankData {
@@ -98,6 +100,7 @@ export interface BankData {
     cash_receipt_tid?: string
     cash_receipt_type?: string
     cash_receipt_no?: string
+    receipt_url?: string
 }
 
 export interface EscrowData {
