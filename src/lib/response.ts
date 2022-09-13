@@ -31,6 +31,7 @@ export interface ReceiptResponseParameters {
     bank_data?: BankData
     vbank_data?: BankData
     escrow_data?: EscrowData
+    cash_receipt_data?: CashReceiptData
 }
 
 export interface ExtraModel {
@@ -108,6 +109,13 @@ export interface EscrowData {
     status_locale: string
     shipping_started_at: Date
     receipt_confirmed_at: Date | null
+}
+
+export interface CashReceiptData {
+    tid?: string
+    cash_receipt_type?: number
+    cash_receipt_no?: string
+    receipt_url?: string
 }
 
 export interface CancelPaymentParameters {

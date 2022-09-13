@@ -15,7 +15,7 @@
         const response = await Bootpay.requestCashReceipt({
             pg: '나이스페이',
             price: 1000,
-            tax_free: 500,
+            tax_free: 0,
             order_name: '테스트',
             cash_receipt_type: '소득공제',
             user: {

@@ -1,4 +1,8 @@
-### 2.0.7  ( Stable )
+### 2.0.8  ( Stable )
+
+* 현금영수증 cash_receipt_data interface 정의 
+
+### 2.0.7
 
 * inteface model 정의 parameters 누락 및 optional 체크
 * 현금영수증 별건 발행 / 취소 API 추가
