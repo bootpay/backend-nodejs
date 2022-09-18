@@ -32,6 +32,10 @@ export interface ReceiptResponseParameters {
     vbank_data?: BankData
     escrow_data?: EscrowData
     cash_receipt_data?: CashReceiptData
+    naver_point_data?: NaverPointData
+    kakao_moneny_data?: KakaoMoneyData
+    payco_point_data?: PaycoPointData
+    toss_point_data?: TossPointData
 }
 
 export interface ExtraModel {
@@ -116,6 +120,22 @@ export interface CashReceiptData {
     cash_receipt_type?: number
     cash_receipt_no?: string
     receipt_url?: string
+}
+
+export interface KakaoMoneyData {
+    tid?: string
+}
+
+export interface NaverPointData {
+    tid?: string
+}
+
+export interface PaycoPointData {
+    tid?: string
+}
+
+export interface TossPointData {
+    tid?: string
 }
 
 export interface CancelPaymentParameters {
