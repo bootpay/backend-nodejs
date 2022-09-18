@@ -1,6 +1,10 @@
-### 2.0.8  ( Stable )
+### 2.0.9 ( Stable )
 
-* 현금영수증 cash_receipt_data interface 정의 
+* 네이버페이 포인트, 페이코포인트, 카카오머니, 토스포인트 결제시 리턴되는 포맷 interface 추가 정의
+
+### 2.0.8
+
+* 현금영수증 cash_receipt_data interface 정의
 
 ### 2.0.7
 
