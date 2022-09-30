@@ -145,7 +145,7 @@ export interface CancelPaymentParameters {
     cancel_id?: string
     cancel_username?: string
     cancel_message?: string
-    refund: Refund
+    refund?: Refund
 }
 
 export interface Refund {
