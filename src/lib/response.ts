@@ -244,6 +244,7 @@ export interface SubscribePaymentReserveParameters {
     order_name: string
     price: number
     tax_free?: number
+    order_id: string
     user?: UserModel
     items?: ItemModel
     reserve_execute_at: string
