@@ -245,9 +245,12 @@ export interface SubscribePaymentReserveParameters {
     price: number
     tax_free?: number
     order_id: string
+    reserve_execute_at: string
     user?: UserModel
     items?: ItemModel
-    reserve_execute_at: string
+    metadata?: any
+    feedback_url?: string
+    content_type?: 'application/json' | 'application/x-www-form-urlencoded'
 }
 
 export interface ShippingRequestParameters {
