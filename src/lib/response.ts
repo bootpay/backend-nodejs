@@ -245,7 +245,7 @@ export interface SubscribePaymentReserveParameters {
     price: number
     tax_free?: number
     order_id: string
-    reserve_execute_at: string
+    reserve_execute_at: Date 
     user?: UserModel
     items?: ItemModel
     metadata?: any
@@ -265,7 +265,7 @@ export interface ShippingRequestParameters {
 
 export interface SubscribePaymentReserveResponse {
     reserve_id: string
-    reserve_execute_at: string
+    reserve_execute_at: Date
 }
 
 export interface CancelSubscribeReserveResponse {
@@ -296,7 +296,7 @@ export interface RequestCashReceiptParameters {
     order_name: string
     cash_receipt_type: '소득공제' | '지출증빙'
     identity_no: string
-    purchased_at: string
+    purchased_at?: Date 
     order_id: string
     user?: UserModel
     extra?: ExtraModel

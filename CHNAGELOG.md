@@ -1,3 +1,6 @@
+### 2.1.4
+* 날짜 타입을 string -> Date 로 명시적으로 수정 
+
 ### 2.1.3
 * 정기결제요청시 feedback_url, metadata, content_type 파라미터 정의 추가 
 
