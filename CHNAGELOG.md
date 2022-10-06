@@ -1,3 +1,6 @@
+### 2.1.3
+* 정기결제요청시 feedback_url, metadata, content_type 파라미터 정의 추가 
+
 ### 2.1.2
 * 버전 재배포 
 
