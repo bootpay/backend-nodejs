@@ -12,7 +12,7 @@ import {
     SubscribePaymentReserveResponse,
     CancelSubscribeReserveResponse,
     ShippingRequestParameters, CashReceiptPublishOnReceiptParameters, CashReceiptCancelOnReceiptParameters,
-    RequestCashReceiptParameters, CancelCashReceiptParameters
+    RequestCashReceiptParameters, CancelCashReceiptParameters, RequestAuthenticateParameters, AuthenticateData
 } from './lib/response'
 
 class BootpayBackendNodejs extends BootpayBackendNodejsResource {
@@ -283,6 +283,53 @@ class BootpayBackendNodejs extends BootpayBackendNodejsResource {
         try {
             const response: ReceiptResponseParameters = await this.delete<ReceiptResponseParameters>(`request/cash/receipt/${ cancelCashReceiptRequest.receipt_id }`, {
                 params: cancelCashReceiptRequest
+            })
+            return Promise.resolve(response)
+        } catch (e) {
+            return Promise.reject(e)
+        }
+    }
+
+    /**
+     * 본인인증 REST API 요청
+     * Comment by GOSOMI
+     * @date: 2022-11-07
+     */
+    async requestAuthentication(authenticateRequest: RequestAuthenticateParameters) {
+        try {
+            const response: CertificateResponseParameters = await this.post<CertificateResponseParameters>('request/authentication', authenticateRequest)
+            return Promise.resolve(response)
+        } catch (e) {
+            return Promise.reject(e)
+        }
+    }
+
+    /**
+     * 본인인증 승인하기
+     * Comment by GOSOMI
+     * @date: 2022-11-07
+     */
+    async confirmAuthentication(receipt_id: string, otp: null | string = null) {
+        try {
+            const response: CertificateResponseParameters = await this.post<CertificateResponseParameters>('authenticate/confirm', {
+                receipt_id,
+                otp
+            })
+            return Promise.resolve(response)
+        } catch (e) {
+            return Promise.reject(e)
+        }
+    }
+
+    /**
+     * 본인인증 SMS 재전송
+     * Comment by GOSOMI
+     * @date: 2022-11-07
+     */
+    async realarmAuthentication(receipt_id: string) {
+        try {
+            const response: CertificateResponseParameters = await this.post<CertificateResponseParameters>('authenticate/realarm', {
+                receipt_id
             })
             return Promise.resolve(response)
         } catch (e) {

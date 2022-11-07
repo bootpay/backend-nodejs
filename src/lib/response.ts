@@ -157,18 +157,25 @@ export interface Refund {
 export interface CertificateResponseParameters {
     receipt_id: string
     authenticate_id: string
+    pg: string
+    method: string
+    method_origin: string
+    method_origin_symbol: string
     authenticated_at: Date
+    requested_at: Date
     status: number
+    status_locale: string
     authenticate_data: AuthenticateData
 }
 
 export interface AuthenticateData {
     phone?: string
-    unique: string
-    birth: Date
-    gender: number
+    unique?: string
+    birth?: Date
+    gender?: number
     foreigner?: number
     carrier?: string
+    number_of_realarms?: number
     tid: string
 }
 
@@ -245,7 +252,7 @@ export interface SubscribePaymentReserveParameters {
     price: number
     tax_free?: number
     order_id: string
-    reserve_execute_at: Date 
+    reserve_execute_at: Date
     user?: UserModel
     items?: ItemModel
     metadata?: any
@@ -296,7 +303,7 @@ export interface RequestCashReceiptParameters {
     order_name: string
     cash_receipt_type: '소득공제' | '지출증빙'
     identity_no: string
-    purchased_at?: Date 
+    purchased_at?: Date
     order_id: string
     user?: UserModel
     extra?: ExtraModel
@@ -306,4 +313,20 @@ export interface CancelCashReceiptParameters {
     receipt_id: string
     cancel_username?: string
     cancel_message?: string
+}
+
+export interface RequestAuthenticateParameters {
+    authentication_id: string
+    pg: string
+    method: string
+    username: string
+    identity_no: string
+    carrier: string
+    phone: string
+    site_url?: string
+    authenticate_type?: 'sms' | 'pass'
+    order_name: string
+    extra?: ExtraModel
+    user?: UserModel
+    metadata?: object
 }
