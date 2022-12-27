@@ -1,6 +1,6 @@
 {
   "name": "@bootpay/backend-js",
-  "version": "2.1.5",
+  "version": "2.1.6",
   "description": "Bootpay Server Side Package for Node.js",
   "types": "dist/bootpay.d.ts",
   "scripts": {

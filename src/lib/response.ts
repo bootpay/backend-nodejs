@@ -169,6 +169,7 @@ export interface CertificateResponseParameters {
 }
 
 export interface AuthenticateData {
+    name?: string
     phone?: string
     unique?: string
     birth?: Date
