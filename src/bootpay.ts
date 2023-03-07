@@ -20,7 +20,7 @@ import {
     CancelCashReceiptParameters,
     RequestAuthenticateParameters,
     AuthenticateData,
-    SubscribeLookupResponse
+    SubscribePaymentLookupResponse
 } from './lib/response'
 
 class BootpayBackendNodejs extends BootpayBackendNodejsResource {
@@ -216,9 +216,9 @@ class BootpayBackendNodejs extends BootpayBackendNodejsResource {
      * @param reserveId: string
      * @returns Promise<SubscribeLookupResponse>
      */
-    async subscribeReserveLookup(reserveId: string) {
+    async subscribePaymentReserveLookup(reserveId: string) {
         try {
-            const response: SubscribeLookupResponse = await this.get<SubscribeLookupResponse>(`subscribe/payment/reserve/${ reserveId }`)
+            const response: SubscribePaymentLookupResponse = await this.get<SubscribePaymentLookupResponse>(`subscribe/payment/reserve/${ reserveId }`)
             return Promise.resolve(response)
         } catch (e) {
             return Promise.reject(e)
