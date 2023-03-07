@@ -331,3 +331,23 @@ export interface RequestAuthenticateParameters {
     user?: UserModel
     metadata?: object
 }
+
+export interface SubscribeLookupResponse {
+    reserve_id: string
+    receipt_id: string
+    order_id: string
+    price: number
+    tax_free: number
+    order_name: string
+    user: UserModel
+    feedback_url: string
+    content_type: 'application/json' | 'application/x-www-form-urlencoded',
+    version: number
+    extra: ExtraModel
+    reserve_requested_at: string
+    reserve_execute_at: string
+    reserve_started_at: string
+    reserve_finished_at: string
+    reserve_revoked_at: string
+    status: number
+}

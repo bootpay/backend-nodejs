@@ -7,12 +7,20 @@ import {
     ReceiptResponseParameters,
     SubscriptionBillingRequestParameters,
     SubscriptionBillingResponseParameters,
-    SubscriptionCardPaymentRequestParameters, UserTokenRequestParameters, UserTokenResponseParameters,
+    SubscriptionCardPaymentRequestParameters,
+    UserTokenRequestParameters,
+    UserTokenResponseParameters,
     SubscribePaymentReserveParameters,
     SubscribePaymentReserveResponse,
     CancelSubscribeReserveResponse,
-    ShippingRequestParameters, CashReceiptPublishOnReceiptParameters, CashReceiptCancelOnReceiptParameters,
-    RequestCashReceiptParameters, CancelCashReceiptParameters, RequestAuthenticateParameters, AuthenticateData
+    ShippingRequestParameters,
+    CashReceiptPublishOnReceiptParameters,
+    CashReceiptCancelOnReceiptParameters,
+    RequestCashReceiptParameters,
+    CancelCashReceiptParameters,
+    RequestAuthenticateParameters,
+    AuthenticateData,
+    SubscribeLookupResponse
 } from './lib/response'
 
 class BootpayBackendNodejs extends BootpayBackendNodejsResource {
@@ -195,6 +203,22 @@ class BootpayBackendNodejs extends BootpayBackendNodejsResource {
             const response: SubscribePaymentReserveResponse = await this.post<SubscribePaymentReserveResponse>('subscribe/payment/reserve', {
                 ...subscribePaymentReserveRequest
             })
+            return Promise.resolve(response)
+        } catch (e) {
+            return Promise.reject(e)
+        }
+    }
+
+    /**
+     * SubscribeReserve Lookup
+     * Comment by GOSOMI
+     * @date: 2023-03-07
+     * @param reserveId: string
+     * @returns Promise<SubscribeLookupResponse>
+     */
+    async subscribeReserveLookup(reserveId: string) {
+        try {
+            const response: SubscribeLookupResponse = await this.get<SubscribeLookupResponse>(`subscribe/payment/reserve/${ reserveId }`)
             return Promise.resolve(response)
         } catch (e) {
             return Promise.reject(e)
