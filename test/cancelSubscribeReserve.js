@@ -15,7 +15,7 @@
             reserve_execute_at: new Date((new Date()).getTime() + 5000)
         })
         if (response.reserve_id !== undefined) {
-            const lookup = await Bootpay.subscribeReserveLookup(response.reserve_id)
+            const lookup = await Bootpay.subscribePaymentReserveLookup(response.reserve_id)
             console.log(lookup)
             const cancel = await Bootpay.cancelSubscribeReserve(response.reserve_id)
             console.log(cancel)
