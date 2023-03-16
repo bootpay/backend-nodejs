@@ -3,6 +3,7 @@
   "version": "2.1.9",
   "description": "Bootpay Server Side Package for Node.js",
   "types": "dist/bootpay.d.ts",
+  "main": "dist/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "rm -rf ./dist && tsc --build && cp ./package.json dist/package.json &&  rm -rf ./dist/src && cp ./README.md dist/",
