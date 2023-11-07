@@ -35,7 +35,7 @@ class BootpayBackendNodejs extends BootpayBackendNodejsResource {
      */
     async getAccessToken(): Promise<AccessTokenResponseParameters> {
         try {
-            const { application_id, private_key } = this.bootpayConfiguration
+            const { application_id, private_key }         = this.bootpayConfiguration
             const response: AccessTokenResponseParameters = await this.post<AccessTokenResponseParameters>('request/token', {
                 application_id,
                 private_key
@@ -52,10 +52,11 @@ class BootpayBackendNodejs extends BootpayBackendNodejsResource {
      * Lookup Receipt
      * Comment by GOSOMI
      * @param receiptId: string
+     * @param lookupUserData: boolean
      */
-    async receiptPayment(receiptId: string): Promise<ReceiptResponseParameters> {
+    async receiptPayment(receiptId: string, lookupUserData: boolean = false): Promise<ReceiptResponseParameters> {
         try {
-            const response: ReceiptResponseParameters = await this.get<ReceiptResponseParameters>(`receipt/${ receiptId }`)
+            const response: ReceiptResponseParameters = await this.get<ReceiptResponseParameters>(`receipt/${ receiptId }?lookup_user_data=${ lookupUserData ? 'true' : 'false' }`)
             return Promise.resolve(response)
         } catch (e) {
             return Promise.reject(e)
