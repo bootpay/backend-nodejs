@@ -25,7 +25,7 @@ export class BootpayBackendNodejsResource {
     bootpayConfiguration: BootpayConfiguration
     API_ENTRYPOINTS: BootpayEntrypoints
     apiVersion: string = '4.3.3'
-    sdkVersion: string = '2.1.10'
+    sdkVersion: string = '2.1.9'
 
     constructor() {
         this.mode = 'production'
