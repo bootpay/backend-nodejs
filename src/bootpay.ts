@@ -19,7 +19,6 @@ import {
     RequestCashReceiptParameters,
     CancelCashReceiptParameters,
     RequestAuthenticateParameters,
-    AuthenticateData,
     SubscribePaymentLookupResponse
 } from './lib/response'
 
