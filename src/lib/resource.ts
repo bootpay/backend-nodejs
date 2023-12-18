@@ -1,3 +1,4 @@
+// @ts-expect-error
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios'
 
 export interface BootpayRestApiErrorResponse<T = any> {
@@ -21,27 +22,27 @@ interface BootpayConfiguration {
 export class BootpayBackendNodejsResource {
     $http: AxiosInstance
     $token?: string
-    mode: string
+    mode: 'development' | 'production' | 'stage'
     bootpayConfiguration: BootpayConfiguration
     API_ENTRYPOINTS: BootpayEntrypoints
-    apiVersion: string = '4.3.3'
-    sdkVersion: string = '2.1.9'
+    apiVersion: string = '4.3.4'
+    sdkVersion: string = '2.2.10'
 
     constructor() {
-        this.mode = 'production'
-        this.$http = axios.create({
+        this.mode                 = 'production'
+        this.$http                = axios.create({
             timeout: 60000
         })
-        this.$token = undefined
+        this.$token               = undefined
         this.bootpayConfiguration = {
             application_id: '',
-            private_key: '',
-            mode: 'production'
+            private_key:    '',
+            mode:           'production'
         }
-        this.API_ENTRYPOINTS = {
+        this.API_ENTRYPOINTS      = {
             development: 'https://dev-api.bootpay.co.kr/v2',
-            stage: 'https://stage-api.bootpay.co.kr/v2',
-            production: 'https://api.bootpay.co.kr/v2'
+            stage:       'https://stage-api.bootpay.co.kr/v2',
+            production:  'https://api.bootpay.co.kr/v2'
         }
         this.$http.interceptors.response.use((response: AxiosResponse): any => {
             if (response.request !== undefined && response.headers !== undefined) {
@@ -56,20 +57,21 @@ export class BootpayBackendNodejsResource {
             } else {
                 return Promise.reject({
                     error_code: -100,
-                    message: `Request Rest Api Failed to Bootpay Server, ${ error.message }`
+                    message:    `Request Rest Api Failed to Bootpay Server, ${ error.message }`
                 }) as BootpayRestApiErrorResponse
             }
         })
+        // @ts-expect-error
         this.$http.interceptors.request.use((config: AxiosRequestConfig) => {
             if (config.headers !== undefined) {
                 if (this.$token !== undefined) {
                     config.headers.authorization = `Bearer ${ this.$token }`
                 }
-                config.headers['Content-Type'] = 'application/json'
-                config.headers['Accept'] = 'application/json'
+                config.headers['Content-Type']        = 'application/json'
+                config.headers['Accept']              = 'application/json'
                 config.headers['BOOTPAY-SDK-VERSION'] = this.sdkVersion
                 config.headers['BOOTPAY-API-VERSION'] = this.apiVersion
-                config.headers['BOOTPAY-SDK-TYPE'] = 301
+                config.headers['BOOTPAY-SDK-TYPE']    = 301
 
             }
             return config
@@ -111,7 +113,7 @@ export class BootpayBackendNodejsResource {
     }
 
     entrypoints(url: string): string {
-        return [this.API_ENTRYPOINTS[this.bootpayConfiguration.mode], url].join('/')
+        return [this.API_ENTRYPOINTS[this.bootpayConfiguration.mode === undefined ? 'production' : this.bootpayConfiguration.mode], url].join('/')
     }
 
     async get<T = any, D = any>(url: string, config?: AxiosRequestConfig<D>): Promise<T> {
