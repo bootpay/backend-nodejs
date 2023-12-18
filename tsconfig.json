@@ -11,6 +11,9 @@
       "esnext",
       "DOM"
     ],
+    "typeRoots": [
+      "./src/lib"
+    ],
     "moduleResolution": "node16",
     "resolveJsonModule": true,
     "esModuleInterop": true,

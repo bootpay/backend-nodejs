@@ -1,5 +1,4 @@
-import { Bootpay } from "../dist/bootpay.js"
-
+import { Bootpay } from "@bootpay/backend-js"
 
 (async () => {
     // const Bootpay = require('../dist/bootpay.js').Bootpay

@@ -1,20 +1,20 @@
 {
-  "name": "@bootpay/backend-js",
-  "version": "2.2.0",
+  "name": "@bootpay/backend",
+  "version": "2.2.0-beta.1",
   "description": "Bootpay Server Side Package for Node.js",
   "types": "dist/bootpay.d.ts",
-  "main": "./index.js",
-  "module": "./index.js",
+  "main": "dist/bootpay.js",
+  "module": "dist/bootpay.js",
   "exports": {
     ".": {
-      "import": "./index.js",
-      "require": "./index.js",
-      "types": "./lib/request.d.ts"
+      "import": "./dist/bootpay.js",
+      "require": "./dist/bootpay.js",
+      "types": "./dist/bootpay.d.ts"
     }
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "rm -rf ./dist && tsc --p ./tsconfig.json && cp ./package.json dist/package.json &&  rm -rf ./dist/src && cp ./README.md dist/",
+    "build": "rm -rf ./dist && tsc --p ./tsconfig.json &&  rm -rf ./dist/src && cp ./README.md dist/",
     "clear": "tsc --build --clean"
   },
   "dependencies": {
@@ -27,7 +27,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/bootpay/backend-nodejs"
+    "url": "git+https://github.com/bootpay/backend-nodejs.git"
   },
   "keywords": [
     "결제",
@@ -46,5 +46,8 @@
   "bugs": {
     "url": "https://bootpay.channel.io/"
   },
-  "homepage": "https://www.bootpay.co.kr"
+  "homepage": "https://www.bootpay.co.kr",
+  "directories": {
+    "test": "test"
+  }
 }

@@ -367,3 +367,6 @@ const Bootpay: BootpayBackendNodejs = new BootpayBackendNodejs()
 export { Bootpay }
 
 export default Bootpay
+
+export * from './lib/response'
+export * from './lib/resource'
