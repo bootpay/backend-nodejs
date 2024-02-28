@@ -1,4 +1,3 @@
-// @ts-expect-error
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios'
 
 export interface BootpayRestApiErrorResponse<T = any> {
