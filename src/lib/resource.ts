@@ -50,7 +50,7 @@ export class BootpayBackendNodejsResource {
                 // 오류를 리턴
                 return response.data as BootpayRestApiErrorResponse
             }
-        }, (error) => {
+        }, (error: any) => {
             if (error.response !== undefined) {
                 return Promise.reject(error.response.data as BootpayRestApiErrorResponse)
             } else {
@@ -74,7 +74,7 @@ export class BootpayBackendNodejsResource {
 
             }
             return config
-        }, (error) => {
+        }, (error: any) => {
             return Promise.reject(error)
         })
     }

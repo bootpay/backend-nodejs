@@ -1,3 +1,6 @@
+### 2.1.11
+* 필드명 back_username -> bank_username 으로 오타 수정
+
 ### 2.1.4
 * 날짜 타입을 string -> Date 로 명시적으로 수정 
 

@@ -98,7 +98,7 @@ export interface BankData {
     tid: string
     bank_code: string
     bank_name: string
-    back_username: string
+    bank_username: string
     bank_account?: string
     sender_name?: string
     expired_at?: Date
@@ -150,7 +150,7 @@ export interface CancelPaymentParameters {
 
 export interface Refund {
     bank_account: string
-    back_username: string
+    bank_username: string
     bank_code: string
 }
 
