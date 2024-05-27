@@ -19,7 +19,7 @@ import {
     RequestCashReceiptParameters,
     CancelCashReceiptParameters,
     RequestAuthenticateParameters,
-    SubscribePaymentLookupResponse
+    SubscribePaymentLookupResponse, SubscriptionBillingTransferRequestParameters
 } from './lib/response'
 
 class BootpayBackendNodejs extends BootpayBackendNodejsResource {
@@ -120,6 +120,21 @@ class BootpayBackendNodejs extends BootpayBackendNodejsResource {
     async lookupSubscribeBillingKey(receiptId: string): Promise<SubscriptionBillingResponseParameters> {
         try {
             const response: SubscriptionBillingResponseParameters = await this.get<SubscriptionBillingResponseParameters>(`subscribe/billing_key/${ receiptId }`)
+            return Promise.resolve(response)
+        } catch (e) {
+            return Promise.reject(e)
+        }
+    }
+
+    /**
+     * lookupBillingKey
+     * Comment by ehowlsla
+     * @param billingKey: string
+     * @returns Promise<SubscriptionBillingResponseParameters>
+     */
+    async lookupBillingKey(billingKey: string): Promise<SubscriptionBillingResponseParameters> {
+        try {
+            const response: SubscriptionBillingResponseParameters = await this.get<SubscriptionBillingResponseParameters>(`billing_key/${ billingKey }`)
             return Promise.resolve(response)
         } catch (e) {
             return Promise.reject(e)
@@ -354,6 +369,36 @@ class BootpayBackendNodejs extends BootpayBackendNodejsResource {
         try {
             const response: CertificateResponseParameters = await this.post<CertificateResponseParameters>('authenticate/realarm', {
                 receipt_id
+            })
+            return Promise.resolve(response)
+        } catch (e) {
+            return Promise.reject(e)
+        }
+    }
+
+    /**
+     * 계좌 자동이체를 위한 빌링키 발급 요청
+     * Comment by ehowlsla
+     * @date: 2024-05-27
+     */
+    async requestSubscribeAutomaticTransferBillingKey(parameters: SubscriptionBillingTransferRequestParameters) {
+        try {
+            const response: ReceiptResponseParameters = await this.post<ReceiptResponseParameters>('request/subscribe/automatic-transfer', parameters)
+            return Promise.resolve(response)
+        } catch (e) {
+            return Promise.reject(e)
+        }
+    }
+
+    /**
+     * 계좌 자동이체를 위한 출금 동의 확인 요청
+     * Comment by ehowlsla
+     * @date: 2024-05-27
+     */
+    async publishAutomaticTransferBillingKey(receipt_id: string) {
+        try {
+            const response: SubscriptionBillingResponseParameters = await this.post<SubscriptionBillingResponseParameters>('request/subscribe/automatic-transfer/publish', {
+                "receipt_id": receipt_id
             })
             return Promise.resolve(response)
         } catch (e) {

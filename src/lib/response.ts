@@ -36,6 +36,7 @@ export interface ReceiptResponseParameters {
     kakao_moneny_data?: KakaoMoneyData
     payco_point_data?: PaycoPointData
     toss_point_data?: TossPointData
+    currency?: string
 }
 
 export interface ExtraModel {
@@ -197,6 +198,28 @@ export interface SubscriptionBillingRequestParameters {
     metadata?: object
 }
 
+export interface SubscriptionBillingTransferRequestParameters {
+    pg: string
+    method?: string
+    order_name: string
+    subscription_id: string
+
+    auth_type: 'ARS' | '간편인증'
+    username: string
+    bank_name: string
+    bank_account: string
+    identity_no: string
+    cash_receipt_type?: '소득공제' | '지출증빙'
+    cash_receipt_identity_no?: string
+    phone?: string
+
+    price?: number
+    tax_free?: number
+    extra: ExtraModel
+    user: UserModel
+    metadata?: object
+}
+
 export interface SubscriptionBillingResponseParameters {
     billing_key: string
     billing_data: BillingData
@@ -207,6 +230,7 @@ export interface SubscriptionBillingResponseParameters {
     pg: string
     method: string
     method_origin?: string
+    method_origin_symbol?: string
     method_symbol?: string
     published_at: Date
     requested_at: Date
