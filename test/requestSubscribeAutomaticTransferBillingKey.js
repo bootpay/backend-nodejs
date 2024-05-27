@@ -11,12 +11,12 @@
             order_name: '테스트결제',
             subscription_id: (new Date()).getTime(),
             price: 1000,
-            username: '윤태섭',
+            username: '홍길동',
             bank_name: '국민',
-            bank_account: '67560101092472',
-            identity_no: '861014',
-            cash_receipt_identity_no: '01040334678',
-            phone: '01040334678',
+            bank_account: '67561234123492472',
+            identity_no: '901014',
+            cash_receipt_identity_no: '01012341234',
+            phone: '01012341234',
             user: {
                 username: '홍길동',
                 phone: '01012345678'
