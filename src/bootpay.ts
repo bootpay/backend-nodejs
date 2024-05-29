@@ -19,7 +19,7 @@ import {
     RequestCashReceiptParameters,
     CancelCashReceiptParameters,
     RequestAuthenticateParameters,
-    SubscribePaymentLookupResponse, SubscriptionBillingTransferRequestParameters
+    SubscribePaymentLookupResponse, SubscriptionBillingTransferRequestParameters, SubscriptionPaymentRequestParameters
 } from './lib/response'
 
 class BootpayBackendNodejs extends BootpayBackendNodejsResource {
@@ -168,6 +168,23 @@ class BootpayBackendNodejs extends BootpayBackendNodejsResource {
         try {
             const response: ReceiptResponseParameters = await this.post<ReceiptResponseParameters>('subscribe/payment', {
                 ...subscriptionCardRequest
+            })
+            return Promise.resolve(response)
+        } catch (e) {
+            return Promise.reject(e)
+        }
+    }
+
+    /**
+     * requestSubscribePayment
+     * Comment by ehowlsla
+     * @param subscriptionRequest: SubscriptionPaymentRequestParameters
+     * @returns Promise<ReceiptResponseParameters>
+     */
+    async requestSubscribePayment(subscriptionRequest: SubscriptionPaymentRequestParameters): Promise<ReceiptResponseParameters> {
+        try {
+            const response: ReceiptResponseParameters = await this.post<ReceiptResponseParameters>('subscribe/payment', {
+                ...subscriptionRequest
             })
             return Promise.resolve(response)
         } catch (e) {

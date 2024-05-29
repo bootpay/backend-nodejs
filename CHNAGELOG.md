@@ -1,3 +1,6 @@
+### 2.3.1
+* requestSubscribePayment 함수 추가 
+
 ### 2.3.0
 * 계좌 자동 결제 추가 
 

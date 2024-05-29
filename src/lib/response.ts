@@ -248,6 +248,25 @@ export interface SubscriptionCardPaymentRequestParameters {
     card_quota?: string
     card_interest?: string
     order_id: string
+    feedback_url?: string
+    content_type?: string
+    metadata?: any
+    items?: Array<ItemModel>
+    user?: UserModel
+    extra?: ExtraModel
+}
+
+export interface SubscriptionPaymentRequestParameters {
+    billing_key: string
+    order_name: string
+    price: number
+    tax_free?: number
+    card_quota?: string
+    card_interest?: string
+    order_id: string
+    feedback_url?: string
+    content_type?: string
+    metadata?: any
     items?: Array<ItemModel>
     user?: UserModel
     extra?: ExtraModel
