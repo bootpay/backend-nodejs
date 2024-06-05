@@ -306,6 +306,7 @@ export interface SubscribePaymentReserveParameters {
 
 export interface ShippingRequestParameters {
     receipt_id: string
+    receipt_url: string
     tracking_number: string
     delivery_corp: string
     shipping_prepayment?: boolean

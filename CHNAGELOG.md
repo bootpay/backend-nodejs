@@ -1,3 +1,6 @@
+### 2.3.2
+* 배송등록 api 필드 추가 
+
 ### 2.3.1
 * requestSubscribePayment 함수 추가 
 
