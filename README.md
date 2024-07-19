@@ -177,7 +177,8 @@ REST API 방식으로 고객으로부터 카드 정보를 전달하여, PG사에
 ```
 
 ## 4-2. 계좌 빌링키 발급
-발급된 빌링키로 원하는 시점에 원하는 금액으로 결제 승인 요청을 할 수 있습니다. 잔액이 부족하거나 도난 카드 등의 특별한 건이 아니면 PG사에서 결제를 바로 승인합니다.
+REST API 방식으로 고객의 계좌 정보를 전달하여, PG사에게 빌링키 발급을 요청합니다. 요청 후 빌링키가 바로 발급되진 않고, 출금동의 확인 절차까지 진행해야 빌링키가 발급됩니다.
+먼저 빌링키를 요청합니다.
 ```javascript
 (async () => {
    Bootpay.setConfiguration({
@@ -208,8 +209,19 @@ REST API 방식으로 고객으로부터 카드 정보를 전달하여, PG사에
    }
 })()
 
-
 ```
+
+이후 빌링키 발급 요청시 응답받은 receipt_id로, 출금 동의 확인을 요청합니다.
+```javascript
+try {
+    await Bootpay.getAccessToken()
+    const response = await Bootpay.publishAutomaticTransferBillingKey('6655069ca691573f1bb9c28a')
+    console.log(response)
+} catch (e) {
+    console.log(e)
+}
+```
+
 
 
 ## 4-3. 결제 요청하기
