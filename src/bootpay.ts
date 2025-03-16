@@ -19,7 +19,10 @@ import {
     RequestCashReceiptParameters,
     CancelCashReceiptParameters,
     RequestAuthenticateParameters,
-    SubscribePaymentLookupResponse, SubscriptionBillingTransferRequestParameters, SubscriptionPaymentRequestParameters
+    SubscribePaymentLookupResponse,
+    SubscriptionBillingTransferRequestParameters,
+    SubscriptionPaymentRequestParameters,
+    WalletRequestParameters, WalletDataPart, WalletPaymentResponseParameters
 } from './lib/response'
 
 class BootpayBackendNodejs extends BootpayBackendNodejsResource {
@@ -416,6 +419,41 @@ class BootpayBackendNodejs extends BootpayBackendNodejsResource {
         try {
             const response: SubscriptionBillingResponseParameters = await this.post<SubscriptionBillingResponseParameters>('request/subscribe/automatic-transfer/publish', {
                 "receipt_id": receipt_id
+            })
+            return Promise.resolve(response)
+        } catch (e) {
+            return Promise.reject(e)
+        }
+    }
+
+    /**
+     * 등록된 지갑 리스트 가져오기
+     * Comment by ehowlsla
+     * @date: 2025-03-16
+     */
+    async getUserWallets(user_id: string, sandbox: boolean): Promise<WalletDataPart[]> {
+        try {
+            const queryParams = new URLSearchParams({ user_id, sandbox: sandbox.toString() }).toString();
+            const response: WalletDataPart[] =  await this.get<WalletDataPart[]>(`wallet?${queryParams}`);
+            return Promise.resolve(response)
+        } catch (error) {
+            return Promise.reject(error)
+        }
+    }
+
+    // async getUserWallets(user_id: string, sandbox: boolean) {
+    //     try {
+    //         const response: WalletDataPart[] = await this.get<WalletDataPart[]>(`wallet?user_id=${user_id}&sandbox=${sandbox}`)
+    //         return Promise.resolve(response)
+    //     } catch (e) {
+    //         return Promise.reject(e)
+    //     }
+    // }
+
+    async requestWalletPayment(walletRequest: WalletRequestParameters)    {
+        try {
+            const response: WalletPaymentResponseParameters = await this.post<WalletPaymentResponseParameters>('wallet/payment', {
+                ...walletRequest
             })
             return Promise.resolve(response)
         } catch (e) {

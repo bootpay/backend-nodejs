@@ -396,3 +396,87 @@ export interface SubscribePaymentLookupResponse {
     reserve_revoked_at: string
     status: number
 }
+
+export interface WalletRequestParameters {
+    user_id: string
+    order_name: string
+    price: number
+    tax_free?: number
+    order_id: string
+    webhook_url?: string
+    content_type?: 'application/json' | 'application/x-www-form-urlencoded'
+    // order_id?: string
+    items?: ItemModel
+    user?: UserModel
+    extra?: ExtraModel
+    metadata?: object
+    sandbox: boolean
+}
+
+export interface WalletPaymentResponseParameters {
+    cancelled_price: number
+    wallet_data: WalletData
+    metadata: Record<string, any>
+    cancelled_tax_free: number
+    method: string
+    card_data: CardData
+    sandbox: boolean
+    receipt_id: string
+    method_origin: string
+    order_name: string
+    method_origin_symbol: string
+    receipt_url: string
+    method_symbol: string
+    purchased_at: string
+    tax_free: number
+    price: number
+    company_name: string
+    pg: string
+    status_locale: string
+    currency: string
+    http_status: number
+    order_id: number
+    requested_at: string
+    status: number
+}
+
+export interface WalletData {
+    success: WalletDataPart
+    failure: any[] // 실패한 데이터가 리스트 형태로 존재
+}
+
+export interface WalletDataPart {
+    wallet_id: string
+    type: number
+    sandbox: number
+    order: number
+    payment_status: number
+    batch_data: BatchData
+    card_code: string
+    expired_at: string
+    latest_purchased_at: string
+}
+
+export interface BatchData {
+    card_no: string
+    card_company: string
+    card_company_code: string
+    card_type: number
+    card_hash: string
+}
+
+export interface CardData {
+    tid: string
+    card_approve_no: string
+    card_no: string
+    card_quota: string
+    card_company_code: string
+    card_company: string
+    card_type?: string
+}
+
+// public class WalletResponseData {
+//
+//     List<WalletDataPart> data;
+//     int http_status;
+// }
