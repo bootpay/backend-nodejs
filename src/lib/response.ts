@@ -435,7 +435,7 @@ export interface WalletPaymentResponseParameters {
     status_locale: string
     currency: string
     http_status: number
-    order_id: number
+    order_id: string
     requested_at: string
     status: number
 }
