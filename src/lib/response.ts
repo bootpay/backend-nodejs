@@ -368,6 +368,7 @@ export interface RequestAuthenticateParameters {
     identity_no: string
     carrier: string
     phone: string
+    client_ip: string
     site_url?: string
     authenticate_type?: 'sms' | 'pass'
     order_name: string
