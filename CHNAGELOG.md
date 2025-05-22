@@ -1,35 +1,50 @@
+### 2.3.65
+
+* 본인인증 REST API로 요청시 client_ip 파라메터 필수 추가
+
 ### 2.3.5
+
 * walletPayment response type bug fixed
 
 ### 2.3.3
-* wallet api 추가 
+
+* wallet api 추가
 
 ### 2.3.2
-* 배송등록 api 필드 추가 
+
+* 배송등록 api 필드 추가
 
 ### 2.3.1
-* requestSubscribePayment 함수 추가 
+
+* requestSubscribePayment 함수 추가
 
 ### 2.3.0
-* 계좌 자동 결제 추가 
+
+* 계좌 자동 결제 추가
 
 ### 2.1.11
+
 * 필드명 back_username -> bank_username 으로 오타 수정
 
 ### 2.1.4
-* 날짜 타입을 string -> Date 로 명시적으로 수정 
+
+* 날짜 타입을 string -> Date 로 명시적으로 수정
 
 ### 2.1.3
-* 정기결제요청시 feedback_url, metadata, content_type 파라미터 정의 추가 
+
+* 정기결제요청시 feedback_url, metadata, content_type 파라미터 정의 추가
 
 ### 2.1.2
-* 버전 재배포 
+
+* 버전 재배포
 
 ### 2.1.1
-* 정기결제 예약시 order_id 파라미터 정의 추가 
 
-### 2.1.0 
-* 결제취소 요청시 refund optional 로 수정 
+* 정기결제 예약시 order_id 파라미터 정의 추가
+
+### 2.1.0
+
+* 결제취소 요청시 refund optional 로 수정
 
 ### 2.0.9 ( Stable )
 
