@@ -5,16 +5,19 @@
         private_key: 'rm6EYECr6aroQVG2ntW0A6LpWnkTgP4uQ3H18sDDUYw='
     })
     try {
-        // console.log(new Date((new Date()).getTime() + 5000))
         await Bootpay.getAccessToken()
-        const response = await Bootpay.subscribePaymentReserve({
-            billing_key: '62b3d166cf9f6d001bd20d59',
+        const response = await Bootpay.requestWalletPayment({
+            user_id: 'bootpay',
             order_name: '테스트 결제',
             order_id: (new Date()).getTime(),
-            price: 1000,
-            reserve_execute_at: new Date((new Date()).getTime() + 5000)
+            price: 100,
+            sandbox: true,
+            user: {
+                phone: '01012341234',
+                username: '홍길동',
+                email: 'test@bootpay.co.kr'
+            }
         })
-
         console.log(response)
     } catch (e) {
         console.log(e)

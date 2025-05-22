@@ -1,12 +1,15 @@
 (async () => {
     const Bootpay = require('../dist/bootpay.js').Bootpay
     Bootpay.setConfiguration({
-        application_id: '6784d481a3175898bd6e5494',
-        private_key: 'cznW8pZU8f60PAT2p/VUyJidiz0PdKXiro2LikyZnH4='
+        application_id: '5b8f6a4d396fa665fdc2b5ea',
+        private_key: 'rm6EYECr6aroQVG2ntW0A6LpWnkTgP4uQ3H18sDDUYw='
     })
     try {
         await Bootpay.getAccessToken()
-        const response = await Bootpay.lookupSubscribeBillingKey('67a1faaf54c6b5ba3bc0b98d')
+        const response = await Bootpay.getUserWallets(
+            'bootpay',
+            true
+        )
         console.log(response)
     } catch (e) {
         console.log(e)

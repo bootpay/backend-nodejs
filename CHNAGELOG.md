@@ -1,3 +1,9 @@
+### 2.3.5
+* walletPayment response type bug fixed
+
+### 2.3.3
+* wallet api 추가 
+
 ### 2.3.2
 * 배송등록 api 필드 추가 
 
