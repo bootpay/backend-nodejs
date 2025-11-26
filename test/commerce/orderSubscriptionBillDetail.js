@@ -13,7 +13,7 @@
         await commerce.getAccessToken()
 
         const response = await commerce.orderSubscriptionBill.detail('ORDER_SUBSCRIPTION_BILL_ID_HERE')
-        console.log('OrderSubscriptionBill Detail Response:', response)
+        console.log('OrderSubscriptionBill Detail Response:', JSON.stringify(response, null, 2))
     } catch (e) {
         console.error('Error:', e)
     }

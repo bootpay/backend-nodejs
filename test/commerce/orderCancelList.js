@@ -14,7 +14,7 @@
 
         // 기본 목록 조회
         const response = await commerce.orderCancel.list()
-        console.log('OrderCancel List Response:', response)
+        console.log('OrderCancel List Response:', JSON.stringify(response, null, 2))
 
         // order_id로 조회
         const byOrderId = await commerce.orderCancel.list({

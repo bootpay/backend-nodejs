@@ -13,7 +13,7 @@
         await commerce.getAccessToken()
 
         const response = await commerce.order.detail('25112678946009400157')
-        console.log('Order Detail Response:', response)
+        console.log('Order Detail Response:', JSON.stringify(response, null, 2))
     } catch (e) {
         console.error('Error:', e)
     }

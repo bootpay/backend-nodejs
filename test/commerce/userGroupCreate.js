@@ -17,7 +17,7 @@
             corporate_type: 1, // 법인 유형
             description: '테스트용 사용자 그룹'
         })
-        console.log('UserGroup Create Response:', response)
+        console.log('UserGroup Create Response:', JSON.stringify(response, null, 2))
     } catch (e) {
         console.error('Error:', e)
     }

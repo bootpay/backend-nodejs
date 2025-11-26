@@ -16,7 +16,7 @@
             'USER_GROUP_ID_HERE',
             'USER_ID_HERE'
         )
-        console.log('UserGroup User Create Response:', response)
+        console.log('UserGroup User Create Response:', JSON.stringify(response, null, 2))
     } catch (e) {
         console.error('Error:', e)
     }

@@ -18,7 +18,7 @@
             amount: 3000,
             description: '조정 금액 수정'
         })
-        console.log('OrderSubscriptionAdjustment Update Response:', response)
+        console.log('OrderSubscriptionAdjustment Update Response:', JSON.stringify(response, null, 2))
     } catch (e) {
         console.error('Error:', e)
     }

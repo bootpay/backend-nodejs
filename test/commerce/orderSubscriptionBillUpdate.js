@@ -17,7 +17,7 @@
             amount: 15000,
             billing_date: '2025-02-01'
         })
-        console.log('OrderSubscriptionBill Update Response:', response)
+        console.log('OrderSubscriptionBill Update Response:', JSON.stringify(response, null, 2))
     } catch (e) {
         console.error('Error:', e)
     }

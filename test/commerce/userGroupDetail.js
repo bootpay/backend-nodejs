@@ -13,7 +13,7 @@
         await commerce.getAccessToken()
 
         const response = await commerce.userGroup.detail('USER_GROUP_ID_HERE')
-        console.log('UserGroup Detail Response:', response)
+        console.log('UserGroup Detail Response:', JSON.stringify(response, null, 2))
     } catch (e) {
         console.error('Error:', e)
     }

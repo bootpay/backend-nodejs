@@ -17,7 +17,7 @@
             cancel_reason: '고객 요청에 의한 취소',
             cancel_amount: 10000
         })
-        console.log('OrderCancel Request Response:', response)
+        console.log('OrderCancel Request Response:', JSON.stringify(response, null, 2))
     } catch (e) {
         console.error('Error:', e)
     }

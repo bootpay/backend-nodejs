@@ -16,7 +16,7 @@
         const response = await commerce.orderSubscription.requestIng.calculateTerminationFee(
             'ORDER_SUBSCRIPTION_ID_HERE'
         )
-        console.log('Calculate Termination Fee Response:', response)
+        console.log('Calculate Termination Fee Response:', JSON.stringify(response, null, 2))
 
         // order_number로 조회
         const responseByOrderNumber = await commerce.orderSubscription.requestIng.calculateTerminationFeeByOrderNumber(

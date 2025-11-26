@@ -16,7 +16,7 @@
             order_cancel_request_history_id: 'ORDER_CANCEL_REQUEST_HISTORY_ID_HERE',
             approve_reason: '취소 승인 완료'
         })
-        console.log('OrderCancel Approve Response:', response)
+        console.log('OrderCancel Approve Response:', JSON.stringify(response, null, 2))
     } catch (e) {
         console.error('Error:', e)
     }

@@ -13,7 +13,7 @@
         await commerce.getAccessToken()
 
         const response = await commerce.user.authenticationData('STAND_ID_HERE')
-        console.log('User Authentication Data Response:', response)
+        console.log('User Authentication Data Response:', JSON.stringify(response, null, 2))
     } catch (e) {
         console.error('Error:', e)
     }

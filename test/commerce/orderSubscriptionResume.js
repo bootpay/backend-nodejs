@@ -15,7 +15,7 @@
         const response = await commerce.orderSubscription.requestIng.resume({
             order_subscription_id: 'ORDER_SUBSCRIPTION_ID_HERE'
         })
-        console.log('OrderSubscription Resume Response:', response)
+        console.log('OrderSubscription Resume Response:', JSON.stringify(response, null, 2))
     } catch (e) {
         console.error('Error:', e)
     }

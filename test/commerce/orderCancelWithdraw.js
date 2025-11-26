@@ -13,7 +13,7 @@
         await commerce.getAccessToken()
 
         const response = await commerce.orderCancel.withdraw('ORDER_CANCEL_REQUEST_HISTORY_ID_HERE')
-        console.log('OrderCancel Withdraw Response:', response)
+        console.log('OrderCancel Withdraw Response:', JSON.stringify(response, null, 2))
     } catch (e) {
         console.error('Error:', e)
     }

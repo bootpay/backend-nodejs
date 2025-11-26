@@ -13,7 +13,7 @@
         await commerce.getAccessToken()
 
         const response = await commerce.product.detail('PRODUCT_ID_HERE')
-        console.log('Product Detail Response:', response)
+        console.log('Product Detail Response:', JSON.stringify(response, null, 2))
     } catch (e) {
         console.error('Error:', e)
     }

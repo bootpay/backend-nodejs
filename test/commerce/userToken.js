@@ -13,7 +13,7 @@
         await commerce.getAccessToken()
 
         const response = await commerce.user.token('USER_ID_HERE')
-        console.log('User Token Response:', response)
+        console.log('User Token Response:', JSON.stringify(response, null, 2))
     } catch (e) {
         console.error('Error:', e)
     }

@@ -14,7 +14,7 @@
 
         // send_types: 1=SMS, 2=Email 등
         const response = await commerce.invoice.notify('INVOICE_ID_HERE', [1, 2])
-        console.log('Invoice Notify Response:', response)
+        console.log('Invoice Notify Response:', JSON.stringify(response, null, 2))
     } catch (e) {
         console.error('Error:', e)
     }

@@ -16,7 +16,7 @@
             'ORDER_SUBSCRIPTION_ID_HERE',
             'ORDER_SUBSCRIPTION_ADJUSTMENT_ID_HERE'
         )
-        console.log('OrderSubscriptionAdjustment Delete Response:', response)
+        console.log('OrderSubscriptionAdjustment Delete Response:', JSON.stringify(response, null, 2))
     } catch (e) {
         console.error('Error:', e)
     }

@@ -13,7 +13,7 @@
         await commerce.getAccessToken()
 
         const response = await commerce.product.delete('PRODUCT_ID_HERE')
-        console.log('Product Delete Response:', response)
+        console.log('Product Delete Response:', JSON.stringify(response, null, 2))
     } catch (e) {
         console.error('Error:', e)
     }

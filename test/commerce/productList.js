@@ -14,7 +14,7 @@
 
         // 기본 목록 조회
         const response = await commerce.product.list()
-        console.log('Product List Response:', response)
+        console.log('Product List Response:', JSON.stringify(response, null, 2))
 
         // 파라미터로 조회
         const filteredResponse = await commerce.product.list({

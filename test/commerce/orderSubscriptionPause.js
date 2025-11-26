@@ -16,7 +16,7 @@
             order_subscription_id: 'ORDER_SUBSCRIPTION_ID_HERE',
             pause_reason: '일시 정지 사유'
         })
-        console.log('OrderSubscription Pause Response:', response)
+        console.log('OrderSubscription Pause Response:', JSON.stringify(response, null, 2))
     } catch (e) {
         console.error('Error:', e)
     }

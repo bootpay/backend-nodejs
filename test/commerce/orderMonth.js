@@ -13,7 +13,7 @@
         await commerce.getAccessToken()
 
         const response = await commerce.order.month('USER_GROUP_ID_HERE', '2024-12')
-        console.log('Order Month Response:', response)
+        console.log('Order Month Response:', JSON.stringify(response, null, 2))
     } catch (e) {
         console.error('Error:', e)
     }

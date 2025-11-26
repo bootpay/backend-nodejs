@@ -11,7 +11,7 @@
 
     try {
         const response = await commerce.getAccessToken()
-        console.log('Access Token Response:', response)
+        console.log('Access Token Response:', JSON.stringify(response, null, 2))
 
         // 토큰 확인
         console.log('Has Token:', commerce.hasToken())

@@ -17,7 +17,7 @@
             limit_amount: 1000000, // 제한 금액
             limit_count: 100 // 제한 횟수
         })
-        console.log('UserGroup Limit Response:', response)
+        console.log('UserGroup Limit Response:', JSON.stringify(response, null, 2))
     } catch (e) {
         console.error('Error:', e)
     }

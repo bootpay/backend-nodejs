@@ -14,7 +14,7 @@
 
         // 기본 목록 조회
         const response = await commerce.orderSubscription.list()
-        console.log('OrderSubscription List Response:', response)
+        console.log('OrderSubscription List Response:', JSON.stringify(response, null, 2))
 
         // 파라미터로 조회
         const filteredResponse = await commerce.orderSubscription.list({

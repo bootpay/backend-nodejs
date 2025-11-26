@@ -20,7 +20,7 @@
             type: 1, // 상품 유형
             status: 1 // 활성 상태
         })
-        console.log('Product Create Response:', response)
+        console.log('Product Create Response:', JSON.stringify(response, null, 2))
 
         // 이미지와 함께 상품 생성
         // const responseWithImages = await commerce.product.create(

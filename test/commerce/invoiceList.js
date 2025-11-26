@@ -14,7 +14,7 @@
 
         // 기본 목록 조회
         const response = await commerce.invoice.list()
-        console.log('Invoice List Response:', response)
+        console.log('Invoice List Response:', JSON.stringify(response, null, 2))
 
         // 파라미터로 조회
         const filteredResponse = await commerce.invoice.list({

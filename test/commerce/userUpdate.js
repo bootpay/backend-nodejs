@@ -17,7 +17,7 @@
             name: '수정된 이름',
             phone: '010-9876-5432'
         })
-        console.log('User Update Response:', response)
+        console.log('User Update Response:', JSON.stringify(response, null, 2))
     } catch (e) {
         console.error('Error:', e)
     }

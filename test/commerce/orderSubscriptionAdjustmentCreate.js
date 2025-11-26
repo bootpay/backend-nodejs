@@ -20,7 +20,7 @@
                 description: '할인 적용'
             }
         )
-        console.log('OrderSubscriptionAdjustment Create Response:', response)
+        console.log('OrderSubscriptionAdjustment Create Response:', JSON.stringify(response, null, 2))
     } catch (e) {
         console.error('Error:', e)
     }

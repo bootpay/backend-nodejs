@@ -18,7 +18,7 @@
             price: 15000,
             description: '수정된 상품 설명'
         })
-        console.log('Product Update Response:', response)
+        console.log('Product Update Response:', JSON.stringify(response, null, 2))
     } catch (e) {
         console.error('Error:', e)
     }

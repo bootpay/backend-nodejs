@@ -17,7 +17,7 @@
             s_at: '2024-01-01',
             e_at: '2024-12-31'
         })
-        console.log('UserGroup Aggregate Transaction Response:', response)
+        console.log('UserGroup Aggregate Transaction Response:', JSON.stringify(response, null, 2))
     } catch (e) {
         console.error('Error:', e)
     }

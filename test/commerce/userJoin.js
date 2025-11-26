@@ -19,7 +19,7 @@
             email: 'test_user@example.com',
             phone: '010-1234-5678'
         })
-        console.log('User Join Response:', response)
+        console.log('User Join Response:', JSON.stringify(response, null, 2))
     } catch (e) {
         console.error('Error:', e)
     }

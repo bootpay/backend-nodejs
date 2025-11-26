@@ -13,7 +13,7 @@
         await commerce.getAccessToken()
 
         const response = await commerce.invoice.detail('INVOICE_ID_HERE')
-        console.log('Invoice Detail Response:', response)
+        console.log('Invoice Detail Response:', JSON.stringify(response, null, 2))
     } catch (e) {
         console.error('Error:', e)
     }

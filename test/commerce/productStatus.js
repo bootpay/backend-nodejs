@@ -16,7 +16,7 @@
             product_id: 'PRODUCT_ID_HERE',
             status: 2 // 비활성 상태로 변경
         })
-        console.log('Product Status Response:', response)
+        console.log('Product Status Response:', JSON.stringify(response, null, 2))
     } catch (e) {
         console.error('Error:', e)
     }

@@ -16,7 +16,7 @@
             order_subscription_id: 'ORDER_SUBSCRIPTION_ID_HERE',
             termination_reason: '해지 사유'
         })
-        console.log('OrderSubscription Termination Response:', response)
+        console.log('OrderSubscription Termination Response:', JSON.stringify(response, null, 2))
     } catch (e) {
         console.error('Error:', e)
     }

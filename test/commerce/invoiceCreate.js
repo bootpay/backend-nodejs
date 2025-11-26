@@ -18,7 +18,7 @@
             title: '테스트 청구서',
             description: '테스트 청구서 설명'
         })
-        console.log('Invoice Create Response:', response)
+        console.log('Invoice Create Response:', JSON.stringify(response, null, 2))
     } catch (e) {
         console.error('Error:', e)
     }

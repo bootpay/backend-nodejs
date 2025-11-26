@@ -13,7 +13,7 @@
         await commerce.getAccessToken()
 
         const response = await commerce.user.delete('USER_ID_HERE')
-        console.log('User Delete Response:', response)
+        console.log('User Delete Response:', JSON.stringify(response, null, 2))
     } catch (e) {
         console.error('Error:', e)
     }

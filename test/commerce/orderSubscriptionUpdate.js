@@ -16,7 +16,7 @@
             order_subscription_id: 'ORDER_SUBSCRIPTION_ID_HERE',
             next_billing_date: '2025-01-15'
         })
-        console.log('OrderSubscription Update Response:', response)
+        console.log('OrderSubscription Update Response:', JSON.stringify(response, null, 2))
     } catch (e) {
         console.error('Error:', e)
     }

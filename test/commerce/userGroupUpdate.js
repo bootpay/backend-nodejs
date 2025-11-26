@@ -17,7 +17,7 @@
             name: '수정된 그룹명',
             description: '수정된 설명'
         })
-        console.log('UserGroup Update Response:', response)
+        console.log('UserGroup Update Response:', JSON.stringify(response, null, 2))
     } catch (e) {
         console.error('Error:', e)
     }
