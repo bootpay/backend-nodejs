@@ -470,3 +470,4 @@ export default Bootpay
 
 export * from './lib/response'
 export * from './lib/resource'
+export * from './bootpay-commerce'

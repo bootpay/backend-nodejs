@@ -13,7 +13,7 @@
       "DOM"
     ],
     "typeRoots": [
-      "./src/lib"
+      "./node_modules/@types"
     ],
     "resolveJsonModule": true,
     "esModuleInterop": true,
@@ -29,7 +29,7 @@
     }
   },
   "include": [
-    "src/*"
+    "src/**/*"
   ],
   "exclude": [
     "**/*.spec.ts",
