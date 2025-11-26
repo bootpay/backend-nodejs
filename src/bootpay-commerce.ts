@@ -49,17 +49,17 @@ export class BootpayCommerce extends BootpayCommerceResource {
      * 액세스 토큰 발급
      * client_key/secret_key로 인증
      */
-    async getAccessToken(): Promise<BootpayCommerceResponse<CommerceTokenResponse>> {
+    async getAccessToken(): Promise<any> {
         try {
             const { client_key, secret_key } = this.commerceConfiguration
 
-            const response = await this.postWithBasicAuth<CommerceTokenResponse>('request/token', {
+            const response: any = await this.postWithBasicAuth<CommerceTokenResponse>('request/token', {
                 client_key,
                 secret_key
             })
 
-            if (response.success && response.data?.access_token) {
-                this.setToken(response.data.access_token)
+            if (response?.access_token) {
+                this.setToken(response.access_token)
             }
 
             return response

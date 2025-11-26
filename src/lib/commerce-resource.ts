@@ -54,28 +54,15 @@ export class BootpayCommerceResource {
 
         this.$http.interceptors.response.use(
             (response: AxiosResponse): any => {
-                const result: BootpayCommerceResponse = {
-                    http_status: response.status,
-                    success: response.status >= 200 && response.status < 300,
-                    data: response.data
-                }
-                return result
+                return response.data
             },
             (error: any) => {
                 if (error.response !== undefined) {
-                    return Promise.reject({
-                        http_status: error.response.status,
-                        success: false,
-                        data: error.response.data,
-                        error: error.response.data?.message || error.message
-                    } as BootpayCommerceResponse)
+                    return Promise.reject(error.response.data)
                 } else {
                     return Promise.reject({
-                        http_status: -100,
-                        success: false,
-                        data: null,
                         error: `Request Rest Api Failed to Bootpay Commerce Server, ${error.message}`
-                    } as BootpayCommerceResponse)
+                    })
                 }
             }
         )
