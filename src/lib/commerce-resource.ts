@@ -18,7 +18,6 @@ export interface CommerceConfiguration {
 }
 
 export interface BootpayCommerceResponse<T = any> {
-    http_status: number
     success: boolean
     data: T
     error?: string
