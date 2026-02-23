@@ -6,7 +6,12 @@ import {
     OrderSubscriptionPauseParams,
     OrderSubscriptionResumeParams,
     OrderSubscriptionTerminationParams,
-    CalcTerminateFeeResponse
+    CalcTerminateFeeResponse,
+    SupervisorOrderSubscriptionApproveParams,
+    SupervisorOrderSubscriptionRejectParams,
+    SupervisorOrderSubscriptionTerminateParams,
+    SupervisorOrderSubscriptionPauseParams,
+    SupervisorOrderSubscriptionResumeParams
 } from '../types'
 
 export class OrderSubscriptionRequestIngModule {
@@ -125,5 +130,40 @@ export class OrderSubscriptionModule {
             return Promise.reject({ success: false, error: 'order_subscription_id is required' })
         }
         return this.bootpay.put<CommerceOrderSubscription>(`order_subscriptions/${params.order_subscription_id}`, params)
+    }
+
+    async supervisorApprove(
+        orderSubscriptionId: string,
+        params: SupervisorOrderSubscriptionApproveParams = {}
+    ): Promise<BootpayCommerceResponse<CommerceOrderSubscription>> {
+        return this.bootpay.put<CommerceOrderSubscription>(`order_subscriptions/${orderSubscriptionId}/approve`, params)
+    }
+
+    async supervisorReject(
+        orderSubscriptionId: string,
+        params: SupervisorOrderSubscriptionRejectParams = {}
+    ): Promise<BootpayCommerceResponse<CommerceOrderSubscription>> {
+        return this.bootpay.put<CommerceOrderSubscription>(`order_subscriptions/${orderSubscriptionId}/reject`, params)
+    }
+
+    async supervisorTerminate(
+        orderSubscriptionId: string,
+        params: SupervisorOrderSubscriptionTerminateParams = {}
+    ): Promise<BootpayCommerceResponse<CommerceOrderSubscription>> {
+        return this.bootpay.put<CommerceOrderSubscription>(`order_subscriptions/${orderSubscriptionId}/terminate`, params)
+    }
+
+    async supervisorPause(
+        orderSubscriptionId: string,
+        params: SupervisorOrderSubscriptionPauseParams
+    ): Promise<BootpayCommerceResponse<CommerceOrderSubscription>> {
+        return this.bootpay.put<CommerceOrderSubscription>(`order_subscriptions/${orderSubscriptionId}/pause`, params)
+    }
+
+    async supervisorResume(
+        orderSubscriptionId: string,
+        params: SupervisorOrderSubscriptionResumeParams = {}
+    ): Promise<BootpayCommerceResponse<CommerceOrderSubscription>> {
+        return this.bootpay.put<CommerceOrderSubscription>(`order_subscriptions/${orderSubscriptionId}/resume`, params)
     }
 }

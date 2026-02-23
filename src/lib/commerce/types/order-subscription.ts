@@ -99,3 +99,30 @@ export interface CalcTerminateFeeResponse {
     last_bill_refund_price?: number
     final_fee?: number
 }
+
+export interface SupervisorOrderSubscriptionApproveParams {
+    reason?: string
+}
+
+export interface SupervisorOrderSubscriptionRejectParams {
+    reason?: string
+}
+
+export interface SupervisorOrderSubscriptionTerminateParams {
+    reason?: string
+    termination_fee?: number
+    last_bill_refund_price?: number
+    final_fee?: number
+    service_end_at?: string
+    cancel_date?: string
+}
+
+export interface SupervisorOrderSubscriptionPauseParams {
+    reason?: string
+    paused_at: string
+    expected_resume_at?: string
+}
+
+export interface SupervisorOrderSubscriptionResumeParams {
+    reason?: string
+}
