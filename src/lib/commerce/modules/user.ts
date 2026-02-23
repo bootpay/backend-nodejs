@@ -55,6 +55,27 @@ export class UserModule {
     }
 
     /**
+     * 회원 로그인 (Mall API alias)
+     */
+    async userLogin(loginId: string, loginPw: string): Promise<BootpayCommerceResponse<UserLoginResponse>> {
+        return this.login(loginId, loginPw)
+    }
+
+    /**
+     * 회원가입 (Mall API alias)
+     */
+    async userJoin(user: CommerceUser): Promise<BootpayCommerceResponse<CommerceUser>> {
+        return this.join(user)
+    }
+
+    /**
+     * 회원가입 중복 확인 (Mall API alias)
+     */
+    async userJoinCheck(type: string, pk: string): Promise<BootpayCommerceResponse<{ exists: boolean }>> {
+        return this.checkExist(type, pk)
+    }
+
+    /**
      * 사용자 목록 조회
      * @param params 조회 파라미터
      */

@@ -31,6 +31,14 @@ export class ProductModule {
         return this.bootpay.get<{ items: CommerceProduct[]; total: number }>(`products${query ? `?${query}` : ''}`)
     }
 
+
+    /**
+     * 상품 목록 조회 (Mall API alias)
+     */
+    async products(params?: ProductListParams): Promise<BootpayCommerceResponse<{ items: CommerceProduct[]; total: number }>> {
+        return this.list(params)
+    }
+
     /**
      * 상품 생성 (이미지 포함)
      * @param product 상품 정보
@@ -76,6 +84,13 @@ export class ProductModule {
      */
     async detail(productId: string): Promise<BootpayCommerceResponse<CommerceProduct>> {
         return this.bootpay.get<CommerceProduct>(`products/${productId}`)
+    }
+
+    /**
+     * 상품 상세 조회 (Mall API alias)
+     */
+    async productDetail(productId: string): Promise<BootpayCommerceResponse<CommerceProduct>> {
+        return this.detail(productId)
     }
 
     /**

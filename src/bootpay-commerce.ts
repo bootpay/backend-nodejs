@@ -8,6 +8,7 @@ import { OrderCancelModule } from './lib/commerce/modules/order-cancel'
 import { OrderSubscriptionModule } from './lib/commerce/modules/order-subscription'
 import { OrderSubscriptionBillModule } from './lib/commerce/modules/order-subscription-bill'
 import { OrderSubscriptionAdjustmentModule } from './lib/commerce/modules/order-subscription-adjustment'
+import { StoreModule } from './lib/commerce/modules/store'
 
 export interface CommerceTokenResponse {
     access_token: string
@@ -24,6 +25,7 @@ export class BootpayCommerce extends BootpayCommerceResource {
     public orderSubscription!: OrderSubscriptionModule
     public orderSubscriptionBill!: OrderSubscriptionBillModule
     public orderSubscriptionAdjustment!: OrderSubscriptionAdjustmentModule
+    public store!: StoreModule
 
     constructor(configuration?: CommerceConfiguration) {
         super()
@@ -43,6 +45,7 @@ export class BootpayCommerce extends BootpayCommerceResource {
         this.orderSubscription = new OrderSubscriptionModule(this)
         this.orderSubscriptionBill = new OrderSubscriptionBillModule(this)
         this.orderSubscriptionAdjustment = new OrderSubscriptionAdjustmentModule(this)
+        this.store = new StoreModule(this)
     }
 
     /**
