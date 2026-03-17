@@ -77,8 +77,6 @@ export class BootpayBackendNodejsResource {
                 } else if (application_id) {
                     if (this.$token !== undefined) {
                         config.headers.authorization = `Bearer ${ this.$token }`
-                    } else if (private_key) {
-                        config.headers.authorization = `Basic ${Buffer.from(`${application_id}:${private_key}`).toString('base64')}`
                     }
                 }
                 config.headers['Content-Type']        = 'application/json'
