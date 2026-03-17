@@ -13,8 +13,10 @@ interface BootpayEntrypoints {
 }
 
 interface BootpayConfiguration {
-    application_id: string
-    private_key: string
+    application_id?: string
+    private_key?: string
+    client_key?: string
+    secret_key?: string
     mode?: 'development' | 'production' | 'stage'
 }
 
@@ -36,6 +38,8 @@ export class BootpayBackendNodejsResource {
         this.bootpayConfiguration = {
             application_id: '',
             private_key:    '',
+            client_key:     '',
+            secret_key:     '',
             mode:           'production'
         }
         this.API_ENTRYPOINTS      = {
@@ -65,6 +69,13 @@ export class BootpayBackendNodejsResource {
             if (config.headers !== undefined) {
                 if (this.$token !== undefined) {
                     config.headers.authorization = `Bearer ${ this.$token }`
+                } else {
+                    const { client_key, secret_key, application_id, private_key } = this.bootpayConfiguration
+                    const key = client_key || application_id
+                    const secret = secret_key || private_key
+                    if (key && secret) {
+                        config.headers.authorization = `Basic ${Buffer.from(`${key}:${secret}`).toString('base64')}`
+                    }
                 }
                 config.headers['Content-Type']        = 'application/json'
                 config.headers['Accept']              = 'application/json'
