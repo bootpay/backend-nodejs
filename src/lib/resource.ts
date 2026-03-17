@@ -67,14 +67,18 @@ export class BootpayBackendNodejsResource {
         // @ts-expect-error
         this.$http.interceptors.request.use((config: AxiosRequestConfig) => {
             if (config.headers !== undefined) {
-                if (this.$token !== undefined) {
-                    config.headers.authorization = `Bearer ${ this.$token }`
-                } else {
-                    const { client_key, secret_key, application_id, private_key } = this.bootpayConfiguration
-                    const key = client_key || application_id
-                    const secret = secret_key || private_key
-                    if (key && secret) {
-                        config.headers.authorization = `Basic ${Buffer.from(`${key}:${secret}`).toString('base64')}`
+                const { client_key, secret_key, application_id, private_key } = this.bootpayConfiguration
+
+                // 인증 우선순위:
+                // 1) client_key가 있으면 Basic(client_key:secret_key)
+                // 2) application_id가 있으면 Bearer(token) 우선, token 미존재 시 Basic(application_id:private_key) fallback
+                if (client_key && secret_key) {
+                    config.headers.authorization = `Basic ${Buffer.from(`${client_key}:${secret_key}`).toString('base64')}`
+                } else if (application_id) {
+                    if (this.$token !== undefined) {
+                        config.headers.authorization = `Bearer ${ this.$token }`
+                    } else if (private_key) {
+                        config.headers.authorization = `Basic ${Buffer.from(`${application_id}:${private_key}`).toString('base64')}`
                     }
                 }
                 config.headers['Content-Type']        = 'application/json'
