@@ -74,7 +74,7 @@ export class BootpayBackendNodejsResource {
                 // 2) application_id가 있으면 Bearer(token) 우선, token 미존재 시 Basic(application_id:private_key) fallback
                 if (client_key && secret_key) {
                     config.headers.authorization = `Basic ${Buffer.from(`${client_key}:${secret_key}`).toString('base64')}`
-                } else if (application_id) {
+                } else {
                     if (this.$token !== undefined) {
                         config.headers.authorization = `Bearer ${ this.$token }`
                     }
