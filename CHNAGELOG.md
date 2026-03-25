@@ -1,3 +1,6 @@
+### 2.5.0
+* client_key, secret_key 추가 및 레거시 application_id, private_key 유지
+
 ### 2.4.1
 * Commerce 응답포맷 개선 
 
