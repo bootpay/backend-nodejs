@@ -8,6 +8,10 @@ import { OrderCancelModule } from './lib/commerce/modules/order-cancel'
 import { OrderSubscriptionModule } from './lib/commerce/modules/order-subscription'
 import { OrderSubscriptionBillModule } from './lib/commerce/modules/order-subscription-bill'
 import { OrderSubscriptionAdjustmentModule } from './lib/commerce/modules/order-subscription-adjustment'
+import { OrderSubscriptionRequestModule } from './lib/commerce/modules/order-subscription-request'
+import { CategoryModule } from './lib/commerce/modules/category'
+import { CouponModule } from './lib/commerce/modules/coupon'
+import { PointModule } from './lib/commerce/modules/point'
 import { StoreModule } from './lib/commerce/modules/store'
 
 export interface CommerceTokenResponse {
@@ -25,6 +29,10 @@ export class BootpayCommerce extends BootpayCommerceResource {
     public orderSubscription!: OrderSubscriptionModule
     public orderSubscriptionBill!: OrderSubscriptionBillModule
     public orderSubscriptionAdjustment!: OrderSubscriptionAdjustmentModule
+    public orderSubscriptionRequest!: OrderSubscriptionRequestModule
+    public category!: CategoryModule
+    public coupon!: CouponModule
+    public point!: PointModule
     public store!: StoreModule
 
     constructor(configuration?: CommerceConfiguration) {
@@ -45,6 +53,10 @@ export class BootpayCommerce extends BootpayCommerceResource {
         this.orderSubscription = new OrderSubscriptionModule(this)
         this.orderSubscriptionBill = new OrderSubscriptionBillModule(this)
         this.orderSubscriptionAdjustment = new OrderSubscriptionAdjustmentModule(this)
+        this.orderSubscriptionRequest = new OrderSubscriptionRequestModule(this)
+        this.category = new CategoryModule(this)
+        this.coupon = new CouponModule(this)
+        this.point = new PointModule(this)
         this.store = new StoreModule(this)
     }
 
