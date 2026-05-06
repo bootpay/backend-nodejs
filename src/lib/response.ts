@@ -435,6 +435,7 @@ export interface WalletPaymentResponseParameters {
     pg: string
     status_locale: string
     currency: string
+    /** @deprecated HTTP status code 노출 type. 다음 메이저 버전에서 제거 예정. 성공 여부는 status 필드 사용. */
     http_status: number
     order_id: string
     requested_at: string
