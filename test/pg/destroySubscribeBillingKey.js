@@ -6,7 +6,7 @@ const { getActivePgConfig, TEST_DATA } = require('../config.js');
     try {
         // legacy 모드에서만 실제 토큰 발급. ck/sk 모드에서는 no-op.
         await Bootpay.getAccessToken();
-        const response = await Bootpay.destroySubscribeBillingKey(TEST_DATA.billing_key);
+        const response = await Bootpay.destroyBillingKey(TEST_DATA.billing_key);
         console.log(response);
     } catch (e) {
         console.log(e);
