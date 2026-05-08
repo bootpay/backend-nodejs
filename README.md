@@ -11,7 +11,8 @@ node환경에서 작성된 어플리케이션, 프레임워크 등에서 사용�
 
 ## 목차
 - [PG API 사용하기](#사용하기)
-- [2. 결제 단건 조회](#2-결제-단건-조회)
+   - [1. 토큰 발급](#1-토큰-발급)
+   - [2. 결제 단건 조회](#2-결제-단건-조회)
    - [3. 결제 취소 (전액 취소 / 부분 취소)](#3-결제-취소-전액-취소--부분-취소)
    - [4. 자동/빌링/정기 결제](#4-자동빌링정기-결제)
       - [4-1. 카드 빌링키 발급](#4-1-카드-빌링키-발급)
@@ -50,17 +51,54 @@ node환경에서 작성된 어플리케이션, 프레임워크 등에서 사용�
 npm install --save @bootpay/backend-js
 ```
 
+
+## 환경변수 설정
+
+예제와 테스트는 각 SDK 루트의 `.env` 파일을 우선 읽습니다. 먼저 `.env.example`을 복사한 뒤 필요한 키만 변경하세요. `.env`는 gitignore 처리되어 커밋되지 않습니다.
+
+```bash
+cp .env.example .env
+# BOOTPAY_ENV=production 또는 development
+```
+
+주요 변수:
+
+```env
+BOOTPAY_ENV=production
+BOOTPAY_PG_CLIENT_KEY_PROD=...
+BOOTPAY_PG_SECRET_KEY_PROD=...
+BOOTPAY_PG_CLIENT_KEY_DEV=...
+BOOTPAY_PG_SECRET_KEY_DEV=...
+BOOTPAY_COMMERCE_CLIENT_KEY_PROD=...
+BOOTPAY_COMMERCE_SECRET_KEY_PROD=...
+BOOTPAY_COMMERCE_CLIENT_KEY_PROD=...
+BOOTPAY_COMMERCE_SECRET_KEY_PROD=...
+```
+
+변수가 없으면 SDK 테스트용 기본값(NodeJS 기준 ck/sk)으로 fallback 합니다.
+
 # 사용하기
+
+> 권장 인증 방식은 `client_key/secret_key`입니다. 기존 `application_id/private_key` 설정도 하위 호환을 위해 계속 동작합니다. 둘 다 설정된 경우 `client_key/secret_key`가 우선됩니다.
+
+```javascript
+// Legacy fallback:
+// Bootpay.setConfiguration({
+//     application_id: process.env.BOOTPAY_APPLICATION_ID,
+//     private_key: process.env.BOOTPAY_PRIVATE_KEY
+// })
+```
 
 ```javascript
 import { Bootpay } from "@bootpay/backend-js";
 
 (async () => { 
     Bootpay.setConfiguration({
-        client_key: 'r8KT2-2w9iov6IgY93pnuA',
-        secret_key: 't8sUJ1z07a8uoN-iVIeN4nVrWdmZ8s5NoqXGkPBymqs='
+        client_key: process.env.BOOTPAY_PG_CLIENT_KEY_PROD,
+        secret_key: process.env.BOOTPAY_PG_SECRET_KEY_PROD
     })
     try {
+        await Bootpay.getAccessToken()
         const response = await Bootpay.cancelPayment({
             receipt_id: '628b2206d01c7e00209b6087',
             cancel_price: 1000,
@@ -75,16 +113,39 @@ import { Bootpay } from "@bootpay/backend-js";
 ```
 
 
+## 1. 토큰 발급
+
+부트페이와 서버간 통신을 하기 위해서는 부트페이 서버로부터 토큰을 발급받아야 합니다.  
+발급된 토큰은 30분간 유효하며, 최초 발급일로부터 30분이 지날 경우 토큰 발급 함수를 재호출 해주셔야 합니다.
+
+```javascript
+(async () => { 
+    Bootpay.setConfiguration({
+        client_key: process.env.BOOTPAY_PG_CLIENT_KEY_PROD,
+        secret_key: process.env.BOOTPAY_PG_SECRET_KEY_PROD
+    })
+    try {
+        let response = await Bootpay.getAccessToken()
+        console.log(response)
+    } catch (e) {
+        console.log(e)
+    }
+})()
+
+```
+
+
 ## 2. 결제 단건 조회
 결제창 및 정기결제에서 승인/취소된 결제건에 대하여 올바른 결제건인지 서버간 통신으로 결제검증을 합니다.
 ```javascript
 (async () => {
     const Bootpay = require('@bootpay/backend-js').Bootpay
     Bootpay.setConfiguration({
-        client_key: 'r8KT2-2w9iov6IgY93pnuA',
-        secret_key: 't8sUJ1z07a8uoN-iVIeN4nVrWdmZ8s5NoqXGkPBymqs='
+        client_key: process.env.BOOTPAY_PG_CLIENT_KEY_PROD,
+        secret_key: process.env.BOOTPAY_PG_SECRET_KEY_PROD
     })
     try {
+        await Bootpay.getAccessToken()
         const response = await Bootpay.receiptPayment('62b12f4b6262500007629fec')
         console.log(response)
     } catch (e) {
@@ -106,10 +167,11 @@ price를 지정하지 않으면 전액취소 됩니다.
 ```javascript 
 (async () => { 
     Bootpay.setConfiguration({
-        client_key: 'r8KT2-2w9iov6IgY93pnuA',
-        secret_key: 't8sUJ1z07a8uoN-iVIeN4nVrWdmZ8s5NoqXGkPBymqs='
+        client_key: process.env.BOOTPAY_PG_CLIENT_KEY_PROD,
+        secret_key: process.env.BOOTPAY_PG_SECRET_KEY_PROD
     })
     try {
+        await Bootpay.getAccessToken()
         const response = await Bootpay.cancelPayment({
             receipt_id: '628b2206d01c7e00209b6087',
             cancel_price: 1000,
@@ -131,10 +193,11 @@ REST API 방식으로 고객으로부터 카드 정보를 전달하여, PG사에
 ```javascript
 (async () => { 
     Bootpay.setConfiguration({
-        client_key: 'r8KT2-2w9iov6IgY93pnuA',
-        secret_key: 't8sUJ1z07a8uoN-iVIeN4nVrWdmZ8s5NoqXGkPBymqs='
+        client_key: process.env.BOOTPAY_PG_CLIENT_KEY_PROD,
+        secret_key: process.env.BOOTPAY_PG_SECRET_KEY_PROD
     })
     try {
+        await Bootpay.getAccessToken()
         const response = await Bootpay.requestSubscribeBillingKey({
             pg: '나이스페이',
             order_name: '테스트결제',
@@ -162,10 +225,11 @@ REST API 방식으로 고객의 계좌 정보를 전달하여, PG사에게 빌�
 ```javascript
 (async () => {
    Bootpay.setConfiguration({
-      client_key: '5b8f6a4d396fa665fdc2b5ea',
-      secret_key: 'rm6EYECr6aroQVG2ntW0A6LpWnkTgP4uQ3H18sDDUYw='
+      client_key: process.env.BOOTPAY_PG_CLIENT_KEY_PROD,
+      secret_key: process.env.BOOTPAY_PG_SECRET_KEY_PROD
    })
    try {
+      await Bootpay.getAccessToken()
       const response = await Bootpay.requestSubscribeAutomaticTransferBillingKey({
          pg: '나이스페이',
          order_name: '테스트결제',
@@ -193,6 +257,7 @@ REST API 방식으로 고객의 계좌 정보를 전달하여, PG사에게 빌�
 이후 빌링키 발급 요청시 응답받은 receipt_id로, 출금 동의 확인을 요청합니다.
 ```javascript
 try {
+    await Bootpay.getAccessToken()
     const response = await Bootpay.publishAutomaticTransferBillingKey('6655069ca691573f1bb9c28a')
     console.log(response)
 } catch (e) {
@@ -208,10 +273,11 @@ try {
 ```javascript 
 (async () => { 
     Bootpay.setConfiguration({
-        client_key: 'r8KT2-2w9iov6IgY93pnuA',
-        secret_key: 't8sUJ1z07a8uoN-iVIeN4nVrWdmZ8s5NoqXGkPBymqs='
+        client_key: process.env.BOOTPAY_PG_CLIENT_KEY_PROD,
+        secret_key: process.env.BOOTPAY_PG_SECRET_KEY_PROD
     })
     try {
+        await Bootpay.getAccessToken()
         const response = await Bootpay.requestSubscribeCardPayment({
             billing_key: '62b3d166cf9f6d001bd20d59',
             order_name: '테스트 결제',
@@ -230,11 +296,12 @@ try {
 ```javascript
 (async () => { 
     Bootpay.setConfiguration({
-        client_key: 'r8KT2-2w9iov6IgY93pnuA',
-        secret_key: 't8sUJ1z07a8uoN-iVIeN4nVrWdmZ8s5NoqXGkPBymqs='
+        client_key: process.env.BOOTPAY_PG_CLIENT_KEY_PROD,
+        secret_key: process.env.BOOTPAY_PG_SECRET_KEY_PROD
     })
     try {
         // console.log(new Date((new Date()).getTime() + 5000))
+        await Bootpay.getAccessToken()
         const response = await Bootpay.subscribePaymentReserve({
             billing_key: '62b3d166cf9f6d001bd20d59',
             order_name: '테스트 결제',
@@ -262,11 +329,12 @@ await Bootpay.subscribePaymentReserveLookup(reserve_id)
 ```javascript
 (async () => { 
     Bootpay.setConfiguration({
-        client_key: 'r8KT2-2w9iov6IgY93pnuA',
-        secret_key: 't8sUJ1z07a8uoN-iVIeN4nVrWdmZ8s5NoqXGkPBymqs='
+        client_key: process.env.BOOTPAY_PG_CLIENT_KEY_PROD,
+        secret_key: process.env.BOOTPAY_PG_SECRET_KEY_PROD
     })
     try {
         // console.log(new Date((new Date()).getTime() + 5000))
+        await Bootpay.getAccessToken()
         const response = await Bootpay.subscribePaymentReserve({
             billing_key: '62b3d166cf9f6d001bd20d59',
             order_name: '테스트 결제',
@@ -289,10 +357,11 @@ await Bootpay.subscribePaymentReserveLookup(reserve_id)
 ```javascript 
 (async () => { 
     Bootpay.setConfiguration({
-        client_key: 'r8KT2-2w9iov6IgY93pnuA',
-        secret_key: 't8sUJ1z07a8uoN-iVIeN4nVrWdmZ8s5NoqXGkPBymqs='
+        client_key: process.env.BOOTPAY_PG_CLIENT_KEY_PROD,
+        secret_key: process.env.BOOTPAY_PG_SECRET_KEY_PROD
     })
     try {
+        await Bootpay.getAccessToken()
         const response = await Bootpay.destroyBillingKey('62b3d166cf9f6d001bd20d59')
         console.log(response)
     } catch (e) {
@@ -307,10 +376,11 @@ await Bootpay.subscribePaymentReserveLookup(reserve_id)
 ```javascript
 (async () => { 
     Bootpay.setConfiguration({
-        client_key: 'r8KT2-2w9iov6IgY93pnuA',
-        secret_key: 't8sUJ1z07a8uoN-iVIeN4nVrWdmZ8s5NoqXGkPBymqs='
+        client_key: process.env.BOOTPAY_PG_CLIENT_KEY_PROD,
+        secret_key: process.env.BOOTPAY_PG_SECRET_KEY_PROD
     })
     try {
+        await Bootpay.getAccessToken()
         const response = await Bootpay.lookupSubscribeBillingKey('62b3cbbecf9f6d001bd20ce8')
         console.log(response)
     } catch (e) {
@@ -332,10 +402,11 @@ console.log(response)
 ```javascript
 (async () => { 
     Bootpay.setConfiguration({
-        client_key: 'r8KT2-2w9iov6IgY93pnuA',
-        secret_key: 't8sUJ1z07a8uoN-iVIeN4nVrWdmZ8s5NoqXGkPBymqs='
+        client_key: process.env.BOOTPAY_PG_CLIENT_KEY_PROD,
+        secret_key: process.env.BOOTPAY_PG_SECRET_KEY_PROD
     })
     try {
+        await Bootpay.getAccessToken()
         const response = await Bootpay.requestUserToken({
             user_id: 'gosomi1',
             phone:'01012345678'
@@ -359,10 +430,11 @@ console.log(response)
 ```javascript
 (async () => { 
     Bootpay.setConfiguration({
-        client_key: 'r8KT2-2w9iov6IgY93pnuA',
-        secret_key: 't8sUJ1z07a8uoN-iVIeN4nVrWdmZ8s5NoqXGkPBymqs='
+        client_key: process.env.BOOTPAY_PG_CLIENT_KEY_PROD,
+        secret_key: process.env.BOOTPAY_PG_SECRET_KEY_PROD
     })
     try {
+        await Bootpay.getAccessToken()
         const response = await Bootpay.confirmPayment('62876963d01c7e00209b6028')
         console.log(response)
     } catch (e) {
@@ -377,10 +449,11 @@ console.log(response)
 ```javascript
 (async () => { 
     Bootpay.setConfiguration({
-        client_key: 'r8KT2-2w9iov6IgY93pnuA',
-        secret_key: 't8sUJ1z07a8uoN-iVIeN4nVrWdmZ8s5NoqXGkPBymqs='
+        client_key: process.env.BOOTPAY_PG_CLIENT_KEY_PROD,
+        secret_key: process.env.BOOTPAY_PG_SECRET_KEY_PROD
     })
     try {
+        await Bootpay.getAccessToken()
         const response = await Bootpay.certificate('625783a6cf9f6d001d0aed19')
         console.log(response)
     } catch (e) {
@@ -397,10 +470,11 @@ PG사로 배송정보( 이니시스, KCP만 지원 )를 보내서 에스크로 �
 ```javascript
 (async () => { 
     Bootpay.setConfiguration({
-        client_key: 'r8KT2-2w9iov6IgY93pnuA',
-        secret_key: 't8sUJ1z07a8uoN-iVIeN4nVrWdmZ8s5NoqXGkPBymqs='
+        client_key: process.env.BOOTPAY_PG_CLIENT_KEY_PROD,
+        secret_key: process.env.BOOTPAY_PG_SECRET_KEY_PROD
     })
     try {
+        await Bootpay.getAccessToken()
         const response = await Bootpay.shippingStart({
             receipt_id: "62a9379ad01c7e001f7dc1f3",
             tracking_number: '123456',
@@ -429,10 +503,13 @@ PG사로 배송정보( 이니시스, KCP만 지원 )를 보내서 에스크로 �
 const { BootpayCommerce } = require('@bootpay/backend-js')
 
 const commerce = new BootpayCommerce({
-    client_key: 'r8KT2-2w9iov6IgY93pnuA',
-    secret_key: 't8sUJ1z07a8uoN-iVIeN4nVrWdmZ8s5NoqXGkPBymqs=',
-    mode: 'development' // 'production' | 'development' | 'stage'
+    client_key: process.env.BOOTPAY_COMMERCE_CLIENT_KEY_PROD,
+    secret_key: process.env.BOOTPAY_COMMERCE_SECRET_KEY_PROD,
+    mode: 'production' // 'production' | 'development' | 'stage'
 })
+
+// 토큰 발급
+await commerce.getAccessToken()
 ```
 
 ### 10-2. 사용자 관리
