@@ -1,16 +1,19 @@
+const { getCommerceKeys } = require('../config.js');
+const keys = getCommerceKeys();
 // Commerce API - OrderCancel Approve (취소 승인) 테스트
 
 (async () => {
     const { BootpayCommerce } = require('../../dist/bootpay-commerce.js')
 
     const commerce = new BootpayCommerce({
-        client_key: 'hxS-Up--5RvT6oU6QJE0JA',
-        secret_key: 'r5zxvDcQJiAP2PBQ0aJjSHQtblNmYFt6uFoEMhti_mg=',
-        mode: 'development'
+        client_key: keys.client_key,
+        secret_key: keys.secret_key,
+        mode: keys.mode
     })
 
     try {
-        await commerce.getAccessToken()
+        // (legacy) application_id 방식에서만 필요. ck/sk 는 매 요청 Basic Auth 헤더로 직접 인증되므로 호출 불필요.
+        // await commerce.getAccessToken()
 
         const response = await commerce.orderCancel.approve({
             order_cancel_request_history_id: 'ORDER_CANCEL_REQUEST_HISTORY_ID_HERE',

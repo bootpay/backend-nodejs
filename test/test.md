@@ -104,3 +104,61 @@ test/
 │   └── ...
 └── [기존파일].js       # 기존 테스트 파일 (레거시)
 ```
+
+## PG 인증 방식 토글 (BOOTPAY_AUTH_MODE)
+
+PG 테스트는 기본적으로 신규 `client_key/secret_key` 방식으로 동작한다. 매 실행 시 환경변수로 레거시 `application_id/private_key` 방식으로 전환할 수 있다.
+
+### 토글 contract
+
+| `BOOTPAY_AUTH_MODE` | 동작 |
+|---|---|
+| `new` (기본, 미설정 시 동일) | `client_key` + `secret_key` Basic Auth 로 PG 인스턴스 생성. 토큰 발급 호출 불필요. |
+| `legacy` | `application_id` + `private_key` 로 PG 인스턴스 생성. 토큰 발급 호출 후 `Bearer` 헤더 사용. |
+
+키 값은 모두 `.env` (또는 환경변수) 로 주입한다 — `.env.example` 참고. 토글만 바꾸고 키는 그대로 둬도 된다.
+
+### 사용법
+
+```bash
+# (1) 기본 — env var 생략 (= new)
+node test/pg/receiptPayment.js
+
+# (2) 한 번만 legacy 로 전환
+BOOTPAY_AUTH_MODE=legacy node test/pg/receiptPayment.js
+
+# (3) 셸 세션 동안 legacy 고정
+export BOOTPAY_AUTH_MODE=legacy
+node test/pg/receiptPayment.js
+node test/pg/cancelPayment.js
+unset BOOTPAY_AUTH_MODE   # 끝나면 해제
+
+# (4) 영구 전환 — .env 의 BOOTPAY_AUTH_MODE 값을 legacy 로 바꾸면 셸 export 없이도 동작
+```
+
+### 진입 헬퍼 — 어디서 토글이 흡수되는가
+
+`test/config.js` 의 `getActivePgConfig()` 가 `BOOTPAY_AUTH_MODE` 값에 따라 `Bootpay.setConfiguration(...)` 인자 dict 를 반환한다. PG 테스트 파일은 모두 한 줄로 두 모드를 모두 지원한다:
+
+```js
+const { getActivePgConfig } = require('../config.js');
+Bootpay.setConfiguration(getActivePgConfig());
+```
+
+두 모드 모두 `Bootpay.getAccessToken()` 호출은 안전하다 (ck/sk 모드에서는 SDK 내부에서 no-op).
+
+### 실행 시 인증 모드 표시
+
+`getActivePgConfig()` 가 호출될 때마다 stdout 에 한 줄로 어떤 모드가 활성화됐는지 표시된다 — 어떤 키 set 으로 실행됐는지 로그에서 즉시 확인 가능:
+
+```
+[BOOTPAY_AUTH_MODE=new] PG: client_key/secret_key (Basic Auth) | env=production
+[BOOTPAY_AUTH_MODE=legacy] PG: application_id/private_key (Bearer) | env=production
+```
+
+### 토글의 영향을 받지 않는 파일
+
+다음은 한 스크립트 안에서 두 모드를 모두 검증하므로 환경변수에 무관하게 동일한 동작을 한다:
+
+- `test/pg/getAccessToken.js`
+- `test/legacyCompatibility.js`

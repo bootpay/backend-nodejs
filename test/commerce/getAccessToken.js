@@ -1,12 +1,14 @@
+const { getCommerceKeys } = require('../config.js');
+const keys = getCommerceKeys();
 // Commerce API - getAccessToken 테스트
 
 (async () => {
     const { BootpayCommerce } = require('../../dist/bootpay-commerce.js')
 
     const commerce = new BootpayCommerce({
-        client_key: 'hxS-Up--5RvT6oU6QJE0JA',
-        secret_key: 'r5zxvDcQJiAP2PBQ0aJjSHQtblNmYFt6uFoEMhti_mg=',
-        mode: 'development' // 'production' | 'development' | 'stage'
+        client_key: keys.client_key,
+        secret_key: keys.secret_key,
+        mode: keys.mode // 'production' | 'development' | 'stage'
     })
 
     try {

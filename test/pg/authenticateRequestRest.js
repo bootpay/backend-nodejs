@@ -1,10 +1,10 @@
+const { Bootpay } = require('../../dist/bootpay.js');
+const { getActivePgConfig } = require('../config.js');
+
 (async () => {
-    const Bootpay = require('../dist/bootpay.js').Bootpay
-    Bootpay.setConfiguration({
-        application_id: '5b8f6a4d396fa665fdc2b5ea',
-        private_key: 'rm6EYECr6aroQVG2ntW0A6LpWnkTgP4uQ3H18sDDUYw='
-    })
+    Bootpay.setConfiguration(getActivePgConfig('production'))
     try {
+        // legacy 모드에서만 실제 토큰 발급. ck/sk 모드에서는 no-op.
         await Bootpay.getAccessToken()
         const response = await Bootpay.requestAuthentication({
             pg: '다날',

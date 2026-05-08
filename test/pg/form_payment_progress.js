@@ -1,9 +1,17 @@
-const Bootpay = require('../lib/bootpay');
+// (legacy) 이 파일은 레거시 application_id/private_key + Promise then() 체인 예제다.
+// ck/sk 모드에서는 getAccessToken() 호출이 불필요하며, 매 요청 Basic Auth 헤더로
+// 직접 인증된다. 신규 코드는 await 패턴으로 토큰 호출 없이 바로 결제/조회 API를 호출하면 된다.
+const { Bootpay } = require('../../dist/bootpay.js');
 
-Bootpay.setConfig(
-    "[[ REST용 Application ID]]",
-    "[[ Private Key ]]"
-);
+Bootpay.setConfiguration({
+    client_key: '[[ Client Key ]]',
+    secret_key: '[[ Server Key ]]'
+});
+// Legacy fallback:
+// Bootpay.setConfiguration({
+//     application_id: '[[ REST용 Application ID ]]',
+//     private_key: '[[ Private Key ]]'
+// });
 
 // POST로 Params를 받아서 처리
 // params가 POST로 전달된 Object라고 가정하면

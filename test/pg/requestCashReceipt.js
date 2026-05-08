@@ -1,17 +1,11 @@
+const { Bootpay } = require('../../dist/bootpay.js');
+const { getActivePgConfig } = require('../config.js');
+
 (async () => {
-    const Bootpay = require('../dist/bootpay.js').Bootpay
-    Bootpay.setConfiguration({
-        application_id: '5b8f6a4d396fa665fdc2b5ea',
-        private_key: 'rm6EYECr6aroQVG2ntW0A6LpWnkTgP4uQ3H18sDDUYw='
-    })
-    // Bootpay.setConfiguration({
-    //     application_id: '59bfc738e13f337dbd6ca48a',
-    //     private_key: 'pDc0NwlkEX3aSaHTp/PPL/i8vn5E/CqRChgyEp/gHD0=',
-    //     mode: 'development'
-    // })
+    Bootpay.setConfiguration(getActivePgConfig('production'));
     try {
-        // console.log(new Date((new Date()).getTime() + 5000))
-        await Bootpay.getAccessToken()
+        // legacy 모드에서만 실제 토큰 발급. ck/sk 모드에서는 no-op.
+        await Bootpay.getAccessToken();
         const response = await Bootpay.requestCashReceipt({
             pg: '나이스페이',
             price: 1000,
@@ -25,15 +19,15 @@
             },
             identity_no: '0100000000',
             order_id: (new Date()).getTime(),
-        })
-        console.log(response)
+        });
+        console.log(response);
         if (response.receipt_id !== undefined) {
             const cancel = await Bootpay.cancelCashReceipt({
                 receipt_id: response.receipt_id,
-            })
-            console.log(cancel)
+            });
+            console.log(cancel);
         }
     } catch (e) {
-        console.log(e)
+        console.log(e);
     }
-})()
+})();

@@ -1,13 +1,13 @@
+const { Bootpay } = require('../../dist/bootpay.js');
+const { getActivePgConfig, TEST_DATA } = require('../config.js');
+
 (async () => {
-    const Bootpay = require('../dist/bootpay.js').Bootpay
-    Bootpay.setConfiguration({
-        application_id: '5b8f6a4d396fa665fdc2b5ea',
-        private_key: 'rm6EYECr6aroQVG2ntW0A6LpWnkTgP4uQ3H18sDDUYw='
-    })
+    Bootpay.setConfiguration(getActivePgConfig('production'))
     try {
+        // legacy 모드에서만 실제 토큰 발급. ck/sk 모드에서는 no-op.
         await Bootpay.getAccessToken()
         const response = await Bootpay.requestSubscribePayment({
-            billing_key: '62b3d166cf9f6d001bd20d59',
+            billing_key: TEST_DATA.billing_key,
             order_name: '테스트 결제',
             order_id: (new Date()).getTime(),
             price: 100,
