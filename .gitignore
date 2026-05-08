@@ -52,3 +52,11 @@ package-lock.json
 yarn.lock
 dist
 test/requestSubscribeRest.js
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Tool runtime dirs
+.omj/
