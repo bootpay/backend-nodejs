@@ -76,13 +76,9 @@ export class BootpayCommerceResource {
                 config.headers.set('BOOTPAY-SDK-TYPE', '301')
                 config.headers.set('BOOTPAY-ROLE', this.$role || 'user')
 
-                if (this.$token !== undefined) {
-                    config.headers.set('Authorization', `Bearer ${this.$token}`)
-                } else {
-                    const basicAuth = this.getBasicAuthHeader()
-                    if (basicAuth) {
-                        config.headers.set('Authorization', basicAuth)
-                    }
+                const basicAuth = this.getBasicAuthHeader()
+                if (basicAuth) {
+                    config.headers.set('Authorization', basicAuth)
                 }
                 return config
             },

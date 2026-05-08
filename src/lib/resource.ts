@@ -67,11 +67,11 @@ export class BootpayBackendNodejsResource {
         // @ts-expect-error
         this.$http.interceptors.request.use((config: AxiosRequestConfig) => {
             if (config.headers !== undefined) {
-                const { client_key, secret_key, application_id, private_key } = this.bootpayConfiguration
+                const { client_key, secret_key } = this.bootpayConfiguration
 
                 // 인증 우선순위:
-                // 1) client_key가 있으면 Basic(client_key:secret_key)
-                // 2) application_id가 있으면 Bearer(token) 우선, token 미존재 시 Basic(application_id:private_key) fallback
+                // 1) client_key/secret_key가 있으면 새 Basic Auth 사용
+                // 2) 없으면 기존 application_id/private_key token 방식 유지
                 if (client_key && secret_key) {
                     config.headers.authorization = `Basic ${Buffer.from(`${client_key}:${secret_key}`).toString('base64')}`
                 } else {

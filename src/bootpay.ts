@@ -22,7 +22,9 @@ import {
     SubscribePaymentLookupResponse,
     SubscriptionBillingTransferRequestParameters,
     SubscriptionPaymentRequestParameters,
-    WalletRequestParameters, WalletDataPart, WalletPaymentResponseParameters
+    WalletDataPart,
+    WalletRequestParameters,
+    WalletPaymentResponseParameters
 } from './lib/response'
 
 class BootpayBackendNodejs extends BootpayBackendNodejsResource {
@@ -37,7 +39,19 @@ class BootpayBackendNodejs extends BootpayBackendNodejsResource {
      */
     async getAccessToken(): Promise<AccessTokenResponseParameters> {
         try {
-            const { application_id, private_key }         = this.bootpayConfiguration
+            const { application_id, private_key, client_key, secret_key } = this.bootpayConfiguration
+            const hasLegacyCredentials = application_id && private_key
+            if ((client_key && !secret_key) || (!client_key && secret_key && !hasLegacyCredentials)) {
+                return Promise.reject({
+                    error_code: -101,
+                    message: 'client_key/secret_key를 함께 입력해주세요.'
+                })
+            }
+            // client_key/secret_key 인증은 매 요청 인터셉터가 Basic Auth 헤더를 직접 부착한다.
+            // request/token 호출이 불필요하므로, 호환을 위해 합성 응답만 즉시 반환한다.
+            if (client_key && secret_key) {
+                return Promise.resolve({ access_token: '', expire_in: 0 })
+            }
             const response: AccessTokenResponseParameters = await this.post<AccessTokenResponseParameters>('request/token', {
                 application_id,
                 private_key
@@ -430,6 +444,7 @@ class BootpayBackendNodejs extends BootpayBackendNodejsResource {
      * 등록된 지갑 리스트 가져오기
      * Comment by ehowlsla
      * @date: 2025-03-16
+     * @deprecated 다음 메이저 버전에서 제거 예정. wallet 엔드포인트는 폐기 예정이며, 결제는 Request::PaymentController#create 의 wallet_id + user_token 으로 처리됩니다.
      */
     async getUserWallets(user_id: string, sandbox: boolean): Promise<WalletDataPart[]> {
         try {
@@ -450,6 +465,7 @@ class BootpayBackendNodejs extends BootpayBackendNodejsResource {
     //     }
     // }
 
+    /** @deprecated wallet 엔드포인트는 폐기 예정. 다음 메이저 버전에서 제거됩니다. wallet_id + user_token 흐름으로 전환하세요. */
     async requestWalletPayment(walletRequest: WalletRequestParameters)    {
         try {
             const response: WalletPaymentResponseParameters = await this.post<WalletPaymentResponseParameters>('wallet/payment', {

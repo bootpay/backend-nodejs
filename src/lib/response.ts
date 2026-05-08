@@ -398,6 +398,7 @@ export interface SubscribePaymentLookupResponse {
     status: number
 }
 
+/** @deprecated wallet 엔드포인트는 폐기 예정이며, 결제는 wallet_id + user_token 방식으로 전환 예정. 다음 메이저 버전에서 제거됩니다. */
 export interface WalletRequestParameters {
     user_id: string
     order_name: string
@@ -406,7 +407,6 @@ export interface WalletRequestParameters {
     order_id: string
     webhook_url?: string
     content_type?: 'application/json' | 'application/x-www-form-urlencoded'
-    // order_id?: string
     items?: ItemModel
     user?: UserModel
     extra?: ExtraModel
@@ -414,6 +414,7 @@ export interface WalletRequestParameters {
     sandbox: boolean
 }
 
+/** @deprecated wallet 엔드포인트는 폐기 예정이며, 결제는 wallet_id + user_token 방식으로 전환 예정. 다음 메이저 버전에서 제거됩니다. */
 export interface WalletPaymentResponseParameters {
     cancelled_price: number
     wallet_data: WalletData
