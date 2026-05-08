@@ -12,6 +12,7 @@ import { OrderSubscriptionRequestModule } from './lib/commerce/modules/order-sub
 import { CategoryModule } from './lib/commerce/modules/category'
 import { CouponModule } from './lib/commerce/modules/coupon'
 import { PointModule } from './lib/commerce/modules/point'
+import { CartModule } from './lib/commerce/modules/cart'
 import { StoreModule } from './lib/commerce/modules/store'
 
 export interface CommerceTokenResponse {
@@ -33,6 +34,7 @@ export class BootpayCommerce extends BootpayCommerceResource {
     public category!: CategoryModule
     public coupon!: CouponModule
     public point!: PointModule
+    public cart!: CartModule
     public store!: StoreModule
 
     constructor(configuration?: CommerceConfiguration) {
@@ -57,6 +59,7 @@ export class BootpayCommerce extends BootpayCommerceResource {
         this.category = new CategoryModule(this)
         this.coupon = new CouponModule(this)
         this.point = new PointModule(this)
+        this.cart = new CartModule(this)
         this.store = new StoreModule(this)
     }
 
