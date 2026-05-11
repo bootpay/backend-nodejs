@@ -34,30 +34,3 @@ export interface PointTransactionsParams {
     limit?: number
     transaction_type?: number
 }
-
-export interface PointPreviewUsageParams {
-    amount: number
-    order_total: number
-}
-
-export interface PointPreviewUsageResponse {
-    current_balance?: number
-    use_amount?: number
-    balance_after?: number
-    order_total?: number
-    payment_amount?: number
-    is_valid?: boolean
-}
-
-export interface PointCalculateLimitParams {
-    order_total: number
-}
-
-export interface PointCalculateLimitResponse {
-    max_usable?: number
-    available_balance?: number
-    order_total?: number
-    max_rate?: number | null
-    min_usage?: number
-    reason?: string
-}

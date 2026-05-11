@@ -1,5 +1,5 @@
 import { BootpayCommerceResource, BootpayCommerceResponse } from '../../commerce-resource'
-import { CommerceCoupon, CouponListParams, CouponPreviewParams, CouponDownloadParams } from '../types'
+import { CommerceCoupon, CouponListParams, CouponDownloadParams } from '../types'
 
 export class CouponModule {
     private bootpay: BootpayCommerceResource
@@ -27,13 +27,6 @@ export class CouponModule {
      */
     async available(): Promise<BootpayCommerceResponse<CommerceCoupon[]>> {
         return this.bootpay.get<CommerceCoupon[]>('coupon/available')
-    }
-
-    /**
-     * 쿠폰 적용 미리보기
-     */
-    async preview(params: CouponPreviewParams): Promise<BootpayCommerceResponse<any>> {
-        return this.bootpay.post<any>('coupon/preview', params)
     }
 
     /**

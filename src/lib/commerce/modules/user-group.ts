@@ -57,7 +57,7 @@ export class UserGroupModule {
      * @param userId 사용자 ID
      */
     async userCreate(userGroupId: string, userId: string): Promise<BootpayCommerceResponse<null>> {
-        return this.bootpay.post<null>(`user-groups/${userGroupId}/add_user`, { user_id: userId })
+        return this.bootpay.post<null>(`user-groups/${userGroupId}/user`, { user_id: userId })
     }
 
     /**
@@ -66,7 +66,7 @@ export class UserGroupModule {
      * @param userId 사용자 ID
      */
     async userDelete(userGroupId: string, userId: string): Promise<BootpayCommerceResponse<null>> {
-        return this.bootpay.delete<null>(`user-groups/${userGroupId}/remove_user?user_id=${userId}`)
+        return this.bootpay.delete<null>(`user-groups/${userGroupId}/user/${userId}`)
     }
 
     /**

@@ -80,7 +80,7 @@ const COMMERCE_CREDENTIALS = {
     }
 };
 
-// 테스트 데이터
+// PG 테스트 데이터
 const TEST_DATA = {
     receipt_id: '628b2206d01c7e00209b6087',
     receipt_id_confirm: '62876963d01c7e00209b6028',
@@ -96,6 +96,37 @@ const TEST_DATA = {
     user_id: '1234',
     certificate_receipt_id: '69fd7187564d1f550535538c'
 };
+
+// Commerce 테스트 fixture — placeholder 였던 ID 들을 .env 로 주입.
+// 빈 값이면 해당 endpoint 는 placeholder 문자열이 그대로 들어가서 ORDER_NOT_FOUND / USER_NOT_FOUND 등으로 실패하므로
+// 실제 통신 검증을 위해선 .env 의 BOOTPAY_TEST_COMMERCE_* 키들을 채워야 한다.
+const COMMERCE_TEST_DATA = {
+    user_id:                          env('BOOTPAY_TEST_COMMERCE_USER_ID', 'USER_ID_HERE'),
+    user_group_id:                    env('BOOTPAY_TEST_COMMERCE_USER_GROUP_ID', 'USER_GROUP_ID_HERE'),
+    product_id:                       env('BOOTPAY_TEST_COMMERCE_PRODUCT_ID', 'PRODUCT_ID_HERE'),
+    category_id:                      env('BOOTPAY_TEST_COMMERCE_CATEGORY_ID', 'CATEGORY_ID_HERE'),
+    coupon_template_id:               env('BOOTPAY_TEST_COMMERCE_COUPON_TEMPLATE_ID', 'COUPON_TEMPLATE_ID_HERE'),
+    invoice_id:                       env('BOOTPAY_TEST_COMMERCE_INVOICE_ID', 'INVOICE_ID_HERE'),
+    order_id:                         env('BOOTPAY_TEST_COMMERCE_ORDER_ID', 'ORDER_ID_HERE'),
+    order_number:                     env('BOOTPAY_TEST_COMMERCE_ORDER_NUMBER', 'ORDER_NUMBER_HERE'),
+    order_subscription_id:            env('BOOTPAY_TEST_COMMERCE_ORDER_SUBSCRIPTION_ID', 'ORDER_SUBSCRIPTION_ID_HERE'),
+    order_subscription_bill_id:       env('BOOTPAY_TEST_COMMERCE_ORDER_SUBSCRIPTION_BILL_ID', 'ORDER_SUBSCRIPTION_BILL_ID_HERE'),
+    order_subscription_adjustment_id: env('BOOTPAY_TEST_COMMERCE_ORDER_SUBSCRIPTION_ADJUSTMENT_ID', 'ORDER_SUBSCRIPTION_ADJUSTMENT_ID_HERE'),
+    order_cancel_request_history_id:  env('BOOTPAY_TEST_COMMERCE_ORDER_CANCEL_REQUEST_HISTORY_ID', 'ORDER_CANCEL_REQUEST_HISTORY_ID_HERE'),
+    stand_id:                         env('BOOTPAY_TEST_COMMERCE_STAND_ID', 'STAND_ID_HERE'),
+    keyword:                          env('BOOTPAY_TEST_COMMERCE_KEYWORD', '테스트'),
+    s_at:                             env('BOOTPAY_TEST_COMMERCE_S_AT', '2024-01-01'),
+    e_at:                             env('BOOTPAY_TEST_COMMERCE_E_AT', '2099-12-31')
+};
+
+// Commerce default role — orderCancel.*, orderSubscriptionAdjustment.*, orderSubscription.update 류는 manager+ 필요.
+// 테스트는 commerce.withRole(COMMERCE_ROLE) 또는 endpoint 별 .asManager() 직접 호출.
+const COMMERCE_ROLE = (env('BOOTPAY_TEST_COMMERCE_ROLE', 'user') || 'user').toLowerCase();
+
+// fixture 가 placeholder 그대로면 true — 테스트는 이걸 보고 skip 결정 가능.
+function isCommercePlaceholder(value) {
+    return typeof value === 'string' && value.endsWith('_HERE');
+}
 
 function normalizeEnv(targetEnv) {
     return targetEnv || CURRENT_ENV;
@@ -135,6 +166,9 @@ module.exports = {
     PG_LEGACY_CREDENTIALS,
     COMMERCE_CREDENTIALS,
     TEST_DATA,
+    COMMERCE_TEST_DATA,
+    COMMERCE_ROLE,
+    isCommercePlaceholder,
     getPgKeys,
     getPgLegacyKeys,
     getActivePgConfig,

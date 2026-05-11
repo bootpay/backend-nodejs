@@ -2,11 +2,7 @@ import { BootpayCommerceResource, BootpayCommerceResponse } from '../../commerce
 import {
     PointBalance,
     PointTransactionsParams,
-    PointTransactionsResponse,
-    PointPreviewUsageParams,
-    PointPreviewUsageResponse,
-    PointCalculateLimitParams,
-    PointCalculateLimitResponse
+    PointTransactionsResponse
 } from '../types'
 
 export class PointModule {
@@ -43,21 +39,4 @@ export class PointModule {
         )
     }
 
-    /**
-     * 적립금 사용 미리보기
-     */
-    async previewUsage(
-        params: PointPreviewUsageParams
-    ): Promise<BootpayCommerceResponse<PointPreviewUsageResponse>> {
-        return this.bootpay.post<PointPreviewUsageResponse>('point/preview_usage', params)
-    }
-
-    /**
-     * 적립금 사용 한도 계산
-     */
-    async calculateLimit(
-        params: PointCalculateLimitParams
-    ): Promise<BootpayCommerceResponse<PointCalculateLimitResponse>> {
-        return this.bootpay.post<PointCalculateLimitResponse>('point/calculate_limit', params)
-    }
 }

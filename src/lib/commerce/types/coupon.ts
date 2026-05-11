@@ -21,18 +21,6 @@ export interface CouponListParams {
     limit?: number
 }
 
-export interface CouponPreviewOrderItem {
-    order_product_id?: string
-    product_id?: string
-    qty?: number
-    price?: number
-}
-
-export interface CouponPreviewParams {
-    coupon_ids: string[]
-    order_items: CouponPreviewOrderItem[]
-}
-
 export interface CouponDownloadParams {
     coupon_template_id: string
 }
