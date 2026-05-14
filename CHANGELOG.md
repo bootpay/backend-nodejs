@@ -1,13 +1,16 @@
-### 2.5.0
+### 2.6.0
 * 인증: client_key/secret_key Basic Auth 지원 (PG + Commerce 공통)
   - 기존 application_id/private_key Bearer 방식 하위 호환 유지
   - ck/sk 모드에서는 request/token 호출 불필요 (getAccessToken 합성 응답)
   - ck 또는 sk 한쪽만 지정 + legacy 키도 없으면 NEED_CLIENT_KEY(-101) reject
 * Commerce: V1 신설 모듈 추가 — category, coupon, point, orderSubscriptionRequest, cart
   - cart.orderPreview: 권위적 배송비/할인 계산 응답 (guest/member 모드)
+* Commerce: userGroup URL parity 정정 — `/add_user` → `/user`, `/remove_user` → `/user/{userId}` (서버 routes.rb 와 정렬, 옛 URL 은 서버 미존재)
+* Commerce: 서버에 존재하지 않는 endpoint 3종 제거 (`coupon.preview`, `point.previewUsage`, `point.calculateLimit`) — npm 미공개 모듈이라 사용자 영향 없음
 * Wallet API (`requestWalletPayment`, `WalletRequestParameters`, `WalletPaymentResponseParameters`) `@deprecated` 표시 — 다음 메이저 버전에서 제거 예정
 * `http_status` 응답 필드 `@deprecated` 표시 — 다음 메이저 버전에서 제거 예정 (성공 여부는 `status` 필드 사용)
 * 테스트 인프라: `.env` / `BOOTPAY_AUTH_MODE=new|legacy` 토글로 ck/sk · legacy 양쪽 검증, PG 테스트 디렉터리 분리(`test/pg/`)
+* docs: CHANGELOG 파일명 오타 정정 (`CHNAGELOG.md` → `CHANGELOG.md`)
 
 ### 2.4.1
 * Commerce 응답포맷 개선 
