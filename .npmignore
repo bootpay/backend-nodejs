@@ -1,5 +1,9 @@
 src/*
 test/*
+tests_*.mjs
+.env
+.env.example
+.env.*
 .gitattributes
 .gitignore
 package-lock.json
