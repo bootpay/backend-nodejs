@@ -32,6 +32,9 @@ function loadDotEnv() {
 
 loadDotEnv();
 
+const packageJson = JSON.parse(readFileSync(resolve(__dirname, 'package.json'), 'utf8'));
+const sdkVersion = packageJson.version;
+
 const env = (process.env.BOOTPAY_ENV || 'production').toLowerCase();
 const baseUrlMap = {
   production: 'https://api.bootapi.com/v1',
@@ -56,7 +59,7 @@ const res = await fetch(`${baseUrl}/products?page=1&limit=1`, {
     'Accept': 'application/json',
     'Content-Type': 'application/json',
     'bootpay_api_version': '5.0.0',
-    'bootpay_sdk_version': '5.0.0',
+    'bootpay_sdk_version': sdkVersion,
     'bootpay_sdk_type': '300'
   }
 });
