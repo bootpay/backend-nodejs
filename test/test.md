@@ -87,7 +87,18 @@ node test/commerce/mallSettingUpdate.js
 # charge_key / 몰 설정 요청 규약 검증 (네트워크 호출 없음, 키 불필요)
 node test/commerce/orderSubscriptionChargeRequest.js
 node test/commerce/mallSettingRequest.js
+
+# 쇼핑몰(V1 Mall API) 회원 세션 / 상품 / 가맹점 요청 규약 검증 (네트워크 호출 없음, 키 불필요)
+node test/commerce/userMallSessionRequest.js
+node test/commerce/productMallRequest.js
+node test/commerce/storeRequest.js
 ```
+
+### 쇼핑몰(V1 Mall API) 회원 endpoint 주의
+
+`user.userLogin / userSession / userLogout / userJoin / userJoinCheck` 는 단수형 `user/...` 경로를 사용하는 쇼핑몰 회원 API 다.
+기존 `user.login / join / checkExist` 가 쓰는 복수형 `users/...` (외부 회원 연동 API) 와는 다른 endpoint 이므로 서로 대체할 수 없다.
+세션이 필요한 호출에는 로그인시 받은 JWT 를 `Bootpay-User-JWT` 헤더로 전달한다.
 
 ## 테스트 데이터
 

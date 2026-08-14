@@ -1,3 +1,16 @@
+### 2.8.0
+* Commerce: 쇼핑몰(V1 Mall API) 회원 endpoint 정정 및 추가 — 단수형 `user/...` 경로 사용 (기존 `users/...` 외부 회원 연동 API 는 그대로 유지)
+  - `user.userLogin({ login_id, password, corporate_type })`: `POST user/login` — corporate_type 미지정시 0
+  - `user.userSession(userJwt)`: `GET user/session`
+  - `user.userLogout(userJwt)`: `DELETE user/session`
+  - `user.userJoin({ login_id, password, name, ... })`: `POST user/join` — null/undefined 값은 전송하지 않음
+  - `user.userJoinCheck(type, pk)`: `GET user/join/{type}?pk={pk}`
+  - 세션이 필요한 호출은 회원 JWT 를 `Bootpay-User-JWT` 헤더로 전달 (값이 있을 때만 부착)
+* Commerce: 상품 조회 Mall API parity
+  - `product.products`: `GET products` — `page`/`limit` 기본값 1/20, `category_id`/`sort` 파라미터 및 `user_jwt` 지원
+  - `product.productDetail(productId, userJwt)`: `GET products/{product_id}` — 회원 JWT 지원
+* Commerce: `store.getStore`/`getStoreDetail` 에 `Idempotency-Key` 헤더 부착 (`idempotencyKey` 인자로 직접 지정 가능)
+
 ### 2.7.0
 * PG: 우선순위(순차) 결제 빌링키 조회 `lookupSequentialBillingKey(widgetKey, billingKey)` 추가 — `GET subscribe/sequential_billing_key/{billing_key}?widget_key={widget_key}`
 * Commerce: 수시결제(온디맨드) charge_key 결제/해지 추가 (supervisor 전용)

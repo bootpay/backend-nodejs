@@ -136,6 +136,17 @@ export interface ProductListParams extends ListParams {
     category_code?: string
 }
 
+/**
+ * 상품 목록 조회 파라미터 (V1 Mall API)
+ * GET /v1/products
+ */
+export interface MallProductListParams extends ProductListParams {
+    category_id?: string
+    sort?: string
+    user_jwt?: string
+    idempotency_key?: string
+}
+
 export interface ProductStatusParams {
     product_id: string
     status: number

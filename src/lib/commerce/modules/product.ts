@@ -1,8 +1,9 @@
 import { BootpayCommerceResource, BootpayCommerceResponse } from '../../commerce-resource'
-import { CommerceProduct, ProductListParams, ProductStatusParams } from '../types'
+import { CommerceProduct, ProductListParams, MallProductListParams, ProductStatusParams } from '../types'
 import FormData from 'form-data'
 import fs from 'fs'
 import path from 'path'
+import { randomUUID } from 'crypto'
 
 export class ProductModule {
     private bootpay: BootpayCommerceResource
@@ -33,10 +34,28 @@ export class ProductModule {
 
 
     /**
-     * 상품 목록 조회 (Mall API alias)
+     * 상품 목록 조회 (V1 Mall API)
+     * GET /v1/products
+     * page/limit 은 미지정시 각각 1 / 20 이 적용되고, 나머지 값은 지정된 것만 전송한다.
+     * @param params 조회 파라미터
      */
-    async products(params?: ProductListParams): Promise<BootpayCommerceResponse<{ items: CommerceProduct[]; total: number }>> {
-        return this.list(params)
+    async products(params?: MallProductListParams): Promise<BootpayCommerceResponse<{ items: CommerceProduct[]; total: number }>> {
+        const { user_jwt, idempotency_key, ...rest } = params || {}
+        const queryParams = new URLSearchParams()
+        queryParams.append('page', (rest.page === undefined ? 1 : rest.page).toString())
+        queryParams.append('limit', (rest.limit === undefined ? 20 : rest.limit).toString())
+        if (rest.category_id) queryParams.append('category_id', rest.category_id)
+        if (rest.sort) queryParams.append('sort', rest.sort)
+        if (rest.keyword) queryParams.append('keyword', rest.keyword)
+        if (rest.type !== undefined) queryParams.append('type', rest.type.toString())
+        if (rest.period_type) queryParams.append('period_type', rest.period_type)
+        if (rest.s_at) queryParams.append('s_at', rest.s_at)
+        if (rest.e_at) queryParams.append('e_at', rest.e_at)
+        if (rest.category_code) queryParams.append('category_code', rest.category_code)
+
+        return this.bootpay.get<{ items: CommerceProduct[]; total: number }>(`products?${queryParams.toString()}`, {
+            headers: this.mallHeaders(user_jwt, idempotency_key)
+        })
     }
 
     /**
@@ -87,10 +106,20 @@ export class ProductModule {
     }
 
     /**
-     * 상품 상세 조회 (Mall API alias)
+     * 상품 상세 조회 (V1 Mall API)
+     * GET /v1/products/{product_id}
+     * @param productId 상품 ID
+     * @param userJwt 회원 JWT (선택)
+     * @param idempotencyKey 미지정시 자동 생성
      */
-    async productDetail(productId: string): Promise<BootpayCommerceResponse<CommerceProduct>> {
-        return this.detail(productId)
+    async productDetail(
+        productId: string,
+        userJwt?: string,
+        idempotencyKey?: string
+    ): Promise<BootpayCommerceResponse<CommerceProduct>> {
+        return this.bootpay.get<CommerceProduct>(`products/${productId}`, {
+            headers: this.mallHeaders(userJwt, idempotencyKey)
+        })
     }
 
     /**
@@ -121,5 +150,19 @@ export class ProductModule {
      */
     async delete(productId: string): Promise<BootpayCommerceResponse<null>> {
         return this.bootpay.delete<null>(`products/${productId}`)
+    }
+
+    /**
+     * V1 Mall API 요청 헤더
+     * Idempotency-Key 는 미지정시 매 호출마다 생성되고, Bootpay-User-JWT 는 값이 있을 때만 붙는다.
+     */
+    private mallHeaders(userJwt?: string, idempotencyKey?: string): Record<string, string> {
+        const headers: Record<string, string> = {
+            'Idempotency-Key': idempotencyKey || randomUUID()
+        }
+        if (userJwt !== undefined && userJwt !== null && userJwt !== '') {
+            headers['Bootpay-User-JWT'] = userJwt
+        }
+        return headers
     }
 }

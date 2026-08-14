@@ -40,6 +40,8 @@ node환경에서 작성된 어플리케이션, 프레임워크 등에서 사용�
    - [10-5. 정기구독 관리](#10-5-정기구독-관리)
    - [10-6. 청구서 관리](#10-6-청구서-관리)
    - [10-7. 몰 설정 관리](#10-7-몰-설정-관리)
+   - [10-8. 쇼핑몰 회원 세션 관리](#10-8-쇼핑몰-회원-세션-관리)
+   - [10-9. 가맹점 정보 조회](#10-9-가맹점-정보-조회)
 - [Example 프로젝트](#example-프로젝트)
 - [Documentation](#documentation)
 - [기술문의](#기술문의)
@@ -671,6 +673,48 @@ await commerce.mallSetting.updateMallSetting({
     use_point: true,
     point_rate: 1
 })
+```
+
+### 10-8. 쇼핑몰 회원 세션 관리
+
+쇼핑몰(Mall) 회원 API 입니다. 단수형 `user/...` 경로를 사용하며, 외부 회원 연동용 `users/...` API(`user.login`, `user.join`, `user.checkExist`)와는 별개의 endpoint 입니다.
+
+```javascript
+// 회원가입 — 전달한 값(non-null)만 서버로 전송되며, corporate_type 미지정시 0(개인)
+await commerce.user.userJoin({
+    login_id: 'test_user@example.com',
+    password: 'password123',
+    name: '테스트 사용자',
+    email: 'test_user@example.com',
+    phone: '010-1234-5678'
+})
+
+// 회원가입 중복 확인 — email-exist, id-exist, phone-exist, group-business-number-exist
+await commerce.user.userJoinCheck('email-exist', 'test_user@example.com')
+
+// 로그인
+const login = await commerce.user.userLogin({
+    login_id: 'test_user@example.com',
+    password: 'password123'
+})
+
+// 세션 조회 / 로그아웃 — 로그인시 발급받은 회원 JWT 를 Bootpay-User-JWT 헤더로 전달합니다
+await commerce.user.userSession(userJwt)
+await commerce.user.userLogout(userJwt)
+
+// 회원 JWT 를 넘기면 상품 조회에도 회원 컨텍스트가 적용됩니다
+await commerce.product.products({ page: 1, limit: 20, category_id: 'CATEGORY_ID', user_jwt: userJwt })
+await commerce.product.productDetail('PRODUCT_ID', userJwt)
+```
+
+### 10-9. 가맹점 정보 조회
+
+```javascript
+// 가맹점 기본 정보
+const store = await commerce.store.getStore()
+
+// 가맹점 상세 정보
+const storeDetail = await commerce.store.getStoreDetail()
 ```
 
 더 자세한 Commerce API 사용 예제는 [test/commerce](./test/commerce) 디렉토리를 참고해주세요.

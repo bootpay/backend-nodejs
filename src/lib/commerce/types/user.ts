@@ -81,3 +81,49 @@ export interface UserLoginResponse {
     expired_at?: string
     user?: CommerceUser
 }
+
+/**
+ * 회원 로그인 파라미터 (V1 Mall API)
+ * POST /v1/user/login
+ */
+export interface MallUserLoginParams {
+    login_id: string
+    password: string
+    // 0: 개인, 1: 사업자
+    corporate_type?: number
+    idempotency_key?: string
+}
+
+/**
+ * 회원가입 파라미터 (V1 Mall API)
+ * POST /v1/user/join
+ */
+export interface MallUserJoinParams {
+    login_id: string
+    password: string
+    name: string
+    email?: string
+    phone?: string
+    nickname?: string
+    gender?: number
+    birth?: string
+    // 0: 개인, 1: 사업자
+    corporate_type?: number
+    group?: Record<string, any>
+    idempotency_key?: string
+}
+
+/**
+ * 회원가입 중복 확인 타입 (V1 Mall API)
+ * GET /v1/user/join/{type}
+ */
+export type MallUserJoinCheckType = 'email-exist' | 'id-exist' | 'phone-exist' | 'group-business-number-exist'
+
+/**
+ * 회원 세션 조회 응답 (V1 Mall API)
+ */
+export interface MallUserSessionResponse {
+    user?: CommerceUser
+    access_token?: string
+    expired_at?: string
+}
