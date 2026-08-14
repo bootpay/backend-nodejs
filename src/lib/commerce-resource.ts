@@ -76,9 +76,9 @@ export class BootpayCommerceResource {
                 config.headers.set('BOOTPAY-SDK-TYPE', '301')
                 config.headers.set('BOOTPAY-ROLE', this.$role || 'user')
 
-                const basicAuth = this.getBasicAuthHeader()
-                if (basicAuth) {
-                    config.headers.set('Authorization', basicAuth)
+                const authorization = this.authorizationHeader()
+                if (authorization) {
+                    config.headers.set('Authorization', authorization)
                 }
                 return config
             },
@@ -115,6 +115,23 @@ export class BootpayCommerceResource {
         return this.$role
     }
 
+    /**
+     * Authorization 헤더
+     * 토큰이 발급되어 있으면 Bearer, 없으면 client_key/secret_key Basic Auth 를 사용한다.
+     */
+    authorizationHeader(): string {
+        const token = this.$token
+        if (token !== undefined && token !== '') {
+            return `Bearer ${token}`
+        }
+        return this.getBasicAuthHeader()
+    }
+
+    /**
+     * client_key/secret_key Basic Auth 헤더
+     * 계산 결과를 $token 에 저장하지 않는다 — 저장하면 다음 요청부터 Basic 값이
+     * Bearer 토큰으로 오인되어 인증이 깨진다.
+     */
     private getBasicAuthHeader(): string {
         const { client_key, secret_key } = this.commerceConfiguration
         if (client_key && secret_key) {

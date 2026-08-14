@@ -66,6 +66,9 @@ node test/pg/cashReceiptPublishOnReceipt.js
 ```bash
 # Commerce 테스트 실행
 node test/commerce/[테스트파일].js
+
+# Authorization 헤더 선택 규칙 검증 (네트워크 호출 없음, 키 불필요)
+node test/commerce/authorizationHeader.js
 ```
 
 ## 테스트 데이터
@@ -162,3 +165,4 @@ Bootpay.setConfiguration(getActivePgConfig());
 
 - `test/pg/getAccessToken.js`
 - `test/legacyCompatibility.js`
+- `test/commerce/authorizationHeader.js` (Commerce — 실제 통신 없이 mock adapter 로 헤더만 검증)

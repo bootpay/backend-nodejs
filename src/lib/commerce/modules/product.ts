@@ -72,7 +72,7 @@ export class ProductModule {
         return this.bootpay.$http.post(url, formData, {
             headers: {
                 ...formData.getHeaders(),
-                Authorization: `Bearer ${this.bootpay.getToken()}`,
+                Authorization: this.bootpay.authorizationHeader(),
                 'BOOTPAY-ROLE': this.bootpay.getRole() || 'user'
             }
         })
