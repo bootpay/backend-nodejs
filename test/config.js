@@ -94,7 +94,9 @@ const TEST_DATA = {
     reserve_id: '6490149ca575b40024f0b70d',
     reserve_id_2: '628b316cd01c7e00219b6081',
     user_id: '1234',
-    certificate_receipt_id: '69fd7187564d1f550535538c'
+    certificate_receipt_id: '69fd7187564d1f550535538c',
+    // 우선순위(순차) 결제 빌링키 조회용 위젯키 — .env 의 BOOTPAY_TEST_PG_WIDGET_KEY 로 주입
+    widget_key: env('BOOTPAY_TEST_PG_WIDGET_KEY', 'WIDGET_KEY_HERE')
 };
 
 // Commerce 테스트 fixture — placeholder 였던 ID 들을 .env 로 주입.
@@ -114,6 +116,7 @@ const COMMERCE_TEST_DATA = {
     order_subscription_adjustment_id: env('BOOTPAY_TEST_COMMERCE_ORDER_SUBSCRIPTION_ADJUSTMENT_ID', 'ORDER_SUBSCRIPTION_ADJUSTMENT_ID_HERE'),
     order_cancel_request_history_id:  env('BOOTPAY_TEST_COMMERCE_ORDER_CANCEL_REQUEST_HISTORY_ID', 'ORDER_CANCEL_REQUEST_HISTORY_ID_HERE'),
     stand_id:                         env('BOOTPAY_TEST_COMMERCE_STAND_ID', 'STAND_ID_HERE'),
+    charge_key:                       env('BOOTPAY_TEST_COMMERCE_CHARGE_KEY', 'CHARGE_KEY_HERE'),
     keyword:                          env('BOOTPAY_TEST_COMMERCE_KEYWORD', '테스트'),
     s_at:                             env('BOOTPAY_TEST_COMMERCE_S_AT', '2024-01-01'),
     e_at:                             env('BOOTPAY_TEST_COMMERCE_E_AT', '2099-12-31')

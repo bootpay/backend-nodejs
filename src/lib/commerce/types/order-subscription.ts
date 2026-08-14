@@ -126,3 +126,45 @@ export interface SupervisorOrderSubscriptionPauseParams {
 export interface SupervisorOrderSubscriptionResumeParams {
     reason?: string
 }
+
+/**
+ * 수시결제(온디맨드) charge_key 즉시 결제 파라미터
+ * charge_key 는 body 로만 전송된다 (URL/query 금지 — 액세스 로그 노출 방지)
+ */
+export interface SupervisorOrderSubscriptionChargeParams {
+    charge_key: string
+    price: number
+    tax_free_price?: number
+    user?: Record<string, any>
+    metadata?: Record<string, any>
+    /** 미지정시 자동 생성 (Idempotency-Key 헤더로 전송, body 에는 포함되지 않는다) */
+    idempotency_key?: string
+}
+
+/**
+ * 수시결제(온디맨드) charge_key 해지 파라미터
+ */
+export interface SupervisorOrderSubscriptionChargeRevokeParams {
+    charge_key: string
+    user?: Record<string, any>
+    /** 미지정시 자동 생성 (Idempotency-Key 헤더로 전송, body 에는 포함되지 않는다) */
+    idempotency_key?: string
+}
+
+export interface OrderSubscriptionChargeResponse {
+    order_id?: string
+    order_number?: string
+    receipt_id?: string
+    charge_key?: string
+    price?: number
+    tax_free_price?: number
+    status?: number
+    [key: string]: unknown
+}
+
+export interface OrderSubscriptionChargeRevokeResponse {
+    charge_key?: string
+    revoked_at?: string
+    status?: number
+    [key: string]: unknown
+}

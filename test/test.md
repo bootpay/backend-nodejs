@@ -40,6 +40,12 @@ node test/pg/lookupSubscribeBilling.js
 # 빌링키 조회 (billing_key)
 node test/pg/lookupBilling.js
 
+# 우선순위(순차) 결제 빌링키 조회 (widget_key + billing_key)
+node test/pg/lookupSequentialBillingKey.js
+
+# 우선순위 빌링키 조회 URL 규약 검증 (네트워크 호출 없음, 키 불필요)
+node test/pg/lookupSequentialBillingKeyRequest.js
+
 # 빌링키 삭제
 node test/pg/destroySubscribeBillingKey.js
 
@@ -69,6 +75,18 @@ node test/commerce/[테스트파일].js
 
 # Authorization 헤더 선택 규칙 검증 (네트워크 호출 없음, 키 불필요)
 node test/commerce/authorizationHeader.js
+
+# 수시결제(온디맨드) charge_key 즉시 결제 / 해지 (supervisor 전용)
+node test/commerce/orderSubscriptionCharge.js
+node test/commerce/orderSubscriptionChargeRevoke.js
+
+# 몰 설정 조회 / 수정 (supervisor 전용)
+node test/commerce/mallSettingDetail.js
+node test/commerce/mallSettingUpdate.js
+
+# charge_key / 몰 설정 요청 규약 검증 (네트워크 호출 없음, 키 불필요)
+node test/commerce/orderSubscriptionChargeRequest.js
+node test/commerce/mallSettingRequest.js
 ```
 
 ## 테스트 데이터

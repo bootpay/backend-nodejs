@@ -23,6 +23,7 @@ node환경에서 작성된 어플리케이션, 프레임워크 등에서 사용�
       - [4-6. 예약 취소하기](#4-6-예약-취소하기)
       - [4-7. 빌링키 삭제하기](#4-7-빌링키-삭제하기)
       - [4-8. 빌링키 조회하기](#4-8-빌링키-조회하기)
+      - [4-9. 우선순위 결제 빌링키 조회하기](#4-9-우선순위-결제-빌링키-조회하기)
    - [5. 회원 토큰 발급요청](#5-회원-토큰-발급요청)
    - [6. 서버 승인 요청](#6-서버-승인-요청)
    - [7. 본인 인증 결과 조회](#7-본인-인증-결과-조회)
@@ -38,6 +39,7 @@ node환경에서 작성된 어플리케이션, 프레임워크 등에서 사용�
    - [10-4. 주문 관리](#10-4-주문-관리)
    - [10-5. 정기구독 관리](#10-5-정기구독-관리)
    - [10-6. 청구서 관리](#10-6-청구서-관리)
+   - [10-7. 몰 설정 관리](#10-7-몰-설정-관리)
 - [Example 프로젝트](#example-프로젝트)
 - [Documentation](#documentation)
 - [기술문의](#기술문의)
@@ -395,6 +397,24 @@ const response = await Bootpay.lookupBillingKey('66542dfb4d18d5fc7b43e1b6')
 console.log(response)
 ```
 
+## 4-9. 우선순위 결제 빌링키 조회하기
+우선순위(순차) 결제에 사용되는 빌링키를 위젯키와 함께 조회합니다.
+```javascript
+(async () => {
+    Bootpay.setConfiguration({
+        client_key: process.env.BOOTPAY_PG_CLIENT_KEY_PROD,
+        secret_key: process.env.BOOTPAY_PG_SECRET_KEY_PROD
+    })
+    try {
+        await Bootpay.getAccessToken()
+        const response = await Bootpay.lookupSequentialBillingKey('WIDGET_KEY', '66542dfb4d18d5fc7b43e1b6')
+        console.log(response)
+    } catch (e) {
+        console.log(e)
+    }
+})()
+```
+
 
 ## 5. 회원 토큰 발급요청
 ㅇㅇ페이 사용을 위해 가맹점 회원의 토큰을 발급합니다. 가맹점은 회원의 고유번호를 관리해야합니다.
@@ -600,6 +620,21 @@ await commerce.orderSubscription.termination({
     order_subscription_id: 'ORDER_SUBSCRIPTION_ID',
     reason: '해지 사유'
 })
+
+// 수시결제(온디맨드) charge_key 즉시 결제 — supervisor 전용
+// charge_key 는 body 로만 전송됩니다 (URL/query 금지 — 액세스 로그 노출 방지)
+await commerce.asSupervisor().orderSubscription.supervisorCharge({
+    charge_key: 'CHARGE_KEY',
+    price: 1000,
+    tax_free_price: 0,
+    user: { id: 'USER_ID' },
+    metadata: { memo: '수시결제' }
+})
+
+// 수시결제(온디맨드) charge_key 해지 — 해지 이후 해당 키로의 재결제는 불가능합니다
+await commerce.asSupervisor().orderSubscription.supervisorChargeRevoke({
+    charge_key: 'CHARGE_KEY'
+})
 ```
 
 ### 10-6. 청구서 관리
@@ -617,6 +652,25 @@ const invoice = await commerce.invoice.create({
 
 // 청구서 알림 전송
 await commerce.invoice.notify('INVOICE_ID', [1, 2]) // 1: SMS, 2: Email
+```
+
+### 10-7. 몰 설정 관리
+
+supervisor scope 토큰(또는 키)으로만 호출할 수 있습니다.
+
+```javascript
+// 몰 설정 조회
+const mallSetting = await commerce.mallSetting.getMallSetting()
+
+// 몰 설정 수정 — 전달한 값(non-null)만 서버로 전송됩니다
+await commerce.mallSetting.updateMallSetting({
+    name: '부트페이몰',
+    description: '몰 소개',
+    use_cart: true,
+    cart_max_limit: 100,
+    use_point: true,
+    point_rate: 1
+})
 ```
 
 더 자세한 Commerce API 사용 예제는 [test/commerce](./test/commerce) 디렉토리를 참고해주세요.

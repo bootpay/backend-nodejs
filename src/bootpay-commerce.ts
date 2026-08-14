@@ -14,6 +14,7 @@ import { CouponModule } from './lib/commerce/modules/coupon'
 import { PointModule } from './lib/commerce/modules/point'
 import { CartModule } from './lib/commerce/modules/cart'
 import { StoreModule } from './lib/commerce/modules/store'
+import { MallSettingModule } from './lib/commerce/modules/mall-setting'
 
 export interface CommerceTokenResponse {
     access_token: string
@@ -36,6 +37,7 @@ export class BootpayCommerce extends BootpayCommerceResource {
     public point!: PointModule
     public cart!: CartModule
     public store!: StoreModule
+    public mallSetting!: MallSettingModule
 
     constructor(configuration?: CommerceConfiguration) {
         super()
@@ -61,6 +63,7 @@ export class BootpayCommerce extends BootpayCommerceResource {
         this.point = new PointModule(this)
         this.cart = new CartModule(this)
         this.store = new StoreModule(this)
+        this.mallSetting = new MallSettingModule(this)
     }
 
     /**

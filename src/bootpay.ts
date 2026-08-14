@@ -159,6 +159,24 @@ class BootpayBackendNodejs extends BootpayBackendNodejsResource {
     }
 
     /**
+     * lookupSequentialBillingKey
+     * 우선순위(순차) 결제 빌링키 조회
+     * Comment by GOSOMI
+     * @date: 2026-07-03
+     * @param widgetKey: string
+     * @param billingKey: string
+     * @returns Promise<SubscriptionBillingResponseParameters>
+     */
+    async lookupSequentialBillingKey(widgetKey: string, billingKey: string): Promise<SubscriptionBillingResponseParameters> {
+        try {
+            const response: SubscriptionBillingResponseParameters = await this.get<SubscriptionBillingResponseParameters>(`subscribe/sequential_billing_key/${ billingKey }?widget_key=${ encodeURIComponent(widgetKey) }`)
+            return Promise.resolve(response)
+        } catch (e) {
+            return Promise.reject(e)
+        }
+    }
+
+    /**
      * requestSubscribeBillingKey
      * Comment by GOSOMI
      * @param subscriptionBillingRequest: SubscriptionBillingRequestParameters

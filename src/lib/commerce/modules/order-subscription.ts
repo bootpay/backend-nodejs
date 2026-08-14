@@ -11,8 +11,13 @@ import {
     SupervisorOrderSubscriptionRejectParams,
     SupervisorOrderSubscriptionTerminateParams,
     SupervisorOrderSubscriptionPauseParams,
-    SupervisorOrderSubscriptionResumeParams
+    SupervisorOrderSubscriptionResumeParams,
+    SupervisorOrderSubscriptionChargeParams,
+    SupervisorOrderSubscriptionChargeRevokeParams,
+    OrderSubscriptionChargeResponse,
+    OrderSubscriptionChargeRevokeResponse
 } from '../types'
+import { randomUUID } from 'crypto'
 
 export class OrderSubscriptionRequestIngModule {
     private bootpay: BootpayCommerceResource
@@ -165,5 +170,56 @@ export class OrderSubscriptionModule {
         params: SupervisorOrderSubscriptionResumeParams = {}
     ): Promise<BootpayCommerceResponse<CommerceOrderSubscription>> {
         return this.bootpay.put<CommerceOrderSubscription>(`order_subscriptions/${orderSubscriptionId}/resume`, params)
+    }
+
+    /**
+     * 수시결제(온디맨드) charge_key 즉시 결제
+     * POST /v1/order_subscriptions/charge
+     * charge_key 는 body 로만 전송한다 (URL/query 금지 — 액세스 로그 노출 방지)
+     * @param params 결제 파라미터
+     */
+    async supervisorCharge(
+        params: SupervisorOrderSubscriptionChargeParams
+    ): Promise<BootpayCommerceResponse<OrderSubscriptionChargeResponse>> {
+        const { idempotency_key, ...payload } = params
+        return this.bootpay.post<OrderSubscriptionChargeResponse>('order_subscriptions/charge', this.compact(payload), {
+            headers: this.supervisorHeaders(idempotency_key)
+        })
+    }
+
+    /**
+     * 수시결제(온디맨드) charge_key 해지
+     * DELETE /v1/order_subscriptions/charge
+     * 해지 이후 해당 키로의 재결제는 불가능하다
+     * @param params 해지 파라미터
+     */
+    async supervisorChargeRevoke(
+        params: SupervisorOrderSubscriptionChargeRevokeParams
+    ): Promise<BootpayCommerceResponse<OrderSubscriptionChargeRevokeResponse>> {
+        const { idempotency_key, ...payload } = params
+        return this.bootpay.delete<OrderSubscriptionChargeRevokeResponse>('order_subscriptions/charge', {
+            data: this.compact(payload),
+            headers: this.supervisorHeaders(idempotency_key)
+        })
+    }
+
+    /**
+     * null/undefined 값을 제거한다. (Ruby SDK 의 payload.compact 와 동일 동작)
+     */
+    private compact(payload: Record<string, any>): Record<string, any> {
+        return Object.fromEntries(
+            Object.entries(payload).filter(([, value]) => value !== undefined && value !== null)
+        )
+    }
+
+    /**
+     * supervisor 전용 요청 헤더
+     * Idempotency-Key 는 미지정시 매 호출마다 생성된다.
+     */
+    private supervisorHeaders(idempotencyKey?: string): Record<string, string> {
+        return {
+            'Idempotency-Key': idempotencyKey || randomUUID(),
+            'BOOTPAY-ROLE': 'supervisor'
+        }
     }
 }

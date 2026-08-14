@@ -74,7 +74,10 @@ export class BootpayCommerceResource {
                 config.headers.set('BOOTPAY-SDK-VERSION', this.sdkVersion)
                 config.headers.set('BOOTPAY-API-VERSION', this.apiVersion)
                 config.headers.set('BOOTPAY-SDK-TYPE', '301')
-                config.headers.set('BOOTPAY-ROLE', this.$role || 'user')
+                // 요청별로 role 이 지정된 경우(supervisor 전용 endpoint 등)에는 그 값을 유지한다.
+                if (!config.headers.has('BOOTPAY-ROLE')) {
+                    config.headers.set('BOOTPAY-ROLE', this.$role || 'user')
+                }
 
                 const authorization = this.authorizationHeader()
                 if (authorization) {

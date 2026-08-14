@@ -1,3 +1,14 @@
+### 2.7.0
+* PG: 우선순위(순차) 결제 빌링키 조회 `lookupSequentialBillingKey(widgetKey, billingKey)` 추가 — `GET subscribe/sequential_billing_key/{billing_key}?widget_key={widget_key}`
+* Commerce: 수시결제(온디맨드) charge_key 결제/해지 추가 (supervisor 전용)
+  - `orderSubscription.supervisorCharge`: `POST order_subscriptions/charge` — charge_key 는 body 로만 전송 (URL/query 금지)
+  - `orderSubscription.supervisorChargeRevoke`: `DELETE order_subscriptions/charge` — 해지 후 해당 키로 재결제 불가
+  - 두 endpoint 모두 `Idempotency-Key` 헤더 자동 생성 (`idempotency_key` 파라미터로 직접 지정 가능)
+* Commerce: 몰 설정 모듈 `mallSetting` 추가 (supervisor 전용)
+  - `getMallSetting`/`detail`: `GET mall-setting`
+  - `updateMallSetting`/`update`: `PUT mall-setting` — flatten 바디, null/undefined 값은 전송하지 않음
+* Commerce: 요청별로 지정된 `BOOTPAY-ROLE` 헤더를 인터셉터가 덮어쓰지 않도록 수정 (supervisor 전용 endpoint 대응, 미지정시 기존 동작 그대로)
+
 ### 2.6.0
 * 인증: client_key/secret_key Basic Auth 지원 (PG + Commerce 공통)
   - 기존 application_id/private_key Bearer 방식 하위 호환 유지

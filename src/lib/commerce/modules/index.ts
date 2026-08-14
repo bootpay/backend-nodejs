@@ -12,5 +12,6 @@ export * from './category'
 export * from './coupon'
 export * from './point'
 export * from './cart'
+export * from './mall-setting'
 
 export * from './store'
