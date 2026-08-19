@@ -52,12 +52,20 @@ export interface CommerceOrderCancellationRequestHistory {
     processed_at?: string
 }
 
+/**
+ * 주문 목록 조회 파라미터 (GET /v1/orders)
+ * limit 은 서버 기본 20 · 최대 50 이며, 50 초과를 보내도 서버가 50 으로 클램프한다.
+ * ⚠️ 날짜 키의 정식 이름은 search_date_from / search_date_to 다.
+ *    css_at / cse_at 는 서버가 받아주는 별칭이며 하위호환을 위해 남겨둔다.
+ */
 export interface OrderListParams extends ListParams {
     user_id?: string
     user_group_id?: string
     status?: number[]
     payment_status?: number[]
     cs_type?: string
+    search_date_from?: string
+    search_date_to?: string
     css_at?: string
     cse_at?: string
     subscription_billing_type?: number

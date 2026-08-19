@@ -147,9 +147,24 @@ export interface MallProductListParams extends ProductListParams {
     idempotency_key?: string
 }
 
+/**
+ * 상품 판매/노출 상태 변경 파라미터 (PUT /v1/products/{product_id}/status)
+ * 서버 _status_params 기준. ⚠️ 재고(stock)는 여기가 아니라 update 로 바꾼다.
+ */
 export interface ProductStatusParams {
     product_id: string
-    status: number
+    status?: number
     status_display?: boolean
     status_sale?: boolean
+    status_frozen?: boolean
+    status_review?: boolean
+    use_display_period?: boolean
+    display_start_at?: string
+    display_end_at?: string
+    use_sale_period?: boolean
+    sale_start_at?: string
+    sale_end_at?: string
+    /** 미지정시 자동 생성 (Idempotency-Key 헤더로 전송, body 에는 포함되지 않는다) */
+    idempotency_key?: string
+    [extra: string]: unknown
 }

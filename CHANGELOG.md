@@ -1,3 +1,33 @@
+### 2.9.0
+* Commerce: 죽은 경로 정정 — 회원 endpoint 는 단수 `user/...` 가 아니라 복수 `users/...` 다 (commerce-api v1 에 단수 라우트가 없다)
+  - `user.userLogin`: `POST users/login` (v1/users/login#create) — `POST users/session` 은 라우트만 있고 create 액션이 없으므로 쓰지 않는다
+  - `user.userSession`: `GET users/session` / `user.userLogout`: `DELETE users/session`
+  - `user.userJoin`: `POST users/join` / `user.userJoinCheck`: `GET users/join/{type}?pk={pk}`
+  - `userJoin`↔`join`, `userJoinCheck`↔`checkExist` 는 같은 endpoint 를 부르지만 서버가 파라미터 조합으로 분기하므로 둘 다 유지
+* Commerce: 신규 endpoint 추가
+  - `user.uidExist(uid)`: `GET users/join/uid-exist?pk={uid}` — `*_exist` 전용형 5종 완성
+  - `webhook.sendTest({ header_content_type })`: `POST webhook/test` — 테스트 웹훅 발송
+  - `orderSubscription.requestIng.purchase`: `POST order_subscriptions/requests/ing/purchase` (중도인수 요청)
+  - `orderSubscription.requestIng.transfer`: `POST order_subscriptions/requests/ing/transfer` (이전/승계 요청)
+* Commerce: multipart 전송 계층 신설 — `postMultipart` 추가 및 요청 인터셉터가 지정된 `Content-Type` 을 덮어쓰지 않도록 수정
+  - 덮어쓰면 form-data 의 boundary 가 사라져 서버가 본문을 null 로 읽는 버그가 있었다
+  - `product.create` 는 이미지가 없으면 JSON, 있으면 multipart(`images[0]`, `images[1]` … 인덱싱)로 전송
+* Commerce: 인자·응답 규약 정정
+  - `invoice.list` 응답은 `{ items, total }` 이 아니라 `{ list, count }` — 타입 선언 정정, `limit` 기본값 24, `cs_type`/`user_id`/`product_type`/`css_at`/`cse_at` 파라미터 추가
+  - `invoice.notify` 의 `sendTypes` 를 선택 인자로 변경 (미전달시 서버가 빈 배열로 처리)
+  - `orderCancel.approve`/`reject`/`withdraw` 인자명을 `order_cancellation_request_id` 로 통일 (구 이름 `order_cancel_request_history_id` 도 계속 지원)
+  - `orderSubscriptionAdjustment.delete` 는 대상 ID 를 query 가 아니라 body 로 전송
+  - `orderSubscriptionAdjustment.update` 에 `adjustments` 배열 지원 (서버는 `duration` 회차 단위로 교체)
+  - `userGroup.limit` 에 `limit_month_purchase`/`limit_week_purchase` 추가 (서버 정식 인자명; `update` 로는 한도가 반영되지 않는다)
+  - `order.list` 에 `search_date_from`/`search_date_to` 추가 (`css_at`/`cse_at` 는 서버 별칭으로 계속 지원)
+  - `orderSubscription.list` 에 `search_date_from`/`search_date_to`/`status` 추가
+  - `orderSubscriptionRequest.list` 에 `order_subscription_id`/`user_id`/`user_group_id` 추가
+  - `product.products` 의 `keyword` 는 서버가 읽지 않음을 문서화 (인자는 하위호환 유지)
+* Commerce: 서버가 요구하는 scope 를 endpoint 별로 명시 — 상품 쓰기/그룹 한도는 `manager`, 구독 계약변경·조정항목·요청 승인은 `supervisor`, 나머지는 `user`
+  - `orderSubscriptionRequest.list`/`detail` 은 `project_id` 가 있으면 `supervisor`, 없으면 `user`
+* PG: `lookupSequentialBillingKey(widgetKey, billingKey, userId)` — `user_id` 쿼리 파라미터 추가
+* 의존성: `form-data` 를 dependencies 에 명시 (multipart 전송에 직접 사용)
+
 ### 2.8.0
 * Commerce: 쇼핑몰(V1 Mall API) 회원 endpoint 정정 및 추가 — 단수형 `user/...` 경로 사용 (기존 `users/...` 외부 회원 연동 API 는 그대로 유지)
   - `user.userLogin({ login_id, password, corporate_type })`: `POST user/login` — corporate_type 미지정시 0

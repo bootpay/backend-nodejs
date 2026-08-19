@@ -400,7 +400,7 @@ console.log(response)
 ```
 
 ## 4-9. 우선순위 결제 빌링키 조회하기
-우선순위(순차) 결제에 사용되는 빌링키를 위젯키와 함께 조회합니다.
+우선순위(순차) 결제에 사용되는 빌링키를 위젯키·회원 ID 와 함께 조회합니다.
 ```javascript
 (async () => {
     Bootpay.setConfiguration({
@@ -409,7 +409,7 @@ console.log(response)
     })
     try {
         await Bootpay.getAccessToken()
-        const response = await Bootpay.lookupSequentialBillingKey('WIDGET_KEY', '66542dfb4d18d5fc7b43e1b6')
+        const response = await Bootpay.lookupSequentialBillingKey('WIDGET_KEY', '66542dfb4d18d5fc7b43e1b6', 'USER_ID')
         console.log(response)
     } catch (e) {
         console.log(e)
@@ -642,8 +642,21 @@ await commerce.asSupervisor().orderSubscription.supervisorChargeRevoke({
 ### 10-6. 청구서 관리
 
 ```javascript
-// 청구서 목록 조회
+// 청구서 목록 조회 — 응답은 { list, count } 구조이며 limit 기본값은 24 입니다.
 const invoices = await commerce.invoice.list()
+const filtered = await commerce.invoice.list({
+    page: 1,
+    limit: 24,
+    keyword: '청구서',
+    cs_type: 'CS_TYPE',
+    user_id: 'USER_ID',
+    product_type: 1,
+    css_at: '2024-01-01',
+    cse_at: '2024-12-31'
+})
+
+// 청구서 상세 조회
+const invoiceDetail = await commerce.invoice.detail('INVOICE_ID')
 
 // 청구서 생성
 const invoice = await commerce.invoice.create({
@@ -652,8 +665,18 @@ const invoice = await commerce.invoice.create({
     title: '청구서 제목'
 })
 
-// 청구서 알림 전송
+// 청구서 알림 재발송 — send_types 를 생략하면 서버가 빈 배열로 처리합니다.
+// ⚠️ 실제 고객에게 알림이 발송되므로 테스트 호출에 주의하세요.
 await commerce.invoice.notify('INVOICE_ID', [1, 2]) // 1: SMS, 2: Email
+```
+
+### 10-6-1. 테스트 웹훅 발송
+
+등록된 웹훅 URL 로 테스트 페이로드를 보내 연동을 확인합니다.
+
+```javascript
+await commerce.webhook.sendTest()
+await commerce.webhook.sendTest({ header_content_type: 1 })
 ```
 
 ### 10-7. 몰 설정 관리

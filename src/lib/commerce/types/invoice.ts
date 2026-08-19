@@ -92,7 +92,28 @@ export interface CommerceInvoiceItem {
     tax_free_price?: number
 }
 
-export interface InvoiceListParams extends ListParams {}
+/**
+ * 청구서 목록 조회 파라미터 (GET /v1/invoices)
+ * limit 미지정시 서버 기본값과 동일한 24 로 전송된다.
+ */
+export interface InvoiceListParams extends ListParams {
+    cs_type?: string
+    user_id?: string
+    product_type?: number
+    css_at?: string
+    cse_at?: string
+    /** 미지정시 자동 생성 (Idempotency-Key 헤더로 전송, query 에는 포함되지 않는다) */
+    idempotency_key?: string
+}
+
+/**
+ * 청구서 목록 조회 응답 (GET /v1/invoices)
+ * ⚠️ { items, total } 이 아니라 { list, count } 다.
+ */
+export interface InvoiceListResponse {
+    list?: CommerceInvoice[]
+    count?: number
+}
 
 export interface InvoiceCreateParams {
     user_id?: string

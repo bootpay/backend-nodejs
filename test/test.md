@@ -88,16 +88,36 @@ node test/commerce/mallSettingUpdate.js
 node test/commerce/orderSubscriptionChargeRequest.js
 node test/commerce/mallSettingRequest.js
 
-# 쇼핑몰(V1 Mall API) 회원 세션 / 상품 / 가맹점 요청 규약 검증 (네트워크 호출 없음, 키 불필요)
+# V1 회원 세션 / 상품 / 가맹점 요청 규약 검증 (네트워크 호출 없음, 키 불필요)
 node test/commerce/userMallSessionRequest.js
 node test/commerce/productMallRequest.js
 node test/commerce/storeRequest.js
+
+# Commerce 라우트/동사/헤더 규약 일괄 검증 (네트워크 호출 없음, 키 불필요)
+node test/commerce/commerceRouteContract.js
+
+# 외부 uid 중복검사 / 테스트 웹훅 발송
+node test/commerce/userUidExist.js
+node test/commerce/webhookSendTest.js
+
+# 구독 중도인수 / 이전·승계 요청
+node test/commerce/orderSubscriptionPurchase.js
+node test/commerce/orderSubscriptionTransfer.js
 ```
 
-### 쇼핑몰(V1 Mall API) 회원 endpoint 주의
+### V1 회원 endpoint 주의
 
-`user.userLogin / userSession / userLogout / userJoin / userJoinCheck` 는 단수형 `user/...` 경로를 사용하는 쇼핑몰 회원 API 다.
-기존 `user.login / join / checkExist` 가 쓰는 복수형 `users/...` (외부 회원 연동 API) 와는 다른 endpoint 이므로 서로 대체할 수 없다.
+`user.userLogin / userSession / userLogout / userJoin / userJoinCheck` 는 모두 복수형 `users/...` 경로를 사용한다.
+단수형 `user/...` 는 commerce-api v1 에 존재하지 않는 죽은 경로다 — 예전 SDK 가 그리로 보내고 있었다.
+
+- 로그인은 `POST /v1/users/login` 이다. `POST /v1/users/session` 은 라우트만 있고 `create` 액션이 없으므로 쓰면 안 된다.
+- `userJoin` 과 `join`, `userJoinCheck` 와 `checkExist` 는 같은 endpoint 를 부르지만 서버가 파라미터 조합으로 분기하므로 둘 다 유지한다.
+
+### 라우트 표기 주의
+
+- 언더스코어: `order_subscriptions`, `order_subscription_bills`
+- 하이픈: `order-subscription-requests`, `user-groups`
+- `requests/ing` 계열은 `resume` 만 `PUT` 이고 나머지(`pause`/`purchase`/`termination`/`transfer`)는 `POST` 다.
 세션이 필요한 호출에는 로그인시 받은 JWT 를 `Bootpay-User-JWT` 헤더로 전달한다.
 
 ## 테스트 데이터
@@ -195,3 +215,4 @@ Bootpay.setConfiguration(getActivePgConfig());
 - `test/pg/getAccessToken.js`
 - `test/legacyCompatibility.js`
 - `test/commerce/authorizationHeader.js` (Commerce — 실제 통신 없이 mock adapter 로 헤더만 검증)
+- `test/commerce/commerceRouteContract.js` (Commerce — 실제 통신 없이 mock adapter 로 라우트/동사/role 검증)

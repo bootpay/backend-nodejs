@@ -1,4 +1,5 @@
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, InternalAxiosRequestConfig } from 'axios'
+import FormData from 'form-data'
 
 export interface BootpayCommerceRestApiErrorResponse<T = any> {
     error_code?: number
@@ -68,7 +69,11 @@ export class BootpayCommerceResource {
 
         this.$http.interceptors.request.use(
             (config: InternalAxiosRequestConfig) => {
-                config.headers.set('Content-Type', 'application/json')
+                // ⚠️ 요청이 Content-Type 을 직접 지정한 경우(multipart/form-data 등) 덮어쓰지 않는다.
+                // 덮어쓰면 form-data 가 붙인 boundary 가 사라져 본문이 서버에서 null 로 파싱된다.
+                if (!config.headers.has('Content-Type')) {
+                    config.headers.set('Content-Type', 'application/json')
+                }
                 config.headers.set('Accept', 'application/json')
                 config.headers.set('Accept-Charset', 'utf-8')
                 config.headers.set('BOOTPAY-SDK-VERSION', this.sdkVersion)
@@ -166,6 +171,31 @@ export class BootpayCommerceResource {
     ): Promise<BootpayCommerceResponse<T>> {
         try {
             const response = await this.$http.post(this.entrypoints(url), data, config)
+            return Promise.resolve(response as unknown as BootpayCommerceResponse<T>)
+        } catch (e) {
+            return Promise.reject(e)
+        }
+    }
+
+    /**
+     * multipart/form-data 전송 (파일 업로드용)
+     * ⚠️ Content-Type 은 form-data 가 생성한 값(boundary 포함)을 그대로 사용한다.
+     *    직접 지정하거나 인터셉터가 덮어쓰면 boundary 가 사라져 본문이 깨진다.
+     * 기존 post 는 JSON 고정이라 손대지 않고 별도 메서드로 둔다.
+     */
+    async postMultipart<T = any>(
+        url: string,
+        form: FormData,
+        config?: AxiosRequestConfig
+    ): Promise<BootpayCommerceResponse<T>> {
+        try {
+            const response = await this.$http.post(this.entrypoints(url), form, {
+                ...config,
+                headers: {
+                    ...config?.headers,
+                    ...form.getHeaders()
+                }
+            })
             return Promise.resolve(response as unknown as BootpayCommerceResponse<T>)
         } catch (e) {
             return Promise.reject(e)

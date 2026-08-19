@@ -62,17 +62,30 @@ export interface UserGroupListParams extends ListParams {
     corporate_type?: number
 }
 
+/**
+ * 그룹 구매한도 설정 파라미터 (PUT /v1/user-groups/{user_group_id}/limit)
+ * ⚠️ update 로는 반영되지 않는다 — 서버가 이 값들을 update 에서 제거하기 때문에 전용 라우트로만 바뀐다.
+ */
 export interface UserGroupLimitParams {
     user_group_id: string
     use_limit?: boolean
+    limit_month_purchase?: number
+    limit_week_purchase?: number
+    limit_message?: string
     purchase_limit?: number
     subscribed_limit?: number
-    limit_message?: string
+    /** 미지정시 자동 생성 (Idempotency-Key 헤더로 전송, body 에는 포함되지 않는다) */
+    idempotency_key?: string
 }
 
+/**
+ * 그룹 구독 합산청구(정산주기) 설정 파라미터 (PUT /v1/user-groups/{user_group_id}/aggregate-transaction)
+ */
 export interface UserGroupAggregateTransactionParams {
     user_group_id: string
     use_subscription_aggregate_transaction?: boolean
     subscription_month_day?: number
     subscription_week_day?: number
+    /** 미지정시 자동 생성 (Idempotency-Key 헤더로 전송, body 에는 포함되지 않는다) */
+    idempotency_key?: string
 }

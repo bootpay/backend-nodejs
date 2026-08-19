@@ -10,6 +10,8 @@ export class OrderModule {
 
     /**
      * 주문 목록 조회
+     * GET /v1/orders
+     * limit 은 서버 기본 20 · 최대 50 (초과분은 서버가 50 으로 클램프한다).
      * @param params 조회 파라미터
      */
     async list(params?: OrderListParams): Promise<BootpayCommerceResponse<{ items: CommerceOrder[]; total: number }>> {
@@ -21,6 +23,8 @@ export class OrderModule {
             if (params.user_id) queryParams.append('user_id', params.user_id)
             if (params.user_group_id) queryParams.append('user_group_id', params.user_group_id)
             if (params.cs_type) queryParams.append('cs_type', params.cs_type)
+            if (params.search_date_from) queryParams.append('search_date_from', params.search_date_from)
+            if (params.search_date_to) queryParams.append('search_date_to', params.search_date_to)
             if (params.css_at) queryParams.append('css_at', params.css_at)
             if (params.cse_at) queryParams.append('cse_at', params.cse_at)
             if (params.subscription_billing_type !== undefined) {

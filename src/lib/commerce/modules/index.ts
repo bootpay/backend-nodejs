@@ -13,5 +13,6 @@ export * from './coupon'
 export * from './point'
 export * from './cart'
 export * from './mall-setting'
+export * from './webhook'
 
 export * from './store'

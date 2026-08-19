@@ -37,6 +37,8 @@ export class ProductModule {
      * 상품 목록 조회 (V1 Mall API)
      * GET /v1/products
      * page/limit 은 미지정시 각각 1 / 20 이 적용되고, 나머지 값은 지정된 것만 전송한다.
+     * ⚠️ keyword 는 서버(v1/products_controller#index)가 읽지 않는다 — page/limit/category_id/ex_uid/sort 만 사용하며
+     *    keyword 를 보내도 조용히 무시된다. 하위호환 때문에 인자는 남겨두되, 검색이 필요하면 서버 지원이 선행되어야 한다.
      * @param params 조회 파라미터
      */
     async products(params?: MallProductListParams): Promise<BootpayCommerceResponse<{ items: CommerceProduct[]; total: number }>> {
@@ -59,42 +61,36 @@ export class ProductModule {
     }
 
     /**
-     * 상품 생성 (이미지 포함)
-     * @param product 상품 정보
+     * 상품 생성
+     * POST /v1/products
+     * imagePaths 가 있으면 multipart/form-data, 없으면 JSON 으로 보낸다.
+     * @param product 상품 정보 (여기 명시되지 않은 값도 서버 _product_params 로 그대로 전달된다)
      * @param imagePaths 이미지 파일 경로 배열
+     * @param idempotencyKey 미지정시 자동 생성
      */
-    async create(product: CommerceProduct, imagePaths?: string[]): Promise<BootpayCommerceResponse<CommerceProduct>> {
-        const formData = new FormData()
+    async create(
+        product: CommerceProduct,
+        imagePaths?: string[],
+        idempotencyKey?: string
+    ): Promise<BootpayCommerceResponse<CommerceProduct>> {
+        const payload = this.compact(product as Record<string, any>)
+        const headers = this.managerHeaders(idempotencyKey)
 
-        // 상품 정보를 JSON으로 변환하여 추가
-        Object.entries(product).forEach(([key, value]) => {
-            if (value !== undefined && value !== null) {
-                if (typeof value === 'object') {
-                    formData.append(key, JSON.stringify(value))
-                } else {
-                    formData.append(key, String(value))
-                }
-            }
-        })
-
-        // 이미지 파일 추가
-        if (imagePaths && imagePaths.length > 0) {
-            for (const imagePath of imagePaths) {
-                const fileName = path.basename(imagePath)
-                formData.append('images', fs.createReadStream(imagePath), fileName)
-            }
+        if (!imagePaths || imagePaths.length === 0) {
+            return this.bootpay.post<CommerceProduct>('products', payload, { headers })
         }
 
-        const mode = this.bootpay.commerceConfiguration.mode || 'production'
-        const url = `${this.bootpay.API_ENTRYPOINTS[mode]}/products`
-
-        return this.bootpay.$http.post(url, formData, {
-            headers: {
-                ...formData.getHeaders(),
-                Authorization: this.bootpay.authorizationHeader(),
-                'BOOTPAY-ROLE': this.bootpay.getRole() || 'user'
-            }
+        const formData = new FormData()
+        Object.entries(payload).forEach(([key, value]) => {
+            formData.append(key, this.multipartValue(value))
         })
+
+        // ⚠️ Rails 는 반복된 `images` 를 배열로 받지 않는다. images[0], images[1] ... 로 인덱싱해야 한다.
+        imagePaths.forEach((imagePath, index) => {
+            formData.append(`images[${index}]`, fs.createReadStream(imagePath), path.basename(imagePath))
+        })
+
+        return this.bootpay.postMultipart<CommerceProduct>('products', formData, { headers })
     }
 
     /**
@@ -124,32 +120,76 @@ export class ProductModule {
 
     /**
      * 상품 수정
+     * PUT /v1/products/{product_id}
+     * 바뀐 값만 보내면 된다. ⚠️ category_id 는 키 존재 여부로 '해제 의사'를 판별하므로 주의.
      * @param product 상품 정보
+     * @param idempotencyKey 미지정시 자동 생성
      */
-    async update(product: CommerceProduct): Promise<BootpayCommerceResponse<CommerceProduct>> {
+    async update(product: CommerceProduct, idempotencyKey?: string): Promise<BootpayCommerceResponse<CommerceProduct>> {
         if (!product.product_id) {
             return Promise.reject({ success: false, error: 'product_id is required' })
         }
-        return this.bootpay.put<CommerceProduct>(`products/${product.product_id}`, product)
+        return this.bootpay.put<CommerceProduct>(
+            `products/${product.product_id}`,
+            this.compact(product as Record<string, any>),
+            { headers: this.managerHeaders(idempotencyKey) }
+        )
     }
 
     /**
-     * 상품 상태 변경
+     * 상품 판매/노출 상태 변경
+     * PUT /v1/products/{product_id}/status
+     * ⚠️ 재고(stock)는 여기가 아니라 update 로 바꾼다.
      * @param params 상태 변경 파라미터
      */
     async status(params: ProductStatusParams): Promise<BootpayCommerceResponse<CommerceProduct>> {
         if (!params.product_id) {
             return Promise.reject({ success: false, error: 'product_id is required' })
         }
-        return this.bootpay.put<CommerceProduct>(`products/${params.product_id}/status`, params)
+        const { product_id, idempotency_key, ...payload } = params
+        return this.bootpay.put<CommerceProduct>(`products/${product_id}/status`, this.compact(payload), {
+            headers: this.managerHeaders(idempotency_key)
+        })
     }
 
     /**
      * 상품 삭제
+     * DELETE /v1/products/{product_id}
      * @param productId 상품 ID
+     * @param idempotencyKey 미지정시 자동 생성
      */
-    async delete(productId: string): Promise<BootpayCommerceResponse<null>> {
-        return this.bootpay.delete<null>(`products/${productId}`)
+    async delete(productId: string, idempotencyKey?: string): Promise<BootpayCommerceResponse<null>> {
+        return this.bootpay.delete<null>(`products/${productId}`, {
+            headers: this.managerHeaders(idempotencyKey)
+        })
+    }
+
+    /**
+     * 상품 쓰기(등록/수정/삭제/상태변경) 요청 헤더
+     * 서버가 manager scope 를 요구한다.
+     */
+    private managerHeaders(idempotencyKey?: string): Record<string, string> {
+        return {
+            'Idempotency-Key': idempotencyKey || randomUUID(),
+            'BOOTPAY-ROLE': 'manager'
+        }
+    }
+
+    /**
+     * null/undefined 값을 제거한다. (Ruby SDK 의 payload.compact 와 동일 동작)
+     */
+    private compact(payload: Record<string, any>): Record<string, any> {
+        return Object.fromEntries(
+            Object.entries(payload).filter(([, value]) => value !== undefined && value !== null)
+        )
+    }
+
+    /**
+     * multipart form 값 정규화 — 배열/객체는 JSON, 나머지는 문자열로 보낸다.
+     */
+    private multipartValue(value: any): string {
+        if (typeof value === 'object') return JSON.stringify(value)
+        return String(value)
     }
 
     /**

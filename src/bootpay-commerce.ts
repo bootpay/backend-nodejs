@@ -15,6 +15,7 @@ import { PointModule } from './lib/commerce/modules/point'
 import { CartModule } from './lib/commerce/modules/cart'
 import { StoreModule } from './lib/commerce/modules/store'
 import { MallSettingModule } from './lib/commerce/modules/mall-setting'
+import { WebhookModule } from './lib/commerce/modules/webhook'
 
 export interface CommerceTokenResponse {
     access_token: string
@@ -38,6 +39,7 @@ export class BootpayCommerce extends BootpayCommerceResource {
     public cart!: CartModule
     public store!: StoreModule
     public mallSetting!: MallSettingModule
+    public webhook!: WebhookModule
 
     constructor(configuration?: CommerceConfiguration) {
         super()
@@ -64,6 +66,7 @@ export class BootpayCommerce extends BootpayCommerceResource {
         this.cart = new CartModule(this)
         this.store = new StoreModule(this)
         this.mallSetting = new MallSettingModule(this)
+        this.webhook = new WebhookModule(this)
     }
 
     /**

@@ -62,7 +62,13 @@ export interface CommerceOrderSubscriptionBill {
     service_end_at?: string
 }
 
+/**
+ * 구독 빌(회차) 목록 조회 파라미터 (GET /v1/order_subscription_bills)
+ * page/limit 미지정시 각각 1 / 20 이 적용된다.
+ */
 export interface OrderSubscriptionBillListParams extends ListParams {
     order_subscription_id?: string
     status?: number[]
+    /** 미지정시 자동 생성 (Idempotency-Key 헤더로 전송, query 에는 포함되지 않는다) */
+    idempotency_key?: string
 }

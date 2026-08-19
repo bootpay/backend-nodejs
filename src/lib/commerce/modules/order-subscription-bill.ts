@@ -1,5 +1,6 @@
 import { BootpayCommerceResource, BootpayCommerceResponse } from '../../commerce-resource'
 import { CommerceOrderSubscriptionBill, OrderSubscriptionBillListParams } from '../types'
+import { randomUUID } from 'crypto'
 
 export class OrderSubscriptionBillModule {
     private bootpay: BootpayCommerceResource
@@ -9,22 +10,26 @@ export class OrderSubscriptionBillModule {
     }
 
     /**
-     * 정기구독 청구 목록 조회
+     * 정기구독 빌(회차) 목록 조회
+     * GET /v1/order_subscription_bills
+     * ⚠️ 경로가 order_subscription_bills — 언더스코어다 (하이픈 아님).
+     * page/limit 미지정시 각각 1 / 20 이 적용된다.
      * @param params 조회 파라미터
      */
     async list(params?: OrderSubscriptionBillListParams): Promise<BootpayCommerceResponse<{ items: CommerceOrderSubscriptionBill[]; total: number }>> {
+        const { idempotency_key, ...rest } = params || {}
         const queryParams = new URLSearchParams()
-        if (params) {
-            if (params.page !== undefined) queryParams.append('page', params.page.toString())
-            if (params.limit !== undefined) queryParams.append('limit', params.limit.toString())
-            if (params.keyword) queryParams.append('keyword', params.keyword)
-            if (params.order_subscription_id) queryParams.append('order_subscription_id', params.order_subscription_id)
-            if (params.status && params.status.length > 0) {
-                queryParams.append('status', params.status.join(','))
-            }
+        if (rest.order_subscription_id) queryParams.append('order_subscription_id', rest.order_subscription_id)
+        queryParams.append('page', (rest.page === undefined ? 1 : rest.page).toString())
+        queryParams.append('limit', (rest.limit === undefined ? 20 : rest.limit).toString())
+        if (rest.keyword) queryParams.append('keyword', rest.keyword)
+        if (rest.status && rest.status.length > 0) {
+            queryParams.append('status', rest.status.join(','))
         }
-        const query = queryParams.toString()
-        return this.bootpay.get<{ items: CommerceOrderSubscriptionBill[]; total: number }>(`order_subscription_bills${query ? `?${query}` : ''}`)
+        return this.bootpay.get<{ items: CommerceOrderSubscriptionBill[]; total: number }>(
+            `order_subscription_bills?${queryParams.toString()}`,
+            { headers: this.userHeaders(idempotency_key) }
+        )
     }
 
     /**
@@ -47,5 +52,16 @@ export class OrderSubscriptionBillModule {
             `order_subscription_bills/${orderSubscriptionBill.order_subscription_bill_id}`,
             orderSubscriptionBill
         )
+    }
+
+    /**
+     * 빌 조회 요청 헤더
+     * Idempotency-Key 는 미지정시 매 호출마다 생성된다.
+     */
+    private userHeaders(idempotencyKey?: string): Record<string, string> {
+        return {
+            'Idempotency-Key': idempotencyKey || randomUUID(),
+            'BOOTPAY-ROLE': 'user'
+        }
     }
 }

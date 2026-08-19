@@ -51,21 +51,47 @@ export interface CommerceOrderSubscription {
     cancel_at?: string
 }
 
+/**
+ * 정기구독 목록 조회 파라미터 (GET /v1/order_subscriptions)
+ * limit 미지정시 서버 기본값과 동일한 20 이 적용된다.
+ * ⚠️ 날짜 키는 search_date_from / search_date_to (또는 s_at / e_at) 다. orders 의 css_at / cse_at 와 다르다.
+ */
 export interface OrderSubscriptionListParams extends ListParams {
+    search_date_from?: string
+    search_date_to?: string
     s_at?: string
     e_at?: string
     request_type?: string
     user_group_id?: string
     user_id?: string
+    status?: number
 }
 
+/**
+ * 구독 계약 변경 파라미터 (PUT /v1/order_subscriptions/{order_subscription_id})
+ * 바뀐 값만 보내면 된다. 서버가 supervisor scope 를 요구한다.
+ */
 export interface OrderSubscriptionUpdateParams {
     order_subscription_id: string
+    product_id?: string
+    product_option_id?: string
+    order_name?: string
+    total_subscription_duration?: number
+    quantity?: number
+    address_id?: string
+    username?: string
+    phone?: string
+    email?: string
+    use_free_trial?: boolean
+    free_trial_day?: number
+    service_start_at?: string
     next_billing_at?: string
     billing_key?: string
     status?: number
     payment_next_at?: string
     service_end_at?: string
+    /** 미지정시 자동 생성 (Idempotency-Key 헤더로 전송, body 에는 포함되지 않는다) */
+    idempotency_key?: string
 }
 
 // Request Ing Types
@@ -75,12 +101,46 @@ export interface OrderSubscriptionPauseParams {
     reason?: string
     paused_at?: string
     expected_resume_at?: string
+    /** 미지정시 자동 생성 (Idempotency-Key 헤더로 전송, body 에는 포함되지 않는다) */
+    idempotency_key?: string
 }
 
 export interface OrderSubscriptionResumeParams {
     order_subscription_id?: string
     order_number?: string
+    reason?: string
     resume_at?: string
+    /** 미지정시 자동 생성 (Idempotency-Key 헤더로 전송, body 에는 포함되지 않는다) */
+    idempotency_key?: string
+}
+
+/**
+ * 중도인수 요청 파라미터 (POST /v1/order_subscriptions/requests/ing/purchase)
+ */
+export interface OrderSubscriptionPurchaseParams {
+    order_subscription_id?: string
+    order_number?: string
+    price?: number
+    tax_free_price?: number
+    reason?: string
+    /** 미지정시 자동 생성 (Idempotency-Key 헤더로 전송, body 에는 포함되지 않는다) */
+    idempotency_key?: string
+}
+
+/**
+ * 구독 이전/승계 요청 파라미터 (POST /v1/order_subscriptions/requests/ing/transfer)
+ */
+export interface OrderSubscriptionTransferParams {
+    order_subscription_id?: string
+    new_user_id?: string
+    new_username?: string
+    new_user_email?: string
+    new_user_phone?: string
+    new_user_address?: string
+    wallet_id?: string
+    reason?: string
+    /** 미지정시 자동 생성 (Idempotency-Key 헤더로 전송, body 에는 포함되지 않는다) */
+    idempotency_key?: string
 }
 
 export interface OrderSubscriptionTerminationParams {
@@ -91,6 +151,8 @@ export interface OrderSubscriptionTerminationParams {
     final_fee?: number
     service_end_at?: string
     reason?: string
+    /** 미지정시 자동 생성 (Idempotency-Key 헤더로 전송, body 에는 포함되지 않는다) */
+    idempotency_key?: string
 }
 
 export interface CalcTerminateFeeResponse {

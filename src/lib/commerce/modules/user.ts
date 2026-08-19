@@ -65,22 +65,25 @@ export class UserModule {
     }
 
     /**
-     * 회원 로그인 (V1 Mall API)
-     * POST /v1/user/login
+     * 회원 로그인 (V1 API)
+     * POST /v1/users/login
+     * v1 에는 단수 user/* 라우트가 없다. 로그인은 v1/users/login#create 다.
+     * ⚠️ POST /v1/users/session 은 resource :session 이 만들어낸 라우트일 뿐 create 액션이 없다 — 그리로 보내면 안 된다.
+     * ⚠️ 서버(LoginService)는 login_id/password 만 읽는다. corporate_type 은 전달돼도 무시된다.
      * @param params 로그인 파라미터 (corporate_type 미지정시 0)
      */
     async userLogin(params: MallUserLoginParams): Promise<BootpayCommerceResponse<UserLoginResponse>> {
         const { idempotency_key, corporate_type, ...rest } = params
         return this.bootpay.post<UserLoginResponse>(
-            'user/login',
+            'users/login',
             this.compact({ ...rest, corporate_type: corporate_type === undefined ? 0 : corporate_type }),
             { headers: this.mallHeaders(undefined, idempotency_key) }
         )
     }
 
     /**
-     * 회원 세션 조회 (V1 Mall API)
-     * GET /v1/user/session
+     * 회원 세션 조회 (V1 API)
+     * GET /v1/users/session
      * @param userJwt 로그인시 발급받은 회원 JWT
      * @param idempotencyKey 미지정시 자동 생성
      */
@@ -88,41 +91,46 @@ export class UserModule {
         userJwt?: string,
         idempotencyKey?: string
     ): Promise<BootpayCommerceResponse<MallUserSessionResponse>> {
-        return this.bootpay.get<MallUserSessionResponse>('user/session', {
+        return this.bootpay.get<MallUserSessionResponse>('users/session', {
             headers: this.mallHeaders(userJwt, idempotencyKey)
         })
     }
 
     /**
-     * 회원 로그아웃 (V1 Mall API)
-     * DELETE /v1/user/session
+     * 회원 로그아웃 (V1 API)
+     * DELETE /v1/users/session
      * @param userJwt 로그인시 발급받은 회원 JWT
      * @param idempotencyKey 미지정시 자동 생성
      */
     async userLogout(userJwt: string, idempotencyKey?: string): Promise<BootpayCommerceResponse<null>> {
-        return this.bootpay.delete<null>('user/session', {
+        return this.bootpay.delete<null>('users/session', {
             headers: this.mallHeaders(userJwt, idempotencyKey)
         })
     }
 
     /**
-     * 회원가입 (V1 Mall API)
-     * POST /v1/user/join
+     * 회원가입 (V1 API) — 일반 회원가입용
+     * POST /v1/users/join
+     * ⚠️ join(user) 과 같은 엔드포인트를 부른다. 중복이 아니라 용도가 다르다 —
+     *    이쪽은 password/corporate_type/group 을 쓰는 일반 회원가입, 저쪽은 uid/login_email/login_pw 를 쓰는 외부 uid 연동 가입이다.
+     *    서버가 파라미터 조합으로 분기하므로 둘 다 유지한다.
      * @param params 회원가입 파라미터 (corporate_type 미지정시 0, 나머지 null/undefined 값은 전송하지 않는다)
      */
     async userJoin(params: MallUserJoinParams): Promise<BootpayCommerceResponse<CommerceUser>> {
         const { idempotency_key, corporate_type, ...rest } = params
         return this.bootpay.post<CommerceUser>(
-            'user/join',
+            'users/join',
             this.compact({ ...rest, corporate_type: corporate_type === undefined ? 0 : corporate_type }),
             { headers: this.mallHeaders(undefined, idempotency_key) }
         )
     }
 
     /**
-     * 회원가입 중복 확인 (V1 Mall API)
-     * GET /v1/user/join/{type}?pk={pk}
-     * @param type email-exist, id-exist, phone-exist, group-business-number-exist
+     * 회원가입 중복 확인 (V1 API) — key 를 인자로 받는 일반형
+     * GET /v1/users/join/{type}?pk={pk}
+     * ⚠️ uidExist 등 전용형과 기능이 겹치지만 둘 다 유지한다.
+     *    일반형은 서버에 새 key 가 생겨도 SDK 수정 없이 쓸 수 있다.
+     * @param type email-exist, id-exist, phone-exist, uid-exist, group-business-number-exist
      * @param pk 중복 확인할 값
      * @param idempotencyKey 미지정시 자동 생성
      */
@@ -131,8 +139,21 @@ export class UserModule {
         pk: string,
         idempotencyKey?: string
     ): Promise<BootpayCommerceResponse<{ exists: boolean }>> {
-        return this.bootpay.get<{ exists: boolean }>(`user/join/${type}?pk=${encodeURIComponent(pk)}`, {
+        return this.bootpay.get<{ exists: boolean }>(`users/join/${type}?pk=${encodeURIComponent(pk)}`, {
             headers: this.mallHeaders(undefined, idempotencyKey)
+        })
+    }
+
+    /**
+     * 외부 uid(ex_uid) 중복 검사
+     * GET /v1/users/join/uid-exist?pk={uid}
+     * email-exist / id-exist / phone-exist / group-business-number-exist 와 같은 전용형이다.
+     * @param uid 중복 확인할 외부 uid
+     * @param idempotencyKey 미지정시 자동 생성
+     */
+    async uidExist(uid: string, idempotencyKey?: string): Promise<BootpayCommerceResponse<{ exists: boolean }>> {
+        return this.bootpay.get<{ exists: boolean }>(`users/join/uid-exist?pk=${encodeURIComponent(uid)}`, {
+            headers: { ...this.mallHeaders(undefined, idempotencyKey), 'BOOTPAY-ROLE': 'user' }
         })
     }
 

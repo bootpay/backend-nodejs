@@ -83,8 +83,8 @@ export interface UserLoginResponse {
 }
 
 /**
- * 회원 로그인 파라미터 (V1 Mall API)
- * POST /v1/user/login
+ * 회원 로그인 파라미터 (V1 API)
+ * POST /v1/users/login
  */
 export interface MallUserLoginParams {
     login_id: string
@@ -95,8 +95,8 @@ export interface MallUserLoginParams {
 }
 
 /**
- * 회원가입 파라미터 (V1 Mall API)
- * POST /v1/user/join
+ * 회원가입 파라미터 (V1 API)
+ * POST /v1/users/join
  */
 export interface MallUserJoinParams {
     login_id: string
@@ -114,13 +114,18 @@ export interface MallUserJoinParams {
 }
 
 /**
- * 회원가입 중복 확인 타입 (V1 Mall API)
- * GET /v1/user/join/{type}
+ * 회원가입 중복 확인 타입 (V1 API)
+ * GET /v1/users/join/{type}
  */
-export type MallUserJoinCheckType = 'email-exist' | 'id-exist' | 'phone-exist' | 'group-business-number-exist'
+export type MallUserJoinCheckType =
+    | 'email-exist'
+    | 'id-exist'
+    | 'phone-exist'
+    | 'uid-exist'
+    | 'group-business-number-exist'
 
 /**
- * 회원 세션 조회 응답 (V1 Mall API)
+ * 회원 세션 조회 응답 (V1 API)
  */
 export interface MallUserSessionResponse {
     user?: CommerceUser

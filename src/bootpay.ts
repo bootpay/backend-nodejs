@@ -165,11 +165,12 @@ class BootpayBackendNodejs extends BootpayBackendNodejsResource {
      * @date: 2026-07-03
      * @param widgetKey: string
      * @param billingKey: string
+     * @param userId: string 조회 대상 회원 ID (서버가 빌링키 소유자 검증에 사용한다)
      * @returns Promise<SubscriptionBillingResponseParameters>
      */
-    async lookupSequentialBillingKey(widgetKey: string, billingKey: string): Promise<SubscriptionBillingResponseParameters> {
+    async lookupSequentialBillingKey(widgetKey: string, billingKey: string, userId: string): Promise<SubscriptionBillingResponseParameters> {
         try {
-            const response: SubscriptionBillingResponseParameters = await this.get<SubscriptionBillingResponseParameters>(`subscribe/sequential_billing_key/${ billingKey }?widget_key=${ encodeURIComponent(widgetKey) }`)
+            const response: SubscriptionBillingResponseParameters = await this.get<SubscriptionBillingResponseParameters>(`subscribe/sequential_billing_key/${ billingKey }?widget_key=${ encodeURIComponent(widgetKey) }&user_id=${ encodeURIComponent(userId) }`)
             return Promise.resolve(response)
         } catch (e) {
             return Promise.reject(e)
