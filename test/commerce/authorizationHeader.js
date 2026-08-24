@@ -9,7 +9,7 @@ function header(config, name) {
 
 // Commerce API - Authorization 헤더 선택 규칙 테스트 (네트워크 호출 없음)
 //   1) 토큰이 없으면 client_key/secret_key Basic Auth
-//   2) 토큰이 있으면 Bearer 우선
+//   2) 저장된 토큰이 있어도 Basic 유지
 //   3) Basic Auth 값이 토큰을 오염시키지 않아야 한다 (연속 요청에도 Basic 유지)
 
 (async () => {
@@ -50,23 +50,24 @@ function header(config, name) {
     assert.strictEqual(header(requests[2], 'Authorization'), basic);
     assert.strictEqual(commerce.getCurrentToken(), 'commerce_access_token');
 
-    // 4) 토큰 발급 이후에는 Bearer 가 우선한다
+    // 4) 토큰 발급 이후에도 Commerce 요청은 Basic을 유지한다
     await commerce.product.list();
-    assert.strictEqual(header(requests[3], 'Authorization'), 'Bearer commerce_access_token');
+    assert.strictEqual(header(requests[3], 'Authorization'), basic);
 
-    // 5) setToken 으로 직접 넣은 토큰도 동일하게 Bearer 우선
+    // 5) setToken 으로 직접 넣은 토큰도 일반 요청의 Basic 인증을 바꾸지 않는다
     commerce.setToken('manual_token');
     await commerce.product.list();
-    assert.strictEqual(header(requests[4], 'Authorization'), 'Bearer manual_token');
+    assert.strictEqual(header(requests[4], 'Authorization'), basic);
 
-    // 6) 키/토큰이 모두 없으면 Authorization 헤더를 붙이지 않는다
+    // 6) 키가 없으면 네트워크 요청 전에 거절한다
     const anonymous = new BootpayCommerce({ mode: 'development' });
     anonymous.$http.defaults.adapter = commerce.$http.defaults.adapter;
-    const beforeAnonymous = requests.length;
-    await anonymous.product.list();
-    assert.ok(!header(requests[beforeAnonymous], 'Authorization'), 'no key/token must not send an Authorization header');
+    await assert.rejects(
+        () => anonymous.product.list(),
+        (error) => error.error_code === -101 && error.message.includes('client_key/secret_key')
+    );
 
-    console.log('commerce authorization header: bearer takes precedence, basic auth stays stable');
+    console.log('commerce authorization header: Basic-only auth stays stable');
 })().catch((error) => {
     console.error(error);
     process.exit(1);

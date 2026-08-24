@@ -21,6 +21,8 @@ export interface CategoryCreateParams {
     status_best?: boolean
     filter_color?: number
     filter_size?: number
+    /** 미지정시 호출마다 자동 생성 */
+    idempotency_key?: string
 }
 
 export interface CategoryUpdateParams {
@@ -31,4 +33,6 @@ export interface CategoryUpdateParams {
     status_best?: boolean
     filter_color?: number
     filter_size?: number
+    /** 미지정시 호출마다 자동 생성 */
+    idempotency_key?: string
 }

@@ -218,39 +218,89 @@ export class OrderSubscriptionModule {
         )
     }
 
+    /**
+     * 구독 관리자 승인
+     * PUT /v1/order_subscriptions/{order_subscription_id}/approve
+     * ⚠️ 서버가 supervisor scope 를 요구한다 (scope_invalid!).
+     */
     async supervisorApprove(
         orderSubscriptionId: string,
         params: SupervisorOrderSubscriptionApproveParams = {}
     ): Promise<BootpayCommerceResponse<CommerceOrderSubscription>> {
-        return this.bootpay.put<CommerceOrderSubscription>(`order_subscriptions/${orderSubscriptionId}/approve`, params)
+        const { idempotency_key, ...payload } = params
+        return this.bootpay.put<CommerceOrderSubscription>(
+            `order_subscriptions/${orderSubscriptionId}/approve`,
+            this.compact(payload),
+            { headers: this.supervisorHeaders(idempotency_key) }
+        )
     }
 
+    /**
+     * 구독 관리자 반려
+     * PUT /v1/order_subscriptions/{order_subscription_id}/reject
+     * ⚠️ 서버가 supervisor scope 를 요구한다 (scope_invalid!).
+     */
     async supervisorReject(
         orderSubscriptionId: string,
         params: SupervisorOrderSubscriptionRejectParams = {}
     ): Promise<BootpayCommerceResponse<CommerceOrderSubscription>> {
-        return this.bootpay.put<CommerceOrderSubscription>(`order_subscriptions/${orderSubscriptionId}/reject`, params)
+        const { idempotency_key, ...payload } = params
+        return this.bootpay.put<CommerceOrderSubscription>(
+            `order_subscriptions/${orderSubscriptionId}/reject`,
+            this.compact(payload),
+            { headers: this.supervisorHeaders(idempotency_key) }
+        )
     }
 
+    /**
+     * 구독 관리자 해지
+     * PUT /v1/order_subscriptions/{order_subscription_id}/terminate
+     * ⚠️ 서버가 supervisor scope 를 요구한다 (scope_invalid!).
+     */
     async supervisorTerminate(
         orderSubscriptionId: string,
         params: SupervisorOrderSubscriptionTerminateParams = {}
     ): Promise<BootpayCommerceResponse<CommerceOrderSubscription>> {
-        return this.bootpay.put<CommerceOrderSubscription>(`order_subscriptions/${orderSubscriptionId}/terminate`, params)
+        const { idempotency_key, ...payload } = params
+        return this.bootpay.put<CommerceOrderSubscription>(
+            `order_subscriptions/${orderSubscriptionId}/terminate`,
+            this.compact(payload),
+            { headers: this.supervisorHeaders(idempotency_key) }
+        )
     }
 
+    /**
+     * 구독 관리자 일시정지
+     * PUT /v1/order_subscriptions/{order_subscription_id}/pause
+     * ⚠️ 서버가 supervisor scope 를 요구한다 (scope_invalid!).
+     */
     async supervisorPause(
         orderSubscriptionId: string,
         params: SupervisorOrderSubscriptionPauseParams
     ): Promise<BootpayCommerceResponse<CommerceOrderSubscription>> {
-        return this.bootpay.put<CommerceOrderSubscription>(`order_subscriptions/${orderSubscriptionId}/pause`, params)
+        const { idempotency_key, ...payload } = params
+        return this.bootpay.put<CommerceOrderSubscription>(
+            `order_subscriptions/${orderSubscriptionId}/pause`,
+            this.compact(payload),
+            { headers: this.supervisorHeaders(idempotency_key) }
+        )
     }
 
+    /**
+     * 구독 관리자 재개
+     * PUT /v1/order_subscriptions/{order_subscription_id}/resume
+     * ⚠️ 서버가 supervisor scope 를 요구한다 (scope_invalid!).
+     */
     async supervisorResume(
         orderSubscriptionId: string,
         params: SupervisorOrderSubscriptionResumeParams = {}
     ): Promise<BootpayCommerceResponse<CommerceOrderSubscription>> {
-        return this.bootpay.put<CommerceOrderSubscription>(`order_subscriptions/${orderSubscriptionId}/resume`, params)
+        const { idempotency_key, ...payload } = params
+        return this.bootpay.put<CommerceOrderSubscription>(
+            `order_subscriptions/${orderSubscriptionId}/resume`,
+            this.compact(payload),
+            { headers: this.supervisorHeaders(idempotency_key) }
+        )
     }
 
     /**

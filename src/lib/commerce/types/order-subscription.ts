@@ -164,10 +164,14 @@ export interface CalcTerminateFeeResponse {
 
 export interface SupervisorOrderSubscriptionApproveParams {
     reason?: string
+    /** 미지정시 호출마다 자동 생성 */
+    idempotency_key?: string
 }
 
 export interface SupervisorOrderSubscriptionRejectParams {
     reason?: string
+    /** 미지정시 호출마다 자동 생성 */
+    idempotency_key?: string
 }
 
 export interface SupervisorOrderSubscriptionTerminateParams {
@@ -177,16 +181,22 @@ export interface SupervisorOrderSubscriptionTerminateParams {
     final_fee?: number
     service_end_at?: string
     cancel_date?: string
+    /** 미지정시 호출마다 자동 생성 */
+    idempotency_key?: string
 }
 
 export interface SupervisorOrderSubscriptionPauseParams {
     reason?: string
     paused_at: string
     expected_resume_at?: string
+    /** 미지정시 호출마다 자동 생성 */
+    idempotency_key?: string
 }
 
 export interface SupervisorOrderSubscriptionResumeParams {
     reason?: string
+    /** 미지정시 호출마다 자동 생성 */
+    idempotency_key?: string
 }
 
 /**

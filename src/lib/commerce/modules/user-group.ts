@@ -54,20 +54,38 @@ export class UserGroupModule {
 
     /**
      * 그룹에 사용자 추가
+     * ⚠️ 서버가 manager scope 를 요구한다 (scope_invalid!).
      * @param userGroupId 그룹 ID
      * @param userId 사용자 ID
+     * @param idempotencyKey 미지정시 자동 생성
      */
-    async userCreate(userGroupId: string, userId: string): Promise<BootpayCommerceResponse<null>> {
-        return this.bootpay.post<null>(`user-groups/${userGroupId}/user`, { user_id: userId })
+    async userCreate(
+        userGroupId: string,
+        userId: string,
+        idempotencyKey?: string
+    ): Promise<BootpayCommerceResponse<null>> {
+        return this.bootpay.post<null>(
+            `user-groups/${userGroupId}/user`,
+            { user_id: userId },
+            { headers: this.managerHeaders(idempotencyKey) }
+        )
     }
 
     /**
      * 그룹에서 사용자 제거
+     * ⚠️ 서버가 manager scope 를 요구한다 (scope_invalid!).
      * @param userGroupId 그룹 ID
      * @param userId 사용자 ID
+     * @param idempotencyKey 미지정시 자동 생성
      */
-    async userDelete(userGroupId: string, userId: string): Promise<BootpayCommerceResponse<null>> {
-        return this.bootpay.delete<null>(`user-groups/${userGroupId}/user/${userId}`)
+    async userDelete(
+        userGroupId: string,
+        userId: string,
+        idempotencyKey?: string
+    ): Promise<BootpayCommerceResponse<null>> {
+        return this.bootpay.delete<null>(`user-groups/${userGroupId}/user/${userId}`, {
+            headers: this.managerHeaders(idempotencyKey)
+        })
     }
 
     /**
@@ -114,7 +132,7 @@ export class UserGroupModule {
     }
 
     /**
-     * 그룹 한도/합산청구 설정 요청 헤더 — 서버가 manager scope 를 요구한다.
+     * 그룹 멤버십/한도/합산청구 요청 헤더 — 서버가 manager scope 를 요구한다.
      * Idempotency-Key 는 미지정시 매 호출마다 생성된다.
      */
     private managerHeaders(idempotencyKey?: string): Record<string, string> {

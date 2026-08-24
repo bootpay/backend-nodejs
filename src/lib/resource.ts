@@ -106,6 +106,49 @@ export class BootpayBackendNodejsResource {
         this.bootpayConfiguration = configuration
     }
 
+    private validateCredentialPairs(): void {
+        const { application_id, private_key, client_key, secret_key } = this.bootpayConfiguration
+        if (!!client_key !== !!secret_key) {
+            throw {
+                error_code: -101,
+                message: 'client_key/secret_key를 함께 입력해주세요.'
+            }
+        }
+        if (!!application_id !== !!private_key) {
+            throw {
+                error_code: -101,
+                message: 'application_id/private_key를 함께 입력해주세요.'
+            }
+        }
+    }
+
+    protected requireAuthentication(): void {
+        this.validateCredentialPairs()
+        const { application_id, private_key, client_key, secret_key } = this.bootpayConfiguration
+        if (client_key && secret_key) return
+        if (application_id && private_key && this.$token) return
+        if (application_id && private_key) {
+            throw {
+                error_code: -101,
+                message: 'legacy application_id/private_key 인증은 getAccessToken()으로 토큰을 먼저 발급해야 합니다.'
+            }
+        }
+        throw {
+            error_code: -101,
+            message: '인증 정보가 없습니다. client_key/secret_key 또는 application_id/private_key를 지정하세요.'
+        }
+    }
+
+    protected validateTokenRequestCredentials(): void {
+        this.validateCredentialPairs()
+        const { application_id, private_key, client_key, secret_key } = this.bootpayConfiguration
+        if ((client_key && secret_key) || (application_id && private_key)) return
+        throw {
+            error_code: -101,
+            message: '인증 정보가 없습니다. client_key/secret_key 또는 application_id/private_key를 지정하세요.'
+        }
+    }
+
     /**
      * SET API Version
      * Comment by GOSOMI
@@ -130,6 +173,7 @@ export class BootpayBackendNodejsResource {
 
     async get<T = any, D = any>(url: string, config?: AxiosRequestConfig<D>): Promise<T> {
         try {
+            this.requireAuthentication()
             const response: T = await this.$http.get(this.entrypoints(url), config)
             return Promise.resolve(response)
         } catch (e) {
@@ -139,6 +183,7 @@ export class BootpayBackendNodejsResource {
 
     async post<T = any, D = any>(url: string, data?: D, config?: AxiosRequestConfig<D>): Promise<T> {
         try {
+            this.requireAuthentication()
             const response: T = await this.$http.post(this.entrypoints(url), data, config)
             return Promise.resolve(response)
         } catch (e) {
@@ -148,6 +193,7 @@ export class BootpayBackendNodejsResource {
 
     async put<T = any, D = any>(url: string, data?: D, config?: AxiosRequestConfig<D>): Promise<T> {
         try {
+            this.requireAuthentication()
             const response: T = await this.$http.put(this.entrypoints(url), data, config)
             return Promise.resolve(response)
         } catch (e) {
@@ -157,6 +203,7 @@ export class BootpayBackendNodejsResource {
 
     async delete<T = any, D = any>(url: string, config?: AxiosRequestConfig<D>): Promise<T> {
         try {
+            this.requireAuthentication()
             const response: T = await this.$http.delete(this.entrypoints(url), config)
             return Promise.resolve(response)
         } catch (e) {

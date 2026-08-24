@@ -1,3 +1,19 @@
+### 2.10.0
+
+#### Commerce scope(BOOTPAY-ROLE) 정합성 (동작 변경)
+
+서버(commerce-api)가 `scope_invalid!` 로 supervisor / manager scope 를 요구하는 10개 엔드포인트가 `BOOTPAY-ROLE: user` 로 나가고 있었다. 요청 단위로 올바른 scope 를 붙인다. Java SDK 3.3.0 · Ruby SDK 와 같은 규약이다.
+
+- `orderSubscription` — `supervisorApprove` / `supervisorReject` / `supervisorTerminate` / `supervisorPause` / `supervisorResume` → **supervisor**
+- `category` — `create` / `update` / `destroy` → **supervisor**
+- `userGroup` — `userCreate` / `userDelete` → **manager**
+
+부수 효과로 이 10개 호출에 `Idempotency-Key` 가 자동 부착된다 (다른 supervisor 메서드·Ruby SDK 와 동일). 요청 경로·바디는 변경 없다.
+⚠️ 그동안 이 API 들은 올바른 키로도 scope 오류로 거절됐다. 우회하려고 role 을 직접 조작하던 코드가 있다면 제거해도 된다.
+
+- 각 메서드의 파라미터에 `idempotency_key` (optional) 를 추가했다. 지정하면 그 값이 `Idempotency-Key` 헤더로 나가고 바디에는 실리지 않는다. `category.destroy(categoryId, idempotencyKey?)` / `userGroup.userCreate(userGroupId, userId, idempotencyKey?)` / `userGroup.userDelete(userGroupId, userId, idempotencyKey?)` 는 선택 인자로 받는다.
+- `test/commerce/commerceRouteContract.js` 에 10개 엔드포인트의 scope·Idempotency-Key 회귀 테스트를 추가했다.
+
 ### 2.9.0
 * Commerce: 죽은 경로 정정 — 회원 endpoint 는 단수 `user/...` 가 아니라 복수 `users/...` 다 (commerce-api v1 에 단수 라우트가 없다)
   - `user.userLogin`: `POST users/login` (v1/users/login#create) — `POST users/session` 은 라우트만 있고 create 액션이 없으므로 쓰지 않는다

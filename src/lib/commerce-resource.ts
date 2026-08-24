@@ -103,6 +103,16 @@ export class BootpayCommerceResource {
         this.commerceConfiguration = configuration
     }
 
+    private requireCommerceCredentials(): void {
+        const { client_key, secret_key } = this.commerceConfiguration
+        if (!client_key || !secret_key) {
+            throw {
+                error_code: -101,
+                message: 'Commerce API에는 client_key/secret_key를 함께 입력해주세요.'
+            }
+        }
+    }
+
     setApiVersion(version: string) {
         this.apiVersion = version
     }
@@ -125,13 +135,9 @@ export class BootpayCommerceResource {
 
     /**
      * Authorization 헤더
-     * 토큰이 발급되어 있으면 Bearer, 없으면 client_key/secret_key Basic Auth 를 사용한다.
+     * Commerce API는 항상 client_key/secret_key Basic Auth 를 사용한다.
      */
     authorizationHeader(): string {
-        const token = this.$token
-        if (token !== undefined && token !== '') {
-            return `Bearer ${token}`
-        }
         return this.getBasicAuthHeader()
     }
 
@@ -141,13 +147,11 @@ export class BootpayCommerceResource {
      * Bearer 토큰으로 오인되어 인증이 깨진다.
      */
     private getBasicAuthHeader(): string {
+        this.requireCommerceCredentials()
         const { client_key, secret_key } = this.commerceConfiguration
-        if (client_key && secret_key) {
-            const credentials = `${client_key}:${secret_key}`
-            const encoded = Buffer.from(credentials).toString('base64')
-            return `Basic ${encoded}`
-        }
-        return ''
+        const credentials = `${client_key}:${secret_key}`
+        const encoded = Buffer.from(credentials).toString('base64')
+        return `Basic ${encoded}`
     }
 
     entrypoints(url: string): string {
@@ -157,6 +161,7 @@ export class BootpayCommerceResource {
 
     async get<T = any, D = any>(url: string, config?: AxiosRequestConfig<D>): Promise<BootpayCommerceResponse<T>> {
         try {
+            this.requireCommerceCredentials()
             const response = await this.$http.get(this.entrypoints(url), config)
             return Promise.resolve(response as unknown as BootpayCommerceResponse<T>)
         } catch (e) {
@@ -170,6 +175,7 @@ export class BootpayCommerceResource {
         config?: AxiosRequestConfig<D>
     ): Promise<BootpayCommerceResponse<T>> {
         try {
+            this.requireCommerceCredentials()
             const response = await this.$http.post(this.entrypoints(url), data, config)
             return Promise.resolve(response as unknown as BootpayCommerceResponse<T>)
         } catch (e) {
@@ -189,6 +195,7 @@ export class BootpayCommerceResource {
         config?: AxiosRequestConfig
     ): Promise<BootpayCommerceResponse<T>> {
         try {
+            this.requireCommerceCredentials()
             const response = await this.$http.post(this.entrypoints(url), form, {
                 ...config,
                 headers: {
@@ -208,6 +215,7 @@ export class BootpayCommerceResource {
         config?: AxiosRequestConfig<D>
     ): Promise<BootpayCommerceResponse<T>> {
         try {
+            this.requireCommerceCredentials()
             const authConfig: AxiosRequestConfig = {
                 ...config,
                 headers: {
@@ -228,6 +236,7 @@ export class BootpayCommerceResource {
         config?: AxiosRequestConfig<D>
     ): Promise<BootpayCommerceResponse<T>> {
         try {
+            this.requireCommerceCredentials()
             const response = await this.$http.put(this.entrypoints(url), data, config)
             return Promise.resolve(response as unknown as BootpayCommerceResponse<T>)
         } catch (e) {
@@ -237,6 +246,7 @@ export class BootpayCommerceResource {
 
     async delete<T = any, D = any>(url: string, config?: AxiosRequestConfig<D>): Promise<BootpayCommerceResponse<T>> {
         try {
+            this.requireCommerceCredentials()
             const response = await this.$http.delete(this.entrypoints(url), config)
             return Promise.resolve(response as unknown as BootpayCommerceResponse<T>)
         } catch (e) {

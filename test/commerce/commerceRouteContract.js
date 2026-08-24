@@ -286,6 +286,38 @@ function relative(config) {
     );
     assert.strictEqual(header(aggregate, 'BOOTPAY-ROLE'), 'manager');
 
+    // ── scope(BOOTPAY-ROLE) 정합성 ──
+    // 서버(commerce-api)가 scope_invalid! 로 supervisor/manager 를 요구하는 엔드포인트들이다.
+    // 헤더를 붙이지 않으면 인스턴스 기본값 user 로 조용히 나가고 서버가 거절한다.
+    const scopeCases = [
+        ['orderSubscription.supervisorApprove', () => commerce.orderSubscription.supervisorApprove('s1', { reason: '승인' }), 'put', 'order_subscriptions/s1/approve', 'supervisor'],
+        ['orderSubscription.supervisorReject', () => commerce.orderSubscription.supervisorReject('s1', { reason: '반려' }), 'put', 'order_subscriptions/s1/reject', 'supervisor'],
+        ['orderSubscription.supervisorTerminate', () => commerce.orderSubscription.supervisorTerminate('s1', { reason: '해지' }), 'put', 'order_subscriptions/s1/terminate', 'supervisor'],
+        ['orderSubscription.supervisorPause', () => commerce.orderSubscription.supervisorPause('s1', { paused_at: '2026-01-01' }), 'put', 'order_subscriptions/s1/pause', 'supervisor'],
+        ['orderSubscription.supervisorResume', () => commerce.orderSubscription.supervisorResume('s1'), 'put', 'order_subscriptions/s1/resume', 'supervisor'],
+        ['category.create', () => commerce.category.create({ name: '카테고리' }), 'post', 'categories', 'supervisor'],
+        ['category.update', () => commerce.category.update({ category_id: 'c1', name: '변경' }), 'put', 'categories/c1', 'supervisor'],
+        ['category.destroy', () => commerce.category.destroy('c1'), 'delete', 'categories/c1', 'supervisor'],
+        ['userGroup.userCreate', () => commerce.userGroup.userCreate('g1', 'u1'), 'post', 'user-groups/g1/user', 'manager'],
+        ['userGroup.userDelete', () => commerce.userGroup.userDelete('g1', 'u1'), 'delete', 'user-groups/g1/user/u1', 'manager']
+    ];
+    for (const [label, call, method, uri, role] of scopeCases) {
+        const config = await expect(label, call, method, uri);
+        assert.strictEqual(header(config, 'BOOTPAY-ROLE'), role, `${label}: BOOTPAY-ROLE`);
+        assert.ok(header(config, 'Idempotency-Key'), `${label}: Idempotency-Key 자동 생성`);
+    }
+
+    // 명시한 Idempotency-Key 는 그대로 전달된다
+    const explicitKey = await expect(
+        'category.create(idempotency_key)',
+        () => commerce.category.create({ name: '카테고리', idempotency_key: 'fixed-key' }),
+        'post',
+        'categories'
+    );
+    assert.strictEqual(header(explicitKey, 'Idempotency-Key'), 'fixed-key');
+    // idempotency_key 는 바디에 실리지 않는다
+    assert.deepStrictEqual(JSON.parse(explicitKey.data), { name: '카테고리' });
+
     // ── 테스트 웹훅 ──
     const webhookBare = await expect('webhook.sendTest', () => commerce.webhook.sendTest(), 'post', 'webhook/test');
     assert.deepStrictEqual(JSON.parse(webhookBare.data), {});

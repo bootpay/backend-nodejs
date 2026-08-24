@@ -78,7 +78,7 @@ function body(data) {
         (error) => error.error_code === -101 && error.message.includes('client_key/secret_key')
     );
 
-    // 6) legacy + 부주의하게 sk 만 함께 들어와도 ck 없으면 legacy 경로 유지
+    // 6) legacy와 섞인 불완전 ck/sk도 네트워크 요청 전에 거절한다
     Bootpay.setConfiguration({
         application_id: 'legacy_application_id',
         private_key: 'legacy_private_key',
@@ -86,13 +86,26 @@ function body(data) {
         mode: 'production'
     });
     Bootpay.$token = undefined;
-    const beforeFallback = requests.length;
-    await Bootpay.getAccessToken();
-    assert.deepStrictEqual(body(requests[beforeFallback].data), {
+    const beforePartial = requests.length;
+    await assert.rejects(
+        () => Bootpay.getAccessToken(),
+        (error) => error.error_code === -101 && error.message.includes('client_key/secret_key')
+    );
+    assert.strictEqual(requests.length, beforePartial, 'partial credentials must not make an HTTP request');
+
+    // 7) legacy 토큰 발급 전 일반 요청은 네트워크 요청 전에 거절한다
+    Bootpay.setConfiguration({
         application_id: 'legacy_application_id',
-        private_key: 'legacy_private_key'
+        private_key: 'legacy_private_key',
+        mode: 'production'
     });
-    assert.strictEqual(header(requests[beforeFallback], 'authorization'), undefined);
+    Bootpay.$token = undefined;
+    const beforeLegacyRequest = requests.length;
+    await assert.rejects(
+        () => Bootpay.receiptPayment('receipt_id_without_token'),
+        (error) => error.error_code === -101 && error.message.includes('getAccessToken')
+    );
+    assert.strictEqual(requests.length, beforeLegacyRequest, 'legacy requests require an issued token');
 
     console.log('legacy application_id/private_key and client_key/secret_key auth are compatible');
 })().catch((error) => {

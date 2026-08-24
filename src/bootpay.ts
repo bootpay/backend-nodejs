@@ -40,19 +40,13 @@ class BootpayBackendNodejs extends BootpayBackendNodejsResource {
     async getAccessToken(): Promise<AccessTokenResponseParameters> {
         try {
             const { application_id, private_key, client_key, secret_key } = this.bootpayConfiguration
-            const hasLegacyCredentials = application_id && private_key
-            if ((client_key && !secret_key) || (!client_key && secret_key && !hasLegacyCredentials)) {
-                return Promise.reject({
-                    error_code: -101,
-                    message: 'client_key/secret_key를 함께 입력해주세요.'
-                })
-            }
+            this.validateTokenRequestCredentials()
             // client_key/secret_key 인증은 매 요청 인터셉터가 Basic Auth 헤더를 직접 부착한다.
             // request/token 호출이 불필요하므로, 호환을 위해 합성 응답만 즉시 반환한다.
             if (client_key && secret_key) {
                 return Promise.resolve({ access_token: '', expire_in: 0 })
             }
-            const response: AccessTokenResponseParameters = await this.post<AccessTokenResponseParameters>('request/token', {
+            const response: AccessTokenResponseParameters = await this.$http.post(this.entrypoints('request/token'), {
                 application_id,
                 private_key
             })
