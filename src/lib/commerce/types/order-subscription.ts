@@ -90,6 +90,13 @@ export interface OrderSubscriptionUpdateParams {
     status?: number
     payment_next_at?: string
     service_end_at?: string
+    /**
+     * 회차별 결제 금액의 **기준금액**.
+     * 바꾸면 결제예정(READY) 회차의 청구액이 즉시 다시 계산되고, 이후 회차도 이 금액으로 만들어진다.
+     * 이미 결제된 회차는 그대로다. 0 이하는 받지 않는다.
+     * 특정 회차만 가감하려면 orderSubscriptionAdjustment.create 를 쓴다.
+     */
+    price?: number
     /** 미지정시 자동 생성 (Idempotency-Key 헤더로 전송, body 에는 포함되지 않는다) */
     idempotency_key?: string
 }

@@ -1,5 +1,9 @@
 import { BootpayCommerceResource, BootpayCommerceResponse } from '../../commerce-resource'
-import { CommerceOrderSubscriptionAdjustment, OrderSubscriptionAdjustmentUpdateParams } from '../types'
+import {
+    CommerceOrderSubscriptionAdjustment,
+    OrderSubscriptionAdjustmentCreateParams,
+    OrderSubscriptionAdjustmentUpdateParams
+} from '../types'
 import { randomUUID } from 'crypto'
 
 /**
@@ -19,13 +23,20 @@ export class OrderSubscriptionAdjustmentModule {
      * 가감산 조정항목 추가
      * POST /v1/order_subscriptions/{order_subscription_id}/adjustments
      * type 미전달시 서버가 price > 0 이면 SETUP_PRICE, 아니면 PERIOD_DISCOUNT 로 자동 판정한다.
+     *
+     * 회차 지정 방법 3가지 (아래로 갈수록 넓다):
+     *   - duration: 5                      → 5회차 한 건만
+     *   - duration_from: 3, duration_to: 7 → 3~7회차 각각 한 건씩 (총 5건)
+     *   - duration_from: 3, is_unlimited: true → 3회차부터 계약 끝까지 (레코드는 1건, duration_to 는 무시)
+     * 상한은 계약 총회차이며, 총회차가 무제한인 계약은 60회차까지다.
+     * 이미 결제가 끝난 회차는 거절된다. 범위 중 한 회차라도 최종 금액이 음수면 전부 거절된다(부분 반영 없음).
      * @param orderSubscriptionId 정기구독 ID
      * @param adjustment 조정 정보 (price/duration/tax_free_price 미지정시 각각 0 / 1 / 0)
      * @param idempotencyKey 미지정시 자동 생성
      */
     async create(
         orderSubscriptionId: string,
-        adjustment: CommerceOrderSubscriptionAdjustment,
+        adjustment: OrderSubscriptionAdjustmentCreateParams,
         idempotencyKey?: string
     ): Promise<BootpayCommerceResponse<CommerceOrderSubscriptionAdjustment>> {
         const payload = this.compact({

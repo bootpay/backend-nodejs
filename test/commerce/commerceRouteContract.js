@@ -177,6 +177,15 @@ function relative(config) {
     assert.strictEqual(header(subscriptionUpdate, 'BOOTPAY-ROLE'), 'supervisor');
     assert.deepStrictEqual(JSON.parse(subscriptionUpdate.data), { quantity: 2, order_name: '변경' });
 
+    // price 는 회차별 기준금액. 그대로 body 로 실려야 한다 (READY 회차 청구액이 재계산된다)
+    const subscriptionUpdatePrice = await expect(
+        'orderSubscription.update(price)',
+        () => commerce.orderSubscription.update({ order_subscription_id: 's1', price: 12000 }),
+        'put',
+        'order_subscriptions/s1'
+    );
+    assert.deepStrictEqual(JSON.parse(subscriptionUpdatePrice.data), { price: 12000 });
+
     const adjustmentCreate = await expect(
         'adjustment.create',
         () => commerce.orderSubscriptionAdjustment.create('s1', { name: '할인' }),
@@ -185,6 +194,50 @@ function relative(config) {
     );
     assert.strictEqual(header(adjustmentCreate, 'BOOTPAY-ROLE'), 'supervisor');
     assert.deepStrictEqual(JSON.parse(adjustmentCreate.data), { price: 0, duration: 1, tax_free_price: 0, name: '할인' });
+
+    // 범위 조정: duration_from ~ duration_to 는 회차마다 한 건씩 생성된다
+    const adjustmentRange = await expect(
+        'adjustment.create(range)',
+        () =>
+            commerce.orderSubscriptionAdjustment.create('s1', {
+                name: '할인',
+                price: -1000,
+                duration_from: 3,
+                duration_to: 7
+            }),
+        'post',
+        'order_subscriptions/s1/adjustments'
+    );
+    assert.deepStrictEqual(JSON.parse(adjustmentRange.data), {
+        price: -1000,
+        duration: 1,
+        tax_free_price: 0,
+        name: '할인',
+        duration_from: 3,
+        duration_to: 7
+    });
+
+    // 무제한 조정: duration_from 부터 계약 끝까지 (is_unlimited 가 false 여도 body 에서 빠지면 안 된다)
+    const adjustmentUnlimited = await expect(
+        'adjustment.create(is_unlimited)',
+        () =>
+            commerce.orderSubscriptionAdjustment.create('s1', {
+                name: '할인',
+                price: -1000,
+                duration_from: 3,
+                is_unlimited: true
+            }),
+        'post',
+        'order_subscriptions/s1/adjustments'
+    );
+    assert.deepStrictEqual(JSON.parse(adjustmentUnlimited.data), {
+        price: -1000,
+        duration: 1,
+        tax_free_price: 0,
+        name: '할인',
+        duration_from: 3,
+        is_unlimited: true
+    });
 
     const adjustmentUpdate = await expect(
         'adjustment.update',

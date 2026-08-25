@@ -15,9 +15,11 @@ const keys = getCommerceKeys();
         // (legacy) application_id 방식에서만 필요. ck/sk 는 매 요청 Basic Auth 헤더로 직접 인증되므로 호출 불필요.
         // await commerce.getAccessToken()
 
+        // price 는 회차별 결제 금액의 기준금액이다. 바꾸면 결제예정(READY) 회차의 청구액이
+        // 즉시 다시 계산되고 이후 회차도 이 금액으로 만들어진다. 이미 결제된 회차는 그대로다.
         const response = await commerce.orderSubscription.update({
             order_subscription_id: 'ORDER_SUBSCRIPTION_ID_HERE',
-            next_billing_date: '2025-01-15'
+            price: 12000
         })
         console.log('OrderSubscription Update Response:', JSON.stringify(response, null, 2))
     } catch (e) {

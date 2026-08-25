@@ -1,3 +1,15 @@
+### 2.11.0
+
+#### 구독 가격 변경 · 범위로 회차조정
+
+- `orderSubscription.update` 에 `price` 추가 — 회차별 결제 금액의 **기준금액**이다. 바꾸면 결제예정(READY) 회차의 청구액이 즉시 다시 계산되고, 이후 회차도 이 금액으로 만들어진다. 이미 결제된 회차는 그대로다. 0 이하는 받지 않는다. 특정 회차만 가감하려면 `orderSubscriptionAdjustment.create` 를 쓴다.
+- `orderSubscriptionAdjustment.create` 에 `duration_from` / `duration_to` / `is_unlimited` 추가 — 회차를 범위로 지정한다.
+  - `duration: 5` → 5회차 한 건만
+  - `duration_from: 3, duration_to: 7` → 3~7회차 각각 한 건씩 (총 5건)
+  - `duration_from: 3, is_unlimited: true` → 3회차부터 계약 끝까지 (레코드는 1건, `duration_to` 는 무시)
+  - 상한은 계약 총회차이며, 총회차가 무제한인 계약은 60회차까지다. 이미 결제가 끝난 회차는 거절되고, 범위 중 한 회차라도 최종 금액이 음수면 전부 거절된다(부분 반영 없음).
+- 요청 경로·동사·scope 는 변경 없다. `test/commerce/commerceRouteContract.js` 에 회귀 테스트를 추가했다.
+
 ### 2.10.0
 
 #### Commerce scope(BOOTPAY-ROLE) 정합성 (동작 변경)
