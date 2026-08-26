@@ -14,6 +14,13 @@ export class ProductModule {
 
     /**
      * 상품 목록 조회
+     * GET /v1/products
+     *
+     * ⚠️ 서버(v1/products_controller#index)가 읽는 것은
+     *    page · limit · keyword · category_id · ex_uid · sort **뿐**이다.
+     *    type / period_type / s_at / e_at / category_code 는 보내도 에러 없이 무시되고
+     *    전체 목록이 돌아온다 (하위호환을 위해 전송 자체는 유지한다).
+     *    keyword 는 26-08-26 서버 변경부터 적용된다 — 그 이전 배포본에서는 무시된다.
      * @param params 조회 파라미터
      */
     async list(params?: ProductListParams): Promise<BootpayCommerceResponse<{ items: CommerceProduct[]; total: number }>> {
@@ -22,6 +29,10 @@ export class ProductModule {
             if (params.page !== undefined) queryParams.append('page', params.page.toString())
             if (params.limit !== undefined) queryParams.append('limit', params.limit.toString())
             if (params.keyword) queryParams.append('keyword', params.keyword)
+            if (params.category_id) queryParams.append('category_id', params.category_id)
+            if (params.ex_uid) queryParams.append('ex_uid', params.ex_uid)
+            if (params.sort) queryParams.append('sort', params.sort)
+            // 아래 4개는 서버가 읽지 않는다 — 기존 호출을 깨지 않으려고 전송만 유지한다
             if (params.type !== undefined) queryParams.append('type', params.type.toString())
             if (params.period_type) queryParams.append('period_type', params.period_type)
             if (params.s_at) queryParams.append('s_at', params.s_at)

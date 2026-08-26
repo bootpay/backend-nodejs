@@ -97,6 +97,18 @@ function relative(config) {
     const productsExUid = await expect('product.products(ex_uid)', () => commerce.product.products({ ex_uid: 'EX-1' }), 'get', 'products');
     assert.ok(relative(productsExUid).includes('ex_uid=EX-1'), 'product.products: ex_uid in query');
 
+    // product.list 는 서버가 읽는 category_id / ex_uid / sort 를 실어야 한다.
+    // (keyword 는 서버가 v1/products_controller#index 에서 읽는다 — 26-08-26 서버 수정)
+    const productList = await expect(
+        'product.list(server-read filters)',
+        () => commerce.product.list({ page: 1, limit: 10, keyword: '커피', category_id: 'cat1', ex_uid: 'EX-1', sort: '-price' }),
+        'get',
+        'products'
+    );
+    ['page=1', 'limit=10', 'keyword=%EC%BB%A4%ED%94%BC', 'category_id=cat1', 'ex_uid=EX-1', 'sort=-price'].forEach((q) =>
+        assert.ok(relative(productList).includes(q), `product.list: ${q} in query`)
+    );
+
     // detail 은 productDetail 과 같은 endpoint 다. user_jwt 를 주면 회원 컨텍스트로 조회한다.
     const productDetailBare = await expect('product.detail', () => commerce.product.detail('p1'), 'get', 'products/p1');
     assert.ok(header(productDetailBare, 'Idempotency-Key'), 'product.detail: Idempotency-Key 자동 생성');

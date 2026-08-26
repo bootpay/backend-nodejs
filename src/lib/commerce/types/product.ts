@@ -128,11 +128,34 @@ export interface CommerceSubscriptionSetting {
     billing_count?: number
 }
 
+/**
+ * 상품 목록 조회 파라미터 (GET /v1/products)
+ *
+ * ⚠️ 서버(v1/products_controller#index)가 실제로 읽는 것은
+ *    page · limit · keyword · category_id · ex_uid · sort **뿐**이다.
+ *    아래 `type` / `period_type` / `s_at` / `e_at` / `category_code` 는 전송되더라도
+ *    에러 없이 무시되고 전체 목록이 돌아온다 — 필터가 걸린 것으로 착각하지 말 것.
+ *    keyword 는 26-08-26 서버 변경부터 적용된다 — 그 이전 배포본에서는 무시된다.
+ */
 export interface ProductListParams extends ListParams {
+    /** 카테고리 ID 로 필터한다 (하위 카테고리 포함) */
+    category_id?: string
+    /** 외부 UID 로 상품을 찾는다 */
+    ex_uid?: string
+    /** 정렬 키 — position | created_at | -created_at | price | -price | -sold */
+    sort?: string
+    /**
+     * @deprecated 서버가 읽지 않는다. 서버의 상품 타입 필터는 문자열
+     * (`subscription` | `discount` | `normal`)이라 이 숫자 필드와는 값 체계가 다르다.
+     */
     type?: number
+    /** @deprecated 서버(v1/products_controller#index)가 읽지 않는다 */
     period_type?: string
+    /** @deprecated 서버(v1/products_controller#index)가 읽지 않는다 */
     s_at?: string
+    /** @deprecated 서버(v1/products_controller#index)가 읽지 않는다 */
     e_at?: string
+    /** @deprecated 서버(v1/products_controller#index)가 읽지 않는다 */
     category_code?: string
 }
 
@@ -141,10 +164,7 @@ export interface ProductListParams extends ListParams {
  * GET /v1/products
  */
 export interface MallProductListParams extends ProductListParams {
-    category_id?: string
-    /** 외부 UID 로 상품을 찾는다 */
-    ex_uid?: string
-    sort?: string
+    /** 회원 JWT — Bootpay-User-JWT 헤더로 전송된다 (query 에는 포함되지 않는다) */
     user_jwt?: string
     idempotency_key?: string
 }
