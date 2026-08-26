@@ -11,3 +11,7 @@ package-lock.json
 *.idea
 yarn.lock
 tsconfig.json
+
+# 내부 도구 상태 — 배포본에 들어가면 안 된다 (2.10.0 까지 실제로 포함돼 있었다)
+.omj/
+.omx/
