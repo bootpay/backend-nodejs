@@ -31,6 +31,12 @@ const keys = getCommerceKeys();
             request_type: 'active'
         })
         console.log('Filtered OrderSubscription List Response:', filteredResponse)
+
+        // 주문번호로 구독 계약 역조회
+        const byOrderNumber = await commerce.orderSubscription.list({
+            order_number: 'ORDER_NUMBER_HERE'
+        })
+        console.log('OrderSubscription List By OrderNumber Response:', byOrderNumber)
     } catch (e) {
         console.error('Error:', e)
     }

@@ -66,6 +66,9 @@ export interface CommerceUser {
 }
 
 export interface UserListParams extends ListParams {
+    /** 회원등급. 서버(v1/users_controller#index)가 읽는 정식 키다 */
+    membership_type?: number
+    /** @deprecated membership_type 의 구 이름. 지정하면 membership_type 으로 매핑해 전송한다 */
     member_type?: number
     type?: string
 }

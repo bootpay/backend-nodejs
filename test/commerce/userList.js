@@ -20,10 +20,12 @@ const keys = getCommerceKeys();
         console.log('User List Response:', JSON.stringify(response, null, 2))
 
         // 파라미터로 조회
+        // 회원등급 필터는 membership_type 이 정식 키다 (구 이름 member_type 도 계속 받는다)
         const filteredResponse = await commerce.user.list({
             page: 1,
             limit: 10,
-            keyword: '테스트'
+            keyword: '테스트',
+            membership_type: 2
         })
         console.log('Filtered User List Response:', filteredResponse)
     } catch (e) {

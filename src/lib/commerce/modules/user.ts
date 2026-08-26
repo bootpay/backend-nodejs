@@ -167,7 +167,8 @@ export class UserModule {
             if (params.page !== undefined) queryParams.append('page', params.page.toString())
             if (params.limit !== undefined) queryParams.append('limit', params.limit.toString())
             if (params.keyword) queryParams.append('keyword', params.keyword)
-            if (params.member_type !== undefined) queryParams.append('member_type', params.member_type.toString())
+            const membershipType = params.membership_type !== undefined ? params.membership_type : params.member_type
+            if (membershipType !== undefined) queryParams.append('membership_type', membershipType.toString())
             if (params.type) queryParams.append('type', params.type)
         }
         const query = queryParams.toString()

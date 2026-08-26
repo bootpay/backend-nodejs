@@ -142,6 +142,8 @@ export interface ProductListParams extends ListParams {
  */
 export interface MallProductListParams extends ProductListParams {
     category_id?: string
+    /** 외부 UID 로 상품을 찾는다 */
+    ex_uid?: string
     sort?: string
     user_jwt?: string
     idempotency_key?: string

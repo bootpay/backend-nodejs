@@ -47,6 +47,7 @@ export class ProductModule {
         queryParams.append('page', (rest.page === undefined ? 1 : rest.page).toString())
         queryParams.append('limit', (rest.limit === undefined ? 20 : rest.limit).toString())
         if (rest.category_id) queryParams.append('category_id', rest.category_id)
+        if (rest.ex_uid) queryParams.append('ex_uid', rest.ex_uid)
         if (rest.sort) queryParams.append('sort', rest.sort)
         if (rest.keyword) queryParams.append('keyword', rest.keyword)
         if (rest.type !== undefined) queryParams.append('type', rest.type.toString())
@@ -95,10 +96,20 @@ export class ProductModule {
 
     /**
      * 상품 상세 조회
+     * GET /v1/products/{product_id}
+     * productDetail 과 uri·동작이 같다. 중복이지만 기존 사용자가 있어 남겨둔다 — 신규 코드는 productDetail 을 쓸 것.
      * @param productId 상품 ID
+     * @param userJwt 회원 JWT (선택) — 있으면 회원 컨텍스트로 조회한다
+     * @param idempotencyKey 미지정시 자동 생성
      */
-    async detail(productId: string): Promise<BootpayCommerceResponse<CommerceProduct>> {
-        return this.bootpay.get<CommerceProduct>(`products/${productId}`)
+    async detail(
+        productId: string,
+        userJwt?: string,
+        idempotencyKey?: string
+    ): Promise<BootpayCommerceResponse<CommerceProduct>> {
+        return this.bootpay.get<CommerceProduct>(`products/${productId}`, {
+            headers: this.mallHeaders(userJwt, idempotencyKey)
+        })
     }
 
     /**

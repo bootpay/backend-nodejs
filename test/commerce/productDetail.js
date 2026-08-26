@@ -17,6 +17,10 @@ const keys = getCommerceKeys();
 
         const response = await commerce.product.detail('PRODUCT_ID_HERE')
         console.log('Product Detail Response:', JSON.stringify(response, null, 2))
+
+        // 회원 JWT 를 주면 회원 컨텍스트로 조회한다 (productDetail 과 동작이 같다)
+        const withJwt = await commerce.product.detail('PRODUCT_ID_HERE', 'USER_JWT_HERE')
+        console.log('Product Detail (user_jwt) Response:', withJwt)
     } catch (e) {
         console.error('Error:', e)
     }

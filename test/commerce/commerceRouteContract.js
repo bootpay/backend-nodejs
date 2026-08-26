@@ -54,6 +54,15 @@ function relative(config) {
     assert.ok(relative(uidExist).includes('pk=ex_uid_1'), 'uidExist: pk in query');
     assert.strictEqual(header(uidExist, 'BOOTPAY-ROLE'), 'user');
 
+    // 회원등급 필터는 membership_type 으로 나가야 한다 (member_type 을 보내면 서버가 조용히 무시한다)
+    const userList = await expect('user.list(membership_type)', () => commerce.user.list({ membership_type: 2 }), 'get', 'users');
+    assert.ok(relative(userList).includes('membership_type=2'), 'user.list: membership_type in query');
+    assert.ok(!relative(userList).includes('member_type=2'), 'user.list: 구 키 member_type 으로 보내면 안 된다');
+
+    // 구 인자명도 계속 받는다 (하위호환) — 서버 정식 키로 매핑해서 보낸다
+    const userListLegacy = await expect('user.list(member_type)', () => commerce.user.list({ member_type: 2 }), 'get', 'users');
+    assert.ok(relative(userListLegacy).includes('membership_type=2'), 'user.list: member_type 은 membership_type 으로 매핑된다');
+
     // ── 청구서 ──
     const invoiceList = await expect('invoice.list', () => commerce.invoice.list(), 'get', 'invoices');
     assert.ok(relative(invoiceList).includes('limit=24'), 'invoice.list: 서버 기본 limit 24 를 보낸다');
@@ -83,6 +92,18 @@ function relative(config) {
     assert.strictEqual(header(productCreate, 'BOOTPAY-ROLE'), 'manager');
     assert.ok(String(header(productCreate, 'Content-Type')).includes('application/json'), 'product.create: 이미지 없으면 JSON');
     assert.deepStrictEqual(JSON.parse(productCreate.data), { name: '상품', display_price: 1000 });
+
+    // 외부 UID 로 상품 찾기 — 서버(#index)가 읽는 정식 키다
+    const productsExUid = await expect('product.products(ex_uid)', () => commerce.product.products({ ex_uid: 'EX-1' }), 'get', 'products');
+    assert.ok(relative(productsExUid).includes('ex_uid=EX-1'), 'product.products: ex_uid in query');
+
+    // detail 은 productDetail 과 같은 endpoint 다. user_jwt 를 주면 회원 컨텍스트로 조회한다.
+    const productDetailBare = await expect('product.detail', () => commerce.product.detail('p1'), 'get', 'products/p1');
+    assert.ok(header(productDetailBare, 'Idempotency-Key'), 'product.detail: Idempotency-Key 자동 생성');
+    assert.strictEqual(header(productDetailBare, 'Bootpay-User-JWT'), undefined, 'product.detail: user_jwt 없으면 헤더를 붙이지 않는다');
+
+    const productDetailJwt = await expect('product.detail(user_jwt)', () => commerce.product.detail('p1', 'jwt-1'), 'get', 'products/p1');
+    assert.strictEqual(header(productDetailJwt, 'Bootpay-User-JWT'), 'jwt-1');
 
     const productUpdate = await expect('product.update', () => commerce.product.update({ product_id: 'p1', stock: 5 }), 'put', 'products/p1');
     assert.strictEqual(header(productUpdate, 'BOOTPAY-ROLE'), 'manager');
@@ -128,6 +149,28 @@ function relative(config) {
         assert.ok(relative(orderList).includes(q), `order.list: ${q}`)
     );
 
+    // 구독 계약별 · 결제유형별 필터. status 계열은 콤마로 join 해서 보낸다.
+    const orderListSubscription = await expect(
+        'order.list(subscription filter)',
+        () =>
+            commerce.order.list({
+                status: [1, 2],
+                payment_status: [3],
+                order_subscription_ids: ['s1', 's2'],
+                subscription_billing_type: 1
+            }),
+        'get',
+        'orders'
+    );
+    ['status=1%2C2', 'payment_status=3', 'order_subscription_ids=s1%2Cs2', 'subscription_billing_type=1'].forEach((q) =>
+        assert.ok(relative(orderListSubscription).includes(q), `order.list: ${q}`)
+    );
+
+    // 값이 비면 status= / payment_status= 를 실어 보내지 않는다 (서버는 무시하지만 노이즈다)
+    const orderListEmpty = await expect('order.list(empty)', () => commerce.order.list({ status: [], payment_status: [] }), 'get', 'orders');
+    assert.ok(!relative(orderListEmpty).includes('status='), 'order.list: 빈 배열은 쿼리에 넣지 않는다');
+    assert.ok(!relative(orderListEmpty).includes('order_subscription_ids='), 'order.list: 미지정 order_subscription_ids 는 쿼리에 넣지 않는다');
+
     const cancelList = await expect('orderCancel.list', () => commerce.orderCancel.list({ order_number: 'o1' }), 'get', 'order/cancel');
     assert.strictEqual(header(cancelList, 'BOOTPAY-ROLE'), 'user');
 
@@ -168,6 +211,15 @@ function relative(config) {
         assert.ok(relative(subscriptionList).includes(q), `orderSubscription.list: ${q}`)
     );
 
+    // 주문번호로 구독 계약 역조회
+    const subscriptionByOrderNumber = await expect(
+        'orderSubscription.list(order_number)',
+        () => commerce.orderSubscription.list({ order_number: 'o1' }),
+        'get',
+        'order_subscriptions'
+    );
+    assert.ok(relative(subscriptionByOrderNumber).includes('order_number=o1'), 'orderSubscription.list: order_number in query');
+
     const subscriptionUpdate = await expect(
         'orderSubscription.update',
         () => commerce.orderSubscription.update({ order_subscription_id: 's1', quantity: 2, order_name: '변경' }),
@@ -185,6 +237,15 @@ function relative(config) {
         'order_subscriptions/s1'
     );
     assert.deepStrictEqual(JSON.parse(subscriptionUpdatePrice.data), { price: 12000 });
+
+    // memo 는 변경이력에 남길 사유다. body 로 그대로 실려야 한다.
+    const subscriptionUpdateMemo = await expect(
+        'orderSubscription.update(memo)',
+        () => commerce.orderSubscription.update({ order_subscription_id: 's1', price: 12000, memo: '가격 인하 프로모션' }),
+        'put',
+        'order_subscriptions/s1'
+    );
+    assert.deepStrictEqual(JSON.parse(subscriptionUpdateMemo.data), { price: 12000, memo: '가격 인하 프로모션' });
 
     const adjustmentCreate = await expect(
         'adjustment.create',

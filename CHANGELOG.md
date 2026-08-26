@@ -1,3 +1,17 @@
+### 2.12.0
+
+#### 누락된 파라미터 추가
+
+서버가 이미 읽고 있는데 SDK 에 인자가 없어 쓸 수 없던 파라미터들을 채웠다. 요청 경로·동사·scope 는 변경 없다.
+
+- `user.list` 의 회원등급 필터 키 정정 — 서버(`v1/users_controller#index`)가 읽는 이름은 `membership_type` 인데 `member_type` 을 보내고 있어 등급 필터가 **조용히 무시됐다** (에러 없이 전체 목록이 돌아온다). 기존 호출 호환을 위해 `member_type` 인자는 남기고 `membership_type` 으로 매핑해 전송한다.
+- `orderSubscription.list` 에 `order_number` 추가 — 주문번호로 구독 계약을 역조회한다.
+- `orderSubscription.update` 에 `memo` 추가 — 변경이력(`SUBSCRIPTION_ACTION_UPDATE`)에 남길 사유다.
+- `product.products` 에 `ex_uid` 추가 — 외부 UID 로 상품을 찾는다.
+- `product.detail` 에 `userJwt` / `idempotencyKey` 추가 — 매뉴얼이 `GET /v1/products/:id` 에 `user_jwt` 를 안내하는데 이 메서드만 헤더를 안 보내 회원 컨텍스트 조회가 안 됐다. 이제 `productDetail` 과 동작이 같다 (부수 효과로 `Idempotency-Key` 가 자동 부착된다).
+- `order.list` 의 `order_subscription_ids` / `subscription_billing_type` (구독 계약별·결제유형별 필터)에 회귀 테스트를 추가했다. 빈 배열이면 `status=` / `payment_status=` 를 실어 보내지 않는다.
+- `test/commerce/commerceRouteContract.js` · `test/commerce/productMallRequest.js` 에 회귀 테스트를 추가했다.
+
 ### 2.11.0
 
 #### 구독 가격 변경 · 범위로 회차조정

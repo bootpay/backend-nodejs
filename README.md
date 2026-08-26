@@ -537,8 +537,8 @@ await commerce.getAccessToken()
 ### 10-2. 사용자 관리
 
 ```javascript
-// 사용자 목록 조회
-const users = await commerce.user.list({ page: 1, limit: 10 })
+// 사용자 목록 조회 — 회원등급 필터는 membership_type 입니다 (구 이름 member_type 도 계속 지원)
+const users = await commerce.user.list({ page: 1, limit: 10, membership_type: 2 })
 
 // 사용자 상세 조회
 const user = await commerce.user.detail('USER_ID')
@@ -572,7 +572,7 @@ const product = await commerce.product.create({
     description: '상품 설명'
 })
 
-// 상품 상세 조회
+// 상품 상세 조회 — 회원 JWT 를 넘기면 회원 컨텍스트로 조회합니다
 const productDetail = await commerce.product.detail('PRODUCT_ID')
 
 // 상품 수정
@@ -601,6 +601,9 @@ const monthOrders = await commerce.order.month('USER_GROUP_ID', '2024-12')
 ```javascript
 // 정기구독 목록 조회
 const subscriptions = await commerce.orderSubscription.list()
+
+// 주문번호로 구독 계약 역조회
+const byOrderNumber = await commerce.orderSubscription.list({ order_number: 'ORDER_NUMBER' })
 
 // 정기구독 상세 조회
 const subscription = await commerce.orderSubscription.detail('ORDER_SUBSCRIPTION_ID')
@@ -728,6 +731,10 @@ await commerce.user.userLogout(userJwt)
 // 회원 JWT 를 넘기면 상품 조회에도 회원 컨텍스트가 적용됩니다
 await commerce.product.products({ page: 1, limit: 20, category_id: 'CATEGORY_ID', user_jwt: userJwt })
 await commerce.product.productDetail('PRODUCT_ID', userJwt)
+await commerce.product.detail('PRODUCT_ID', userJwt) // productDetail 과 동작이 같습니다
+
+// 외부 UID 로 상품 찾기
+await commerce.product.products({ ex_uid: 'EX_UID' })
 ```
 
 ### 10-9. 가맹점 정보 조회

@@ -171,6 +171,9 @@ export class OrderSubscriptionModule {
 
     /**
      * 정기구독 목록 조회
+     * GET /v1/order_subscriptions
+     * ⚠️ 날짜 키는 search_date_from / search_date_to (또는 s_at / e_at) 다. order.list 의 css_at / cse_at 와 다르다.
+     * order_number 로 주문번호 역조회를 할 수 있다.
      * @param params 조회 파라미터
      */
     async list(params?: OrderSubscriptionListParams): Promise<BootpayCommerceResponse<{ items: CommerceOrderSubscription[]; total: number }>> {
@@ -187,6 +190,7 @@ export class OrderSubscriptionModule {
             if (params.user_group_id) queryParams.append('user_group_id', params.user_group_id)
             if (params.status !== undefined) queryParams.append('status', params.status.toString())
             if (params.user_id) queryParams.append('user_id', params.user_id)
+            if (params.order_number) queryParams.append('order_number', params.order_number)
         }
         const query = queryParams.toString()
         return this.bootpay.get<{ items: CommerceOrderSubscription[]; total: number }>(`order_subscriptions${query ? `?${query}` : ''}`)
@@ -208,6 +212,8 @@ export class OrderSubscriptionModule {
      * price 는 회차별 결제 금액의 **기준금액**이다. 바꾸면 결제예정(READY) 회차의 청구액이
      * 즉시 다시 계산되고, 이후 회차도 이 금액으로 만들어진다. 이미 결제된 회차는 그대로다.
      * 0 이하는 받지 않는다. 특정 회차만 가감하려면 orderSubscriptionAdjustment.create 를 쓴다.
+     *
+     * memo 는 변경이력(SUBSCRIPTION_ACTION_UPDATE)에 남길 사유다.
      * @param params 수정 파라미터
      */
     async update(params: OrderSubscriptionUpdateParams): Promise<BootpayCommerceResponse<CommerceOrderSubscription>> {

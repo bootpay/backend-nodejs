@@ -17,9 +17,11 @@ const keys = getCommerceKeys();
 
         // price 는 회차별 결제 금액의 기준금액이다. 바꾸면 결제예정(READY) 회차의 청구액이
         // 즉시 다시 계산되고 이후 회차도 이 금액으로 만들어진다. 이미 결제된 회차는 그대로다.
+        // memo 는 변경이력(SUBSCRIPTION_ACTION_UPDATE)에 남길 사유다.
         const response = await commerce.orderSubscription.update({
             order_subscription_id: 'ORDER_SUBSCRIPTION_ID_HERE',
-            price: 12000
+            price: 12000,
+            memo: '가격 인하 프로모션'
         })
         console.log('OrderSubscription Update Response:', JSON.stringify(response, null, 2))
     } catch (e) {

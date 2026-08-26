@@ -65,6 +65,8 @@ export interface OrderSubscriptionListParams extends ListParams {
     user_group_id?: string
     user_id?: string
     status?: number
+    /** 주문번호로 구독 계약을 역조회한다 */
+    order_number?: string
 }
 
 /**
@@ -97,6 +99,8 @@ export interface OrderSubscriptionUpdateParams {
      * 특정 회차만 가감하려면 orderSubscriptionAdjustment.create 를 쓴다.
      */
     price?: number
+    /** 변경이력(SUBSCRIPTION_ACTION_UPDATE)에 남길 사유 */
+    memo?: string
     /** 미지정시 자동 생성 (Idempotency-Key 헤더로 전송, body 에는 포함되지 않는다) */
     idempotency_key?: string
 }
