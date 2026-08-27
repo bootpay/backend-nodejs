@@ -450,6 +450,273 @@ function relative(config) {
     const webhook = await expect('webhook.sendTest(params)', () => commerce.webhook.sendTest({ header_content_type: 1 }), 'post', 'webhook/test');
     assert.deepStrictEqual(JSON.parse(webhook.data), { header_content_type: 1 });
 
+    // ── 알림톡 v1 (/v1/alimtalk/…) ──
+    // 알림톡 endpoint 는 전부 BOOTPAY-ROLE: user 로 고정된다 (스코프 키가 전부 user:alimtalk_*).
+    // ★Idempotency-Key 를 붙이지 않는다★ — 서버가 이 헤더를 읽지 않으므로, 붙이면 주지 않는 멱등을 주는 것처럼 보인다.
+    //   (알림톡의 멱등은 발송의 ref_id 로만 성립한다)
+    function assertAlimtalkHeaders(label, config) {
+        assert.strictEqual(header(config, 'BOOTPAY-ROLE'), 'user', `${label}: BOOTPAY-ROLE 은 항상 user`);
+        assert.strictEqual(header(config, 'Idempotency-Key'), undefined, `${label}: Idempotency-Key 를 보내면 안 된다`);
+    }
+
+    // 인스턴스 role 이 manager 로 바뀌어 있어도 알림톡은 user 로 나가야 한다
+    commerce.asManager();
+
+    // 발송내역·집계
+    const messageList = await expect(
+        'alimtalkMessage.list',
+        () => commerce.alimtalkMessage.list({ template_code: 'T1', status: 'success', ref_id: 'r1', to: '01012345678', s_at: '2026-08-01', e_at: '2026-08-27', page: 2, limit: 50 }),
+        'get',
+        'alimtalk/messages'
+    );
+    assertAlimtalkHeaders('alimtalkMessage.list', messageList);
+    ['template_code=T1', 'status=success', 'ref_id=r1', 'to=01012345678', 's_at=2026-08-01', 'e_at=2026-08-27', 'page=2', 'limit=50'].forEach((q) =>
+        assert.ok(relative(messageList).includes(q), `alimtalkMessage.list: ${q}`)
+    );
+
+    const messageListBare = await expect('alimtalkMessage.list(bare)', () => commerce.alimtalkMessage.list(), 'get', 'alimtalk/messages');
+    assert.ok(!relative(messageListBare).includes('?'), 'alimtalkMessage.list: 미지정 파라미터는 쿼리에 넣지 않는다');
+
+    const messageStats = await expect(
+        'alimtalkMessage.stats',
+        () => commerce.alimtalkMessage.stats({ s_at: '2026-08-01', e_at: '2026-08-27' }),
+        'get',
+        'alimtalk/messages/stats'
+    );
+    assert.ok(relative(messageStats).includes('s_at=2026-08-01'), 'alimtalkMessage.stats: s_at');
+
+    assertAlimtalkHeaders(
+        'alimtalkMessage.detail',
+        await expect('alimtalkMessage.detail', () => commerce.alimtalkMessage.detail('rc1'), 'get', 'alimtalk/messages/rc1')
+    );
+
+    // 공식 카탈로그 — keyword 는 서버 정본 키인 q 로 나가야 한다
+    const officialList = await expect(
+        'alimtalkOfficial.list',
+        () => commerce.alimtalkOfficial.list({ keyword: '주문', category: '주문', msg_type: 'BA', page: 1, per: 50, ksp_id: 'k1' }),
+        'get',
+        'alimtalk/official'
+    );
+    assert.ok(relative(officialList).includes('q=%EC%A3%BC%EB%AC%B8'), 'alimtalkOfficial.list: keyword 는 q 로 보낸다');
+    assert.ok(!relative(officialList).includes('keyword='), 'alimtalkOfficial.list: keyword 키로 보내지 않는다');
+    ['msg_type=BA', 'per=50', 'ksp_id=k1'].forEach((q) => assert.ok(relative(officialList).includes(q), `alimtalkOfficial.list: ${q}`));
+
+    const recommend = await expect(
+        'alimtalkOfficial.recommend',
+        () => commerce.alimtalkOfficial.recommend({ text: '주문이 접수되었습니다', limit: 3 }),
+        'post',
+        'alimtalk/official/recommend'
+    );
+    assert.deepStrictEqual(JSON.parse(recommend.data), { text: '주문이 접수되었습니다', limit: 3 });
+    assertAlimtalkHeaders('alimtalkOfficial.recommend', recommend);
+
+    const officialDetail = await expect('alimtalkOfficial.detail', () => commerce.alimtalkOfficial.detail('OFC001', 'k1'), 'get', 'alimtalk/official/OFC001');
+    assert.ok(relative(officialDetail).includes('ksp_id=k1'), 'alimtalkOfficial.detail: ksp_id');
+
+    // 수신거부
+    const optoutList = await expect('alimtalkOptout.list', () => commerce.alimtalkOptout.list({ phone: '0101234', page: 2 }), 'get', 'alimtalk/optouts');
+    ['phone=0101234', 'page=2'].forEach((q) => assert.ok(relative(optoutList).includes(q), `alimtalkOptout.list: ${q}`));
+
+    const optoutCreate = await expect(
+        'alimtalkOptout.create',
+        () => commerce.alimtalkOptout.create({ phone: '01012345678', reason: '고객 요청' }),
+        'post',
+        'alimtalk/optouts'
+    );
+    assert.deepStrictEqual(JSON.parse(optoutCreate.data), { phone: '01012345678', reason: '고객 요청' });
+
+    const optoutCheck = await expect(
+        'alimtalkOptout.check',
+        () => commerce.alimtalkOptout.check({ phones: ['01012345678', '01087654321'] }),
+        'post',
+        'alimtalk/optouts/check'
+    );
+    assert.deepStrictEqual(JSON.parse(optoutCheck.data), { phones: ['01012345678', '01087654321'] });
+
+    assertAlimtalkHeaders(
+        'alimtalkOptout.release',
+        await expect('alimtalkOptout.release', () => commerce.alimtalkOptout.release('01012345678'), 'delete', 'alimtalk/optouts/01012345678')
+    );
+
+    // 발송 — ⚠️ fallback 은 false 와 미지정이 다르다. false 는 반드시 실려야 한다.
+    const send = await expect(
+        'alimtalkSend.send',
+        () => commerce.alimtalkSend.send({ template_code: 'T1', to: '01012345678', variables: { user_name: '홍길동' }, ref_id: 'ref-1', fallback: false }),
+        'post',
+        'alimtalk/send'
+    );
+    assert.deepStrictEqual(JSON.parse(send.data), {
+        template_code: 'T1',
+        to: '01012345678',
+        variables: { user_name: '홍길동' },
+        ref_id: 'ref-1',
+        fallback: false
+    });
+    assertAlimtalkHeaders('alimtalkSend.send', send);
+
+    const sendBare = await expect('alimtalkSend.send(bare)', () => commerce.alimtalkSend.send({ template_code: 'T1', to: '01012345678' }), 'post', 'alimtalk/send');
+    assert.deepStrictEqual(JSON.parse(sendBare.data), { template_code: 'T1', to: '01012345678' });
+    assert.ok(!('fallback' in JSON.parse(sendBare.data)), 'alimtalkSend.send: 미지정 fallback 은 보내지 않는다(프로젝트 기본값을 따른다)');
+
+    const sendBulk = await expect(
+        'alimtalkSend.bulk',
+        () => commerce.alimtalkSend.bulk({ template_code: 'T1', recipients: [{ to: '01012345678', ref_id: 'b-1' }], fallback: true, sender_key: 'sk1' }),
+        'post',
+        'alimtalk/send/bulk'
+    );
+    assert.deepStrictEqual(JSON.parse(sendBulk.data), {
+        template_code: 'T1',
+        recipients: [{ to: '01012345678', ref_id: 'b-1' }],
+        fallback: true,
+        sender_key: 'sk1'
+    });
+
+    assertAlimtalkHeaders(
+        'alimtalkSend.cancel',
+        await expect('alimtalkSend.cancel', () => commerce.alimtalkSend.cancel('rc1'), 'delete', 'alimtalk/send/rc1')
+    );
+
+    // 발신프로필 — categories 는 senders 하위가 아니라 alimtalk/categories 다
+    assertAlimtalkHeaders(
+        'alimtalkSender.categories',
+        await expect('alimtalkSender.categories', () => commerce.alimtalkSender.categories(), 'get', 'alimtalk/categories')
+    );
+
+    const senderOtp = await expect(
+        'alimtalkSender.otp',
+        () => commerce.alimtalkSender.otp({ yellow_id: '@bootpay', phone: '01012345678' }),
+        'post',
+        'alimtalk/senders/otp'
+    );
+    assert.deepStrictEqual(JSON.parse(senderOtp.data), { yellow_id: '@bootpay', phone: '01012345678' });
+
+    const senderCreate = await expect(
+        'alimtalkSender.create',
+        () => commerce.alimtalkSender.create({ otp: '123456', yellow_id: '@bootpay', phone: '01012345678', category_code: '001001' }),
+        'post',
+        'alimtalk/senders'
+    );
+    assert.deepStrictEqual(JSON.parse(senderCreate.data), { otp: '123456', yellow_id: '@bootpay', phone: '01012345678', category_code: '001001' });
+
+    await expect('alimtalkSender.list', () => commerce.alimtalkSender.list(), 'get', 'alimtalk/senders');
+
+    const senderDetail = await expect('alimtalkSender.detail(sync)', () => commerce.alimtalkSender.detail('k1', true), 'get', 'alimtalk/senders/k1');
+    assert.ok(relative(senderDetail).includes('sync=true'), 'alimtalkSender.detail: sync');
+    const senderDetailBare = await expect('alimtalkSender.detail', () => commerce.alimtalkSender.detail('k1'), 'get', 'alimtalk/senders/k1');
+    assert.ok(!relative(senderDetailBare).includes('sync='), 'alimtalkSender.detail: 미지정 sync 는 보내지 않는다(자체 DB 만 본다)');
+
+    await expect('alimtalkSender.release', () => commerce.alimtalkSender.release('k1'), 'delete', 'alimtalk/senders/k1');
+
+    const variableExamples = await expect(
+        'alimtalkSender.variableExamples',
+        () => commerce.alimtalkSender.variableExamples('k1', { user_name: '홍길동' }),
+        'put',
+        'alimtalk/senders/k1/variable_examples'
+    );
+    assert.deepStrictEqual(JSON.parse(variableExamples.data), { examples: { user_name: '홍길동' } });
+
+    // 자체 템플릿
+    const templateList = await expect(
+        'alimtalkTemplate.list',
+        () => commerce.alimtalkTemplate.list({ ins: 3, sort: 'latest', keyword: '주문' }),
+        'get',
+        'alimtalk/templates'
+    );
+    ['ins=3', 'sort=latest'].forEach((q) => assert.ok(relative(templateList).includes(q), `alimtalkTemplate.list: ${q}`));
+
+    // ⚠️ register: false 는 반드시 실려야 한다 — 빠지면 생성 즉시 대행사·카카오에 실제 등록된다
+    const templateCreate = await expect(
+        'alimtalkTemplate.create',
+        () => commerce.alimtalkTemplate.create({ ksp_id: 'k1', name: '주문완료', content: '#{user_name}님 주문이 완료되었습니다', register: false, msg_type: 'BA' }),
+        'post',
+        'alimtalk/templates'
+    );
+    assert.deepStrictEqual(JSON.parse(templateCreate.data), {
+        ksp_id: 'k1',
+        name: '주문완료',
+        content: '#{user_name}님 주문이 완료되었습니다',
+        register: false,
+        msg_type: 'BA'
+    });
+    assertAlimtalkHeaders('alimtalkTemplate.create', templateCreate);
+
+    const templateDetail = await expect('alimtalkTemplate.detail(sync)', () => commerce.alimtalkTemplate.detail('t1', false), 'get', 'alimtalk/templates/t1');
+    assert.ok(relative(templateDetail).includes('sync=false'), 'alimtalkTemplate.detail: 서버 기본 sync 가 true 라 false 를 명시적으로 실어야 한다');
+
+    const templateUpdate = await expect(
+        'alimtalkTemplate.update',
+        () => commerce.alimtalkTemplate.update('t1', { name: '주문완료', content: '본문' }),
+        'put',
+        'alimtalk/templates/t1'
+    );
+    assert.deepStrictEqual(JSON.parse(templateUpdate.data), { name: '주문완료', content: '본문' });
+
+    await expect('alimtalkTemplate.delete', () => commerce.alimtalkTemplate.delete('t1'), 'delete', 'alimtalk/templates/t1');
+    await expect('alimtalkTemplate.register', () => commerce.alimtalkTemplate.register('t1'), 'post', 'alimtalk/templates/t1/register');
+    await expect('alimtalkTemplate.inspect', () => commerce.alimtalkTemplate.inspect('t1'), 'post', 'alimtalk/templates/t1/inspect');
+
+    // 내보내기 — SDK 기본은 json 이다 (서버 기본 csv 는 JSON 이 아니라서 일반 조회 경로로는 파싱이 깨진다)
+    const exportJson = await expect('alimtalkTemplate.export', () => commerce.alimtalkTemplate.export(), 'get', 'alimtalk/templates/export');
+    assert.ok(relative(exportJson).includes('format=json'), 'alimtalkTemplate.export: 기본 format 은 json');
+    assert.strictEqual(header(exportJson, 'Accept'), 'application/json');
+
+    const exportCsv = await expect(
+        'alimtalkTemplate.export(csv)',
+        () => commerce.alimtalkTemplate.export({ format: 'csv', scope: 'all', include_content: true }),
+        'get',
+        'alimtalk/templates/export'
+    );
+    ['format=csv', 'scope=all', 'include_content=true'].forEach((q) => assert.ok(relative(exportCsv).includes(q), `alimtalkTemplate.export: ${q}`));
+    // CSV 는 파싱하지 않고 원문으로 받는다 — Accept 를 */* 로 덮어쓰고 응답 변환을 끈다
+    assert.strictEqual(header(exportCsv, 'Accept'), '*/*', 'alimtalkTemplate.export(csv): Accept 를 */* 로 보낸다');
+    assert.strictEqual(exportCsv.responseType, 'text');
+    assert.strictEqual(exportCsv.__bootpayRaw, true);
+
+    // 템플릿 이미지 multipart — boundary 가 살아 있어야 한다
+    const templateImagePath = path.join(os.tmpdir(), 'bootpay-alimtalk-template.png');
+    fs.writeFileSync(templateImagePath, Buffer.from('89504e470d0a1a0a', 'hex'));
+    try {
+        for (const [label, call, uri] of [
+            ['alimtalkTemplate.image', () => commerce.alimtalkTemplate.image(templateImagePath, 'https://cdn/old.png'), 'alimtalk/templates/image'],
+            ['alimtalkTemplate.highlightImage', () => commerce.alimtalkTemplate.highlightImage(templateImagePath), 'alimtalk/templates/highlight_image']
+        ]) {
+            const config = await expect(label, call, 'post', uri);
+            const contentType = String(header(config, 'Content-Type'));
+            assert.ok(contentType.startsWith('multipart/form-data'), `${label}: multipart Content-Type 유지`);
+            assert.ok(contentType.includes('boundary='), `${label}: boundary 가 유실되면 서버가 본문을 null 로 읽는다`);
+            assertAlimtalkHeaders(label, config);
+        }
+    } finally {
+        fs.unlinkSync(templateImagePath);
+    }
+
+    // 알림톡 웹훅 — 주문 웹훅(webhook.sendTest, POST /v1/webhook/test)과 완전히 별개 경로다
+    assertAlimtalkHeaders(
+        'alimtalkWebhook.detail',
+        await expect('alimtalkWebhook.detail', () => commerce.alimtalkWebhook.detail(), 'get', 'alimtalk/webhook')
+    );
+
+    const alimtalkWebhookUpdate = await expect(
+        'alimtalkWebhook.update',
+        () => commerce.alimtalkWebhook.update({ url: 'https://example.com/hook', events: [301, 302], enabled: true }),
+        'put',
+        'alimtalk/webhook'
+    );
+    assert.deepStrictEqual(JSON.parse(alimtalkWebhookUpdate.data), { url: 'https://example.com/hook', events: [301, 302], enabled: true });
+
+    await expect('alimtalkWebhook.test', () => commerce.alimtalkWebhook.test(), 'post', 'alimtalk/webhook/test');
+    await expect('alimtalkWebhook.rotateSecret', () => commerce.alimtalkWebhook.rotateSecret(), 'post', 'alimtalk/webhook/secret');
+
+    const deliveries = await expect(
+        'alimtalkWebhook.deliveries',
+        () => commerce.alimtalkWebhook.deliveries({ page: 2, limit: 100 }),
+        'get',
+        'alimtalk/webhook/deliveries'
+    );
+    ['page=2', 'limit=100'].forEach((q) => assert.ok(relative(deliveries).includes(q), `alimtalkWebhook.deliveries: ${q}`));
+
+    commerce.clearRole();
+
     console.log(`commerce route contract: ${requests.length} requests verified (uri · method · role · payload)`);
 })().catch((error) => {
     console.error(error);

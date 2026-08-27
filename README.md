@@ -42,6 +42,7 @@ node환경에서 작성된 어플리케이션, 프레임워크 등에서 사용�
    - [10-7. 몰 설정 관리](#10-7-몰-설정-관리)
    - [10-8. 쇼핑몰 회원 세션 관리](#10-8-쇼핑몰-회원-세션-관리)
    - [10-9. 가맹점 정보 조회](#10-9-가맹점-정보-조회)
+   - [10-10. 알림톡 (카카오 알림톡)](#10-10-알림톡-카카오-알림톡)
 - [Example 프로젝트](#example-프로젝트)
 - [Documentation](#documentation)
 - [기술문의](#기술문의)
@@ -787,6 +788,202 @@ const store = await commerce.store.getStore()
 
 // 가맹점 상세 정보
 const storeDetail = await commerce.store.getStoreDetail()
+```
+
+### 10-10. 알림톡 (카카오 알림톡)
+
+카카오 알림톡 발송·템플릿·발신프로필·수신거부·웹훅 API 입니다.
+
+> ⚠️ **알림톡에는 샌드박스가 없습니다.** 발송(`alimtalkSend.*`), 발신프로필 등록(`alimtalkSender.otp/create`),
+> 템플릿 등록·검수(`alimtalkTemplate.create/register/inspect`), 웹훅 테스트(`alimtalkWebhook.test`)는
+> **실제로 나가고 과금됩니다.**
+
+알림톡 endpoint 는 인스턴스 role 과 무관하게 항상 `BOOTPAY-ROLE: user` 로 요청하며,
+`Idempotency-Key` 를 보내지 않습니다(서버가 읽지 않습니다 — 멱등은 발송의 `ref_id` 로만 성립합니다).
+
+#### 발신프로필(카카오채널) 연동
+
+```javascript
+// 1. 등록에 필요한 category_code 후보 조회
+const categories = await commerce.alimtalkSender.categories()
+
+// 2. 채널 관리자폰으로 OTP 발송 — ⚠️ 실제로 문자가 나갑니다
+await commerce.alimtalkSender.otp({ yellow_id: '@bootpay', phone: '01012345678' })
+
+// 3. 발신프로필 등록 — ⚠️ 카카오에 실제 등록됩니다
+//    등록이 끝나면 서버가 그룹키 등록까지 수행하므로 공식 템플릿은 바로 발송할 수 있습니다
+const sender = await commerce.alimtalkSender.create({
+    otp: '123456',
+    yellow_id: '@bootpay',
+    phone: '01012345678',
+    category_code: '001001'
+})
+
+// 연동 채널 목록 / 상세 (sync: true 면 벤더에서 채널 상태를 다시 읽습니다 — 느립니다)
+await commerce.alimtalkSender.list()
+await commerce.alimtalkSender.detail('KSP_ID', true)
+
+// 템플릿 미리보기용 변수 예문 사전 갱신 — 표시용이며 발송값이 아닙니다 (보낸 키만 덮어씁니다)
+await commerce.alimtalkSender.variableExamples('KSP_ID', { user_name: '홍길동' })
+
+// 채널 연동 해지 — 이 프로젝트와의 연동만 끊고 채널·템플릿은 보존됩니다
+await commerce.alimtalkSender.release('KSP_ID')
+```
+
+#### 발송
+
+```javascript
+// 단건 발송 — ⚠️ 실제로 카카오톡이 발송되고 과금됩니다
+const receipt = await commerce.alimtalkSend.send({
+    template_code: 'TEMPLATE_CODE',
+    to: '01012345678',
+    variables: { user_name: '홍길동' }, // 템플릿의 required_variables 를 모두 채워야 합니다(아니면 3017)
+    ref_id: 'order-1001',              // 멱등 키 — 같은 ref_id 로 재요청하면 기존 receipt 를 돌려줍니다
+    fallback: false,                   // ⚠️ 미지정과 false 는 다릅니다 (미지정 = 프로젝트 기본값)
+    reserved_at: '2026-09-01T10:00:00+09:00' // 생략하면 즉시 발송
+})
+
+// 벌크 발송 (1요청 = N수신자) — ⚠️ 수신자 수만큼 실제 발송되고 과금됩니다
+// 쿼터를 넘으면 요청 시점에 전체 거부되고(3022), 수신거부 번호는 skipped 로 과금되지 않습니다
+await commerce.alimtalkSend.bulk({
+    template_code: 'TEMPLATE_CODE',
+    recipients: [
+        { to: '01012345678', ref_id: 'bulk-0001', variables: { user_name: '홍길동' } },
+        { to: '01087654321', ref_id: 'bulk-0002', variables: { user_name: '김철수' } }
+    ]
+})
+
+// 예약 발송 취소 — 접수(READY) 상태의 예약 건만 취소할 수 있습니다(전송 시작 후에는 3023)
+await commerce.alimtalkSend.cancel('RECEIPT_ID')
+```
+
+#### 발송내역 · 집계
+
+```javascript
+// 발송내역 — ⚠️ 기간 기본값은 최근 30일, 최대 조회 폭은 92일입니다.
+//    초과분은 시작일을 당겨 잘라내므로 실제 적용 구간은 응답의 period 로 확인하세요.
+await commerce.alimtalkMessage.list({ status: 'success', page: 1, limit: 20 })
+
+// 기간 집계 — billing.unit_price_source 가 'default' 면 잠정 단가입니다(확정 청구액이 아닙니다)
+await commerce.alimtalkMessage.stats({ s_at: '2026-08-01', e_at: '2026-08-27' })
+
+// 단건 발송 결과 — 실패 사유는 error_code · error_message 에 담깁니다
+await commerce.alimtalkMessage.detail('RECEIPT_ID')
+```
+
+#### 부트페이 공식 템플릿
+
+부트페이가 미리 카카오 승인을 받아 둔 템플릿이라, 채널을 연동했다면 **검수 없이 즉시 발송**할 수 있습니다.
+
+```javascript
+// 검색 — msg_type 은 BA(기본형)·EX(부가정보형)만 존재합니다
+await commerce.alimtalkOfficial.list({ keyword: '주문', page: 1, per: 20 })
+
+// 보내려는 문구로 추천받기 (유사도 score 0~1 내림차순)
+await commerce.alimtalkOfficial.recommend({ text: '주문하신 상품이 발송되었습니다.' })
+
+// 상세 조회
+await commerce.alimtalkOfficial.detail('OFFICIAL_CODE')
+```
+
+#### 자체 템플릿
+
+```javascript
+// ⚠️ register 를 false 로 주지 않으면 생성 즉시 대행사·카카오에 실제 등록됩니다.
+//    초안으로 만들고 확인한 뒤 register() 로 올리는 것을 권장합니다.
+const draft = await commerce.alimtalkTemplate.create({
+    ksp_id: 'KSP_ID',
+    name: '주문완료 안내',
+    content: '#{user_name}님, 주문이 완료되었습니다.', // 변수는 #{변수명} 형식, 최대 40개
+    register: false,
+    msg_type: 'BA',        // BA(기본형)·EX(부가정보형)·AD(채널추가형)·MI(복합형)
+    emphasize_type: 'NONE' // NONE·TEXT(강조표기형)·IMAGE(이미지형)·ITEM_LIST(아이템리스트형)
+})
+
+// 목록 — ins: 1 REG / 2 REQ / 3 APR(승인) / 4 KRR / 5 REJ. ⚠️ 페이지네이션이 없습니다
+await commerce.alimtalkTemplate.list({ ins: 3, sort: 'latest' })
+
+// 상세 — ⚠️ 서버 기본 sync 가 true 라 조회만 해도 벤더 동기화가 일어납니다.
+//    초안은 sync 를 false 로 주세요
+await commerce.alimtalkTemplate.detail('TEMPLATE_ID', false)
+
+// 수정 — ⚠️ 부분 수정이 아닙니다. 보내지 않은 필드는 null 로 덮어써지므로 항상 전체 필드를 보내세요
+await commerce.alimtalkTemplate.update('TEMPLATE_ID', {
+    name: '주문완료 안내',
+    content: '#{user_name}님, 주문이 완료되었습니다. 감사합니다.',
+    msg_type: 'BA',
+    emphasize_type: 'NONE'
+})
+
+// 대행사 등록 → 검수 요청 — ⚠️ 검수는 카카오에 실제 요청되며 취소할 수 없습니다
+await commerce.alimtalkTemplate.register('TEMPLATE_ID')
+await commerce.alimtalkTemplate.inspect('TEMPLATE_ID')
+
+// 삭제 — 승인(APR) 템플릿은 카카오가 거부하므로 500(3013)이 오고 템플릿은 남습니다
+await commerce.alimtalkTemplate.delete('TEMPLATE_ID')
+
+// 이미지 업로드 — 돌려받은 image_url 을 storage_image_url 로 넘깁니다
+//   본문 이미지: jpg/png · 500KB 이하 · 가로 500px 이상 · 2:1
+//   하이라이트 썸네일: jpg/png · 500KB 이하 · 가로 108px 이상 · 1:1 (규격이 다릅니다)
+await commerce.alimtalkTemplate.image('./banner.png')
+await commerce.alimtalkTemplate.highlightImage('./thumb.png')
+
+// 내보내기 — SDK 기본 format 은 json 입니다 (서버 기본 csv 는 JSON 이 아니라 파싱이 깨집니다)
+await commerce.alimtalkTemplate.export({ scope: 'private', include_content: true })
+
+// csv 는 파싱하지 않고 원문 문자열로 받습니다
+const csv = await commerce.alimtalkTemplate.export({ format: 'csv' })
+console.log(csv.content_type, csv.body)
+```
+
+#### 수신거부
+
+부트페이 전역(global) 차단과 내 프로젝트 차단을 **발송 판정과 같은 기준**으로 다룹니다.
+
+```javascript
+// 목록 — phone 은 숫자만 남겨 부분일치로 찾습니다(정확 매칭이 아닙니다)
+await commerce.alimtalkOptout.list({ page: 1 })
+
+// 등록 (멱등)
+await commerce.alimtalkOptout.create({ phone: '01012345678', reason: '고객 요청' })
+
+// 발송 전 사전 확인 — 벌크에서 skipped 로 낭비될 건을 미리 뺄 수 있습니다 (1회 최대 1,000건)
+await commerce.alimtalkOptout.check({ phones: ['01012345678', '01087654321'] })
+
+// 해제 — ⚠️ 전역 차단은 해제되지 않고 global_blocked: true 로 알려 줍니다
+await commerce.alimtalkOptout.release('01012345678')
+```
+
+#### 알림톡 웹훅
+
+> ⚠️ 주문·구독 통합 웹훅(`commerce.webhook.sendTest`)과 **완전히 별개**입니다.
+> 알림톡 이벤트를 기존 주문 웹훅 URL 로 태우면 수신 서버가 모르는 payload 를 받아 기존 연동이 깨집니다.
+
+서명 검증: `X-Bootpay-Signature: sha256=HMAC_SHA256(secret, "{X-Bootpay-Timestamp}.{raw_body}")`
+— 타임스탬프가 5분 이상 지난 요청은 거부하세요(replay 방지).
+
+```javascript
+// 설정 조회 — 시크릿은 앞 12자만 노출됩니다. 미설정이면 { configured: false }
+await commerce.alimtalkWebhook.detail()
+
+// 설정 저장 — url 은 https 만 허용합니다(아니면 3028)
+// events: 300 발송접수(기본 미구독) / 301 전달성공 / 302 전달실패 / 303 예약취소 /
+//         304 문자(LMS) 대체발송 전환 / 310 검수승인 / 311 검수반려 / 320 수신거부 등록(기본 미구독)
+// 비우면 기본 구독셋(301·302·303·304·310·311)이 적용됩니다
+await commerce.alimtalkWebhook.update({
+    url: 'https://example.com/alimtalk/webhook',
+    events: [301, 302, 304, 310, 311],
+    enabled: true
+})
+
+// 테스트 이벤트 1건 발송 — ⚠️ 설정된 URL 로 실제 HTTP 요청이 나갑니다
+await commerce.alimtalkWebhook.test()
+
+// 서명 시크릿 재발급 — ⚠️ 이 응답에서만 secret 원문을 돌려줍니다
+await commerce.alimtalkWebhook.rotateSecret()
+
+// 전송 이력 (성공·실패 모두)
+await commerce.alimtalkWebhook.deliveries({ page: 1, limit: 20 })
 ```
 
 더 자세한 Commerce API 사용 예제는 [test/commerce](./test/commerce) 디렉토리를 참고해주세요.

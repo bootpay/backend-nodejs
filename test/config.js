@@ -122,6 +122,42 @@ const COMMERCE_TEST_DATA = {
     e_at:                             env('BOOTPAY_TEST_COMMERCE_E_AT', '2099-12-31')
 };
 
+// 알림톡(v1 /alimtalk/…) 테스트 fixture — .env 의 BOOTPAY_TEST_ALIMTALK_* 키로 주입한다.
+// 빈 값이면 placeholder 문자열이 그대로 들어가 TEMPLATE_NOT_FOUND / 3024 등으로 실패한다.
+const ALIMTALK_TEST_DATA = {
+    template_code:  env('BOOTPAY_TEST_ALIMTALK_TEMPLATE_CODE', 'ALIMTALK_TEMPLATE_CODE_HERE'),
+    template_id:    env('BOOTPAY_TEST_ALIMTALK_TEMPLATE_ID', 'ALIMTALK_TEMPLATE_ID_HERE'),
+    official_code:  env('BOOTPAY_TEST_ALIMTALK_OFFICIAL_CODE', 'ALIMTALK_OFFICIAL_CODE_HERE'),
+    ksp_id:         env('BOOTPAY_TEST_ALIMTALK_KSP_ID', 'ALIMTALK_KSP_ID_HERE'),
+    sender_key:     env('BOOTPAY_TEST_ALIMTALK_SENDER_KEY', ''),
+    receipt_id:     env('BOOTPAY_TEST_ALIMTALK_RECEIPT_ID', 'ALIMTALK_RECEIPT_ID_HERE'),
+    ref_id:         env('BOOTPAY_TEST_ALIMTALK_REF_ID', 'ALIMTALK_REF_ID_HERE'),
+    phone:          env('BOOTPAY_TEST_ALIMTALK_PHONE', 'ALIMTALK_PHONE_HERE'),
+    yellow_id:      env('BOOTPAY_TEST_ALIMTALK_YELLOW_ID', 'ALIMTALK_YELLOW_ID_HERE'),
+    otp:            env('BOOTPAY_TEST_ALIMTALK_OTP', 'ALIMTALK_OTP_HERE'),
+    category_code:  env('BOOTPAY_TEST_ALIMTALK_CATEGORY_CODE', 'ALIMTALK_CATEGORY_CODE_HERE'),
+    webhook_url:    env('BOOTPAY_TEST_ALIMTALK_WEBHOOK_URL', 'https://example.com/alimtalk/webhook'),
+    image_path:     env('BOOTPAY_TEST_ALIMTALK_IMAGE_PATH', 'ALIMTALK_IMAGE_PATH_HERE'),
+    s_at:           env('BOOTPAY_TEST_ALIMTALK_S_AT', ''),
+    e_at:           env('BOOTPAY_TEST_ALIMTALK_E_AT', '')
+};
+
+// ⚠️ 알림톡에는 샌드박스가 없다. 발송·채널등록·템플릿등록·검수요청·웹훅발송은 **실제로 나가고 과금된다**.
+//    그래서 부작용이 있는 테스트는 BOOTPAY_TEST_ALIMTALK_LIVE=true 일 때만 실행한다.
+const ALIMTALK_ALLOW_SIDE_EFFECTS = (env('BOOTPAY_TEST_ALIMTALK_LIVE', 'false') || 'false').toLowerCase() === 'true';
+
+// 부작용이 있는 알림톡 테스트의 공통 가드. 실행이 막히면 false 를 돌려준다.
+function alimtalkSideEffectAllowed(label) {
+    if (ALIMTALK_ALLOW_SIDE_EFFECTS) return true;
+    console.log(`[skip] ${label} — 실제 발송/등록이 일어난다. 실행하려면 BOOTPAY_TEST_ALIMTALK_LIVE=true 를 설정하세요.`);
+    return false;
+}
+
+// fixture 가 placeholder 그대로면 true.
+function isAlimtalkPlaceholder(value) {
+    return typeof value === 'string' && value.endsWith('_HERE');
+}
+
 // Commerce default role — orderCancel.*, orderSubscriptionAdjustment.*, orderSubscription.update 류는 manager+ 필요.
 // 테스트는 commerce.withRole(COMMERCE_ROLE) 또는 endpoint 별 .asManager() 직접 호출.
 const COMMERCE_ROLE = (env('BOOTPAY_TEST_COMMERCE_ROLE', 'user') || 'user').toLowerCase();
@@ -171,6 +207,10 @@ module.exports = {
     TEST_DATA,
     COMMERCE_TEST_DATA,
     COMMERCE_ROLE,
+    ALIMTALK_TEST_DATA,
+    ALIMTALK_ALLOW_SIDE_EFFECTS,
+    alimtalkSideEffectAllowed,
+    isAlimtalkPlaceholder,
     isCommercePlaceholder,
     getPgKeys,
     getPgLegacyKeys,
