@@ -1,3 +1,16 @@
+### 2.13.1
+
+#### 별건 현금영수증 발행의 `pg` 를 선택값으로
+
+`Bootpay.requestCashReceipt()` 의 `pg` 가 필수였다. 서버는 `pg` 가 없으면 가맹점에 설정된 기본 PG사로
+발행하는데, SDK 타입이 이를 막고 있어 기본 PG를 쓰려는 가맹점도 PG명을 문자열로 적어 넣어야 했다.
+PG를 바꾸면 SDK 호출부까지 같이 고쳐야 하는, 서버에 없는 제약이었다.
+
+- `RequestCashReceiptParameters.pg` 를 `pg?: string` 으로 변경 — 생략하면 기본 PG사로 발행된다.
+- 기존처럼 `pg` 를 지정하는 호출은 그대로 동작한다 (전송값 변화 없음).
+- 테스트: `test/pg/requestCashReceiptRequest.js` 추가 — `pg` 미지정시 SDK 가 임의의 기본값을 채워 넣지
+  않고 `pg` 키 없이 보내는지, `pg` 를 주면 그대로 전달되는지 고정한다.
+
 ### 2.13.0
 
 #### 알림톡 v1 API 35종 추가

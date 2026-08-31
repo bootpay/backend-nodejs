@@ -516,6 +516,38 @@ PG사로 배송정보( 이니시스, KCP만 지원 )를 보내서 에스크로 �
 })()
 ```
 
+## 9-1. 현금영수증 발행하기
+결제와 별개로 현금영수증을 발행하는 API 입니다.
+
+`pg` 는 **선택값**으로, 생략하면 가맹점에 설정된 기본 PG사로 발행됩니다.
+```javascript
+(async () => { 
+    Bootpay.setConfiguration({
+        client_key: process.env.BOOTPAY_PG_CLIENT_KEY_PROD,
+        secret_key: process.env.BOOTPAY_PG_SECRET_KEY_PROD
+    })
+    try {
+        await Bootpay.getAccessToken()
+        const response = await Bootpay.requestCashReceipt({
+            price: 1000,
+            tax_free: 0,
+            order_name: '테스트 상품',
+            cash_receipt_type: '소득공제',
+            identity_no: '0100000000',
+            order_id: '' + (new Date()).getTime(),
+            user: {
+                username: '부트페이',
+                phone: '01000000000',
+                email: 'bootpay@bootpay.co.kr'
+            }
+        })
+        console.log(response)
+    } catch (e) {
+        console.log(e)
+    }
+})()
+```
+
 ## 10. Commerce API
 
 부트페이 Commerce API를 사용하여 사용자, 상품, 주문, 정기구독 등을 관리할 수 있습니다.

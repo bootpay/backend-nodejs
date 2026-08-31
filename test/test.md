@@ -66,6 +66,12 @@ node test/pg/shippingStart.js
 
 # 결제건 현금영수증 발행
 node test/pg/cashReceiptPublishOnReceipt.js
+
+# 별건 현금영수증 발행 / 발행 취소
+node test/pg/requestCashReceipt.js
+
+# 별건 현금영수증 발행 요청 규약 검증 (네트워크 호출 없음, 키 불필요)
+node test/pg/requestCashReceiptRequest.js
 ```
 
 ### Commerce API 테스트

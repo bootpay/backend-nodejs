@@ -348,6 +348,7 @@ class BootpayBackendNodejs extends BootpayBackendNodejsResource {
 
     /**
      * 별건 현금영수증 발행하기
+     * pg 는 선택값으로, 생략하면 가맹점에 설정된 기본 PG사로 발행한다
      * Comment by GOSOMI
      * @date: 2022-08-09
      */
