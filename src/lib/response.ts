@@ -342,7 +342,8 @@ export interface CashReceiptCancelOnReceiptParameters {
 }
 
 export interface RequestCashReceiptParameters {
-    pg: string
+    /** 생략하면 가맹점에 설정된 기본 PG사로 발행한다 */
+    pg?: string
     price: number
     tax_free?: number
     order_name: string

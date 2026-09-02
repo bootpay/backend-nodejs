@@ -1,4 +1,9 @@
-import { BootpayCommerceResource, CommerceConfiguration, BootpayCommerceResponse } from './lib/commerce-resource'
+import {
+    BootpayCommerceResource,
+    CommerceConfiguration,
+    BootpayCommerceResponse,
+    BootpayCommerceRawResponse
+} from './lib/commerce-resource'
 import { UserModule } from './lib/commerce/modules/user'
 import { UserGroupModule } from './lib/commerce/modules/user-group'
 import { ProductModule } from './lib/commerce/modules/product'
@@ -16,6 +21,13 @@ import { CartModule } from './lib/commerce/modules/cart'
 import { StoreModule } from './lib/commerce/modules/store'
 import { MallSettingModule } from './lib/commerce/modules/mall-setting'
 import { WebhookModule } from './lib/commerce/modules/webhook'
+import { AlimtalkMessageModule } from './lib/commerce/modules/alimtalk-message'
+import { AlimtalkOfficialModule } from './lib/commerce/modules/alimtalk-official'
+import { AlimtalkOptoutModule } from './lib/commerce/modules/alimtalk-optout'
+import { AlimtalkSendModule } from './lib/commerce/modules/alimtalk-send'
+import { AlimtalkSenderModule } from './lib/commerce/modules/alimtalk-sender'
+import { AlimtalkTemplateModule } from './lib/commerce/modules/alimtalk-template'
+import { AlimtalkWebhookModule } from './lib/commerce/modules/alimtalk-webhook'
 
 export interface CommerceTokenResponse {
     access_token: string
@@ -40,6 +52,13 @@ export class BootpayCommerce extends BootpayCommerceResource {
     public store!: StoreModule
     public mallSetting!: MallSettingModule
     public webhook!: WebhookModule
+    public alimtalkMessage!: AlimtalkMessageModule
+    public alimtalkOfficial!: AlimtalkOfficialModule
+    public alimtalkOptout!: AlimtalkOptoutModule
+    public alimtalkSend!: AlimtalkSendModule
+    public alimtalkSender!: AlimtalkSenderModule
+    public alimtalkTemplate!: AlimtalkTemplateModule
+    public alimtalkWebhook!: AlimtalkWebhookModule
 
     constructor(configuration?: CommerceConfiguration) {
         super()
@@ -67,6 +86,13 @@ export class BootpayCommerce extends BootpayCommerceResource {
         this.store = new StoreModule(this)
         this.mallSetting = new MallSettingModule(this)
         this.webhook = new WebhookModule(this)
+        this.alimtalkMessage = new AlimtalkMessageModule(this)
+        this.alimtalkOfficial = new AlimtalkOfficialModule(this)
+        this.alimtalkOptout = new AlimtalkOptoutModule(this)
+        this.alimtalkSend = new AlimtalkSendModule(this)
+        this.alimtalkSender = new AlimtalkSenderModule(this)
+        this.alimtalkTemplate = new AlimtalkTemplateModule(this)
+        this.alimtalkWebhook = new AlimtalkWebhookModule(this)
     }
 
     /**
@@ -175,6 +201,6 @@ export class BootpayCommerce extends BootpayCommerceResource {
     }
 }
 
-export { BootpayCommerceResource, CommerceConfiguration, BootpayCommerceResponse }
+export { BootpayCommerceResource, CommerceConfiguration, BootpayCommerceResponse, BootpayCommerceRawResponse }
 export * from './lib/commerce/types'
 export * from './lib/commerce/modules'

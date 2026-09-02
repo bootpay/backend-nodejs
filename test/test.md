@@ -66,6 +66,12 @@ node test/pg/shippingStart.js
 
 # 결제건 현금영수증 발행
 node test/pg/cashReceiptPublishOnReceipt.js
+
+# 별건 현금영수증 발행 / 발행 취소
+node test/pg/requestCashReceipt.js
+
+# 별건 현금영수증 발행 요청 규약 검증 (네트워크 호출 없음, 키 불필요)
+node test/pg/requestCashReceiptRequest.js
 ```
 
 ### Commerce API 테스트
@@ -105,6 +111,63 @@ node test/commerce/orderSubscriptionPurchase.js
 node test/commerce/orderSubscriptionTransfer.js
 ```
 
+### 알림톡 테스트 실행 (commerce/ 폴더)
+
+⚠️ **알림톡에는 샌드박스가 없다.** 발송·채널등록·템플릿등록·검수요청·웹훅발송은 실제로 나가고 과금된다.
+부작용이 있는 테스트는 `BOOTPAY_TEST_ALIMTALK_LIVE=true` 일 때만 실행되고, 아니면 skip 로그만 남긴다.
+fixture 는 `.env` 의 `BOOTPAY_TEST_ALIMTALK_*` 키로 주입한다.
+
+```bash
+# 발송내역 · 집계 · 단건 결과 (조회 전용)
+node test/commerce/alimtalkMessageList.js
+node test/commerce/alimtalkMessageStats.js
+node test/commerce/alimtalkMessageDetail.js
+
+# 부트페이 공식 템플릿 카탈로그 (조회 전용)
+node test/commerce/alimtalkOfficialList.js
+node test/commerce/alimtalkOfficialRecommend.js
+node test/commerce/alimtalkOfficialDetail.js
+
+# 수신거부 — create/release 는 LIVE 가드
+node test/commerce/alimtalkOptoutList.js
+node test/commerce/alimtalkOptoutCheck.js
+node test/commerce/alimtalkOptoutCreate.js
+node test/commerce/alimtalkOptoutRelease.js
+
+# 발송 — ⚠️ 전부 LIVE 가드 (실제 발송·과금)
+node test/commerce/alimtalkSend.js
+node test/commerce/alimtalkSendBulk.js
+node test/commerce/alimtalkSendCancel.js
+
+# 발신프로필(카카오채널) — otp/create/release 는 LIVE 가드
+node test/commerce/alimtalkSenderCategories.js
+node test/commerce/alimtalkSenderList.js
+node test/commerce/alimtalkSenderDetail.js
+node test/commerce/alimtalkSenderVariableExamples.js
+node test/commerce/alimtalkSenderOtp.js
+node test/commerce/alimtalkSenderCreate.js
+node test/commerce/alimtalkSenderRelease.js
+
+# 자체 템플릿 — create/update/delete/register/inspect/image 는 LIVE 가드
+node test/commerce/alimtalkTemplateList.js
+node test/commerce/alimtalkTemplateDetail.js
+node test/commerce/alimtalkTemplateExport.js
+node test/commerce/alimtalkTemplateCreate.js
+node test/commerce/alimtalkTemplateUpdate.js
+node test/commerce/alimtalkTemplateDelete.js
+node test/commerce/alimtalkTemplateRegister.js
+node test/commerce/alimtalkTemplateInspect.js
+node test/commerce/alimtalkTemplateImage.js
+node test/commerce/alimtalkTemplateHighlightImage.js
+
+# 알림톡 웹훅 — update/test/rotateSecret 은 LIVE 가드
+node test/commerce/alimtalkWebhookDetail.js
+node test/commerce/alimtalkWebhookDeliveries.js
+node test/commerce/alimtalkWebhookUpdate.js
+node test/commerce/alimtalkWebhookTest.js
+node test/commerce/alimtalkWebhookRotateSecret.js
+```
+
 ### V1 회원 endpoint 주의
 
 `user.userLogin / userSession / userLogout / userJoin / userJoinCheck` 는 모두 복수형 `users/...` 경로를 사용한다.
@@ -118,6 +181,20 @@ node test/commerce/orderSubscriptionTransfer.js
 - 언더스코어: `order_subscriptions`, `order_subscription_bills`
 - 하이픈: `order-subscription-requests`, `user-groups`
 - `requests/ing` 계열은 `resume` 만 `PUT` 이고 나머지(`pause`/`purchase`/`termination`/`transfer`)는 `POST` 다.
+
+### 알림톡 endpoint 주의
+
+- **`BOOTPAY-ROLE` 은 항상 `user`** 다. 알림톡 스코프 키가 전부 `user:alimtalk_*` 라서,
+  인스턴스 role 이 `asManager()` 등으로 바뀌어 있어도 알림톡 요청은 `user` 로 고정해 보낸다.
+- **`Idempotency-Key` 를 보내지 않는다.** 서버가 이 헤더를 읽지 않으므로, 붙이면 주지 않는 멱등을
+  주는 것처럼 보인다. 알림톡의 멱등은 발송의 `ref_id` 로만 성립한다.
+- `alimtalkSend.send({ fallback: false })` 의 `false` 는 **미지정과 다르다.** 미지정이면 프로젝트
+  기본값을 따르고, `false` 는 문자(LMS) 대체발송을 명시적으로 끈다 — `compact` 가 `false` 를 걷어내면 안 된다.
+- `alimtalkOfficial.list({ keyword })` 는 서버 정본 키인 **`q`** 로 나간다.
+- `alimtalkTemplate.export({ format: 'csv' })` 는 JSON 파싱 없이 `{ body, content_type }` 을 돌려준다.
+  SDK 기본 `format` 은 `json` 이다(서버 기본은 `csv`).
+- 알림톡 웹훅(`alimtalkWebhook.*`, `/v1/alimtalk/webhook`)은 주문·구독 통합 웹훅(`webhook.sendTest`,
+  `/v1/webhook/test`)과 **완전히 별개 경로**다.
 세션이 필요한 호출에는 로그인시 받은 JWT 를 `Bootpay-User-JWT` 헤더로 전달한다.
 
 ## 테스트 데이터

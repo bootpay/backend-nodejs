@@ -24,6 +24,15 @@ export interface BootpayCommerceResponse<T = any> {
     error?: string
 }
 
+/**
+ * JSON 이 아닌 본문(CSV 등)을 파싱하지 않고 그대로 담아 돌려주는 응답.
+ * 알림톡 템플릿 내보내기(format=csv)처럼 서버가 JSON 을 주지 않는 endpoint 에서 쓴다.
+ */
+export interface BootpayCommerceRawResponse {
+    body: string
+    content_type: string
+}
+
 export class BootpayCommerceResource {
     $http: AxiosInstance
     $token?: string
@@ -54,6 +63,14 @@ export class BootpayCommerceResource {
 
         this.$http.interceptors.response.use(
             (response: AxiosResponse): any => {
+                // ⚠️ 원문 응답을 요청한 경우(CSV 등)에는 파싱된 data 만 돌려주면 Content-Type 이 사라진다.
+                //    호출부가 JSON 인지 CSV 인지 구분할 수 없게 되므로 본문과 함께 실어 보낸다.
+                if ((response.config as any)?.__bootpayRaw === true) {
+                    return {
+                        body: typeof response.data === 'string' ? response.data : String(response.data ?? ''),
+                        content_type: String(response.headers?.['content-type'] ?? '')
+                    }
+                }
                 return response.data
             },
             (error: any) => {
@@ -74,7 +91,11 @@ export class BootpayCommerceResource {
                 if (!config.headers.has('Content-Type')) {
                     config.headers.set('Content-Type', 'application/json')
                 }
-                config.headers.set('Accept', 'application/json')
+                // ⚠️ 원문 응답 요청(CSV 등)만 요청이 지정한 Accept 를 살린다.
+                //    axios 가 기본 Accept 를 항상 채워 두므로 'has' 로는 구분할 수 없다.
+                if ((config as any).__bootpayRaw !== true) {
+                    config.headers.set('Accept', 'application/json')
+                }
                 config.headers.set('Accept-Charset', 'utf-8')
                 config.headers.set('BOOTPAY-SDK-VERSION', this.sdkVersion)
                 config.headers.set('BOOTPAY-API-VERSION', this.apiVersion)
@@ -164,6 +185,27 @@ export class BootpayCommerceResource {
             this.requireCommerceCredentials()
             const response = await this.$http.get(this.entrypoints(url), config)
             return Promise.resolve(response as unknown as BootpayCommerceResponse<T>)
+        } catch (e) {
+            return Promise.reject(e)
+        }
+    }
+
+    /**
+     * JSON 이 아닌 본문을 파싱하지 않고 그대로 받는다.
+     * ⚠️ 일반 get 은 axios 가 JSON 으로 파싱하려 하므로, CSV 를 돌려주는 endpoint
+     *    (알림톡 템플릿 내보내기 format=csv)에서는 본문이 깨지거나 Content-Type 이 유실된다.
+     *    성공 시 { body: '<원문 문자열>', content_type: '...' } 를 돌려준다.
+     */
+    async getRaw(url: string, config?: AxiosRequestConfig): Promise<BootpayCommerceRawResponse> {
+        try {
+            this.requireCommerceCredentials()
+            const response = await this.$http.get(this.entrypoints(url), {
+                ...config,
+                responseType: 'text',
+                transformResponse: [(data: any) => data],
+                __bootpayRaw: true
+            } as AxiosRequestConfig)
+            return Promise.resolve(response as unknown as BootpayCommerceRawResponse)
         } catch (e) {
             return Promise.reject(e)
         }
