@@ -1,5 +1,5 @@
 import { BootpayCommerceResource, BootpayCommerceResponse } from '../../commerce-resource'
-import { CommerceOrder, OrderListParams } from '../types'
+import { CommerceOrder, CommerceOrderPurchase, OrderListParams, OrderPurchaseUpdateItem } from '../types'
 
 export class OrderModule {
     private bootpay: BootpayCommerceResource
@@ -50,6 +50,27 @@ export class OrderModule {
      */
     async detail(orderId: string): Promise<BootpayCommerceResponse<CommerceOrder>> {
         return this.bootpay.get<CommerceOrder>(`orders/${orderId}`)
+    }
+
+    /**
+     * 발송처리 — 발주(배송) 단위 상태·운송장 갱신
+     * PUT /v1/orders/:order_number/purchases
+     *
+     * 발송 완료(status 4)로 넘기면서 운송장을 같이 넣으면 배송 추적이 자동으로 붙는다.
+     * 그 뒤 택배사가 알려주는 단계는 주문 상세의 order_purchases[].d_ts 로 읽는다 —
+     * 따로 폴링할 필요가 없고, 배송 완료를 받으면 발주 상태도 스스로 넘어간다.
+     *
+     * ⚠️ 배송은 주문이 아니라 발주 단위다. 경로의 주문에 딸리지 않은
+     *    order_purchase_number 를 섞으면 요청 전체가 ORDER_PURCHASE_NOT_FOUND 로 거절된다.
+     *
+     * @param orderNumber 주문번호 (order_id 아님)
+     * @param purchases 갱신할 발주 목록 (한 번에 최대 50건)
+     */
+    async purchases(
+        orderNumber: string,
+        purchases: OrderPurchaseUpdateItem[]
+    ): Promise<BootpayCommerceResponse<CommerceOrderPurchase[]>> {
+        return this.bootpay.put<CommerceOrderPurchase[]>(`orders/${ orderNumber }/purchases`, { purchases })
     }
 
     /**

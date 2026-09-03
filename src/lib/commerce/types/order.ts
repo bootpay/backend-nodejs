@@ -42,6 +42,52 @@ export interface CommerceOrder {
     cancelled_request_history?: CommerceOrderCancellationRequestHistory[]
 }
 
+/**
+ * 발주(배송) — 배송은 주문이 아니라 발주 단위로 움직인다.
+ * 한 주문이 나뉘어 나가면 운송장도 나뉜다.
+ * status 는 가맹점이 처리한 단계, d_ts 는 택배사가 알려준 단계로 서로 따로 움직인다.
+ */
+export interface CommerceOrderPurchase {
+    order_purchase_id?: string
+    order_purchase_number?: string
+    /** 발주 상태 — 2 발주확인 · 3 준비중 · 4 발송완료 · 5 배송완료 (음수는 취소·오류·무효) */
+    status?: number
+    progress_status?: number
+    delivery_type?: number
+    delivery_company_code?: string
+    tracking_number?: string
+    /** 배송추적 상태 — 0 추적없음 · 1~3 수거·집화 · 4 배송완료 · 5~8 실패·오류 */
+    d_ts?: number
+    sent_at?: string
+    delivered_at?: string
+    last_synced_at?: string
+    tracking_histories?: CommerceOrderTrackingHistory[]
+}
+
+export interface CommerceOrderTrackingHistory {
+    trakler_status?: string
+    delivery_tracking_status?: number
+    location?: string
+    description?: string
+    occurred_at?: string
+    source?: string
+    created_at?: string
+}
+
+/**
+ * 발송처리 항목 (PUT /v1/orders/:order_number/purchases)
+ * 경로의 주문에 딸린 발주만 갱신된다 — 다른 주문의 번호를 섞으면 요청 전체가 거절된다.
+ */
+export interface OrderPurchaseUpdateItem {
+    order_purchase_number: string
+    /** 2 발주확인 · 3 준비중 · 4 발송완료 · 5 배송완료. 취소·무효는 이 API 로 못 한다 */
+    status: number
+    delivery_company_code?: string
+    tracking_number?: string
+    delivery_type?: number
+    chosen_product_option_id?: string
+}
+
 export interface CommerceOrderCancellationRequestHistory {
     order_cancellation_request_history_id?: string
     order_id?: string
