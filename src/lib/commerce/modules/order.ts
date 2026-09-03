@@ -53,6 +53,19 @@ export class OrderModule {
     }
 
     /**
+     * 배송추적 조회 — 발주(배송) 단위 운송장·택배사·배송추적 상태·추적 이력
+     * GET /v1/orders/:order_number/purchases
+     *
+     * 주문 상세의 order_purchases 와 같은 값이다. 배송만 확인하려는 서버가
+     * 결제·상품·고객까지 받지 않도록 이 면만 떼어 둔 것이다.
+     *
+     * @param orderNumber 주문번호 (order_id 아님)
+     */
+    async purchases(orderNumber: string): Promise<BootpayCommerceResponse<CommerceOrderPurchase[]>> {
+        return this.bootpay.get<CommerceOrderPurchase[]>(`orders/${ orderNumber }/purchases`)
+    }
+
+    /**
      * 발송처리 — 발주(배송) 단위 상태·운송장 갱신
      * PUT /v1/orders/:order_number/purchases
      *
@@ -66,7 +79,7 @@ export class OrderModule {
      * @param orderNumber 주문번호 (order_id 아님)
      * @param purchases 갱신할 발주 목록 (한 번에 최대 50건)
      */
-    async purchases(
+    async updatePurchases(
         orderNumber: string,
         purchases: OrderPurchaseUpdateItem[]
     ): Promise<BootpayCommerceResponse<CommerceOrderPurchase[]>> {
