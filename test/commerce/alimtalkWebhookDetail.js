@@ -1,7 +1,7 @@
 const { getCommerceKeys, ALIMTALK_TEST_DATA } = require('../config.js');
 const keys = getCommerceKeys();
 // Commerce API - 알림톡 웹훅 설정 조회
-// GET /v1/alimtalk/webhook
+// GET /alimtalk/webhook
 // ⚠️ 주문·구독 통합 웹훅(webhookSendTest.js)과 완전히 별개다.
 // 시크릿은 앞 12자만 노출된다. 미설정이면 { configured: false } 로 온다.
 

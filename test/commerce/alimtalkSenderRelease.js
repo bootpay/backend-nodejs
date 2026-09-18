@@ -1,7 +1,7 @@
 const { getCommerceKeys, ALIMTALK_TEST_DATA, alimtalkSideEffectAllowed } = require('../config.js');
 const keys = getCommerceKeys();
 // Commerce API - 알림톡 채널 연동 해지
-// DELETE /v1/alimtalk/senders/{ksp_id}
+// DELETE /alimtalk/senders/{ksp_id}
 // 이 프로젝트와의 연동만 끊는다 — 채널 모델과 템플릿은 보존된다. 성공 시 본문은 null 이다.
 
 (async () => {

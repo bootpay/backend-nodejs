@@ -1,7 +1,7 @@
 const { getCommerceKeys, ALIMTALK_TEST_DATA, alimtalkSideEffectAllowed } = require('../config.js');
 const keys = getCommerceKeys();
 // Commerce API - 알림톡 채널 관리자폰 OTP 발송
-// POST /v1/alimtalk/senders/otp
+// POST /alimtalk/senders/otp
 // ⚠️ 채널 관리자 휴대폰으로 실제 문자가 나간다.
 // 여기서 받은 인증번호를 alimtalkSender.create() 의 otp 로 넘긴다.
 

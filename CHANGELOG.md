@@ -1,3 +1,17 @@
+### Unreleased
+
+#### 알림톡 API 를 메시지 호스트로
+
+알림톡 API 는 이제 커머스 API(`api.bootapi.com/v1`)가 아니라 메시지 API(`message.bootapi.com`, 경로에 `/v1` 없음)가 받는다.
+경로·파라미터·응답은 그대로이고 호스트만 다르므로, 알림톡 모듈은 그대로 두고 `BootpayCommerceResource.entrypoints` 에서
+`alimtalk/…` 경로만 메시지 API 로 보낸다. 옛 주소(`/v1/alimtalk/…`)는 410 으로 응답한다.
+
+- 호스트: development `https://dev-m.bootapi.com` · stage `https://stage-m.bootapi.com` · production `https://message.bootapi.com`
+- `MESSAGE_API_ENTRYPOINTS` · `setMessageApiUrl(url)` 추가 — 현재 mode 의 알림톡 주소를 바꿀 수 있다.
+- 알림톡이 아닌 경로는 기존 `API_ENTRYPOINTS`(`/v1`)로 그대로 나간다.
+- 테스트: `test/commerce/commerceRouteContract.js` 가 경로별 호스트(알림톡 → dev-m, 그 외 → dev-api/v1)와
+  mode 별 주소·`setMessageApiUrl` 를 검증한다.
+
 ### 2.13.1
 
 #### 별건 현금영수증 발행의 `pg` 를 선택값으로

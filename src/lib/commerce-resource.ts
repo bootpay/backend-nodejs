@@ -40,6 +40,7 @@ export class BootpayCommerceResource {
     mode: 'development' | 'production' | 'stage'
     commerceConfiguration: CommerceConfiguration
     API_ENTRYPOINTS: CommerceEntrypoints
+    MESSAGE_API_ENTRYPOINTS: CommerceEntrypoints
     apiVersion: string = '1.0.0'
     sdkVersion: string = '1.0.0'
 
@@ -59,6 +60,12 @@ export class BootpayCommerceResource {
             development: 'https://dev-api.bootapi.com/v1',
             stage: 'https://stage-api.bootapi.com/v1',
             production: 'https://api.bootapi.com/v1'
+        }
+        // 알림톡 API 전용 — 메시지 API 가 직접 받는다(경로에 /v1 없음). entrypoints 가 경로를 보고 고른다.
+        this.MESSAGE_API_ENTRYPOINTS = {
+            development: 'https://dev-m.bootapi.com',
+            stage: 'https://stage-m.bootapi.com',
+            production: 'https://message.bootapi.com'
         }
 
         this.$http.interceptors.response.use(
@@ -175,9 +182,28 @@ export class BootpayCommerceResource {
         return `Basic ${encoded}`
     }
 
-    entrypoints(url: string): string {
+    /**
+     * 알림톡(메시지 API) URL 을 변경한다 (현재 mode 기준)
+     */
+    setMessageApiUrl(url: string): void {
         const mode = this.commerceConfiguration.mode || 'production'
-        return [this.API_ENTRYPOINTS[mode], url].join('/')
+        this.MESSAGE_API_ENTRYPOINTS[mode] = url
+    }
+
+    /**
+     * 요청 경로에 맞는 API 기본 주소.
+     * 알림톡 API 는 커머스 API(api.bootapi.com/v1)가 아니라 메시지 API(message.bootapi.com, /v1 없음)가 받는다.
+     * 경로·파라미터·응답은 그대로이고 호스트만 다르다 — 그래서 알림톡 모듈은 고치지 않고 여기서 주소만 가른다.
+     * 옛 주소(/alimtalk/*)는 410 으로 응답한다.
+     */
+    apiBaseUrl(url: string): string {
+        const mode = this.commerceConfiguration.mode || 'production'
+        const table = String(url).replace(/^\//, '').startsWith('alimtalk') ? this.MESSAGE_API_ENTRYPOINTS : this.API_ENTRYPOINTS
+        return table[mode]
+    }
+
+    entrypoints(url: string): string {
+        return [this.apiBaseUrl(url), url].join('/')
     }
 
     async get<T = any, D = any>(url: string, config?: AxiosRequestConfig<D>): Promise<BootpayCommerceResponse<T>> {

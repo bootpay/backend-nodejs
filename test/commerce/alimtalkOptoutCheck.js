@@ -1,7 +1,7 @@
 const { getCommerceKeys, ALIMTALK_TEST_DATA } = require('../config.js');
 const keys = getCommerceKeys();
 // Commerce API - 알림톡 수신거부 사전 확인
-// POST /v1/alimtalk/optouts/check
+// POST /alimtalk/optouts/check
 // 발송 판정과 같은 축으로 대조하므로, 벌크에서 skipped 로 낭비될 건을 미리 뺄 수 있다.
 // ⚠️ 1회 최대 1,000건이고 넘으면 -48 이다(중복은 서버가 제거).
 

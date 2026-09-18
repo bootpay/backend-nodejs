@@ -1,7 +1,7 @@
 const { getCommerceKeys, ALIMTALK_TEST_DATA } = require('../config.js');
 const keys = getCommerceKeys();
 // Commerce API - 공식 알림톡 템플릿 추천
-// POST /v1/alimtalk/official/recommend
+// POST /alimtalk/official/recommend
 // 보내려는 문구로 유사한 공식 템플릿을 추천받는다. 유사도 score(0~1) 내림차순이다.
 
 (async () => {

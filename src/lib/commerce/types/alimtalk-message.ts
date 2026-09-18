@@ -1,10 +1,10 @@
-// 알림톡 발송내역·집계 (GET /v1/alimtalk/messages 계열)
+// 알림톡 발송내역·집계 (GET /alimtalk/messages 계열)
 
 /** 발송 상태 — 접수 직후에는 requested 이고, 벤더 결과 동기화로 확정된다. */
 export type AlimtalkMessageStatus = 'requested' | 'success' | 'failed' | 'canceled'
 
 /**
- * 발송내역 조회 파라미터 (GET /v1/alimtalk/messages)
+ * 발송내역 조회 파라미터 (GET /alimtalk/messages)
  * ⚠️ 기간 기본값은 최근 30일이고 최대 조회 폭은 92일이다 — 초과분은 거부하지 않고 시작일을 당겨 잘라낸다.
  *    실제 적용된 구간은 응답의 period 로 확인한다.
  */
@@ -22,7 +22,7 @@ export interface AlimtalkMessageListParams {
     limit?: number
 }
 
-/** 기간 집계 조회 파라미터 (GET /v1/alimtalk/messages/stats) */
+/** 기간 집계 조회 파라미터 (GET /alimtalk/messages/stats) */
 export interface AlimtalkMessageStatsParams {
     s_at?: string
     e_at?: string

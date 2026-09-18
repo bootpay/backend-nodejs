@@ -833,6 +833,10 @@ const storeDetail = await commerce.store.getStoreDetail()
 알림톡 endpoint 는 인스턴스 role 과 무관하게 항상 `BOOTPAY-ROLE: user` 로 요청하며,
 `Idempotency-Key` 를 보내지 않습니다(서버가 읽지 않습니다 — 멱등은 발송의 `ref_id` 로만 성립합니다).
 
+알림톡 요청(`alimtalk/…`)은 커머스 API(`/v1`)가 아니라 메시지 API 호스트로 나갑니다(경로에 `/v1` 없음).
+development `https://dev-m.bootapi.com` · stage `https://stage-m.bootapi.com` · production `https://message.bootapi.com` 이며,
+필요하면 `commerce.setMessageApiUrl(url)` 로 현재 mode 의 주소를 바꿀 수 있습니다.
+
 #### 발신프로필(카카오채널) 연동
 
 ```javascript

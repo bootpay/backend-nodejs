@@ -1,7 +1,7 @@
 const { getCommerceKeys, ALIMTALK_TEST_DATA, alimtalkSideEffectAllowed } = require('../config.js');
 const keys = getCommerceKeys();
 // Commerce API - 알림톡 자체 템플릿 대행사 등록
-// POST /v1/alimtalk/templates/{template_id}/register
+// POST /alimtalk/templates/{template_id}/register
 // ⚠️ 대행사·카카오에 실제 등록된다. 등록 전(초안) 상태에서만 호출할 수 있다.
 
 (async () => {

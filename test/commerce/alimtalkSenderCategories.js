@@ -1,7 +1,7 @@
 const { getCommerceKeys, ALIMTALK_TEST_DATA } = require('../config.js');
 const keys = getCommerceKeys();
 // Commerce API - 알림톡 카카오 카테고리 목록 조회
-// GET /v1/alimtalk/categories
+// GET /alimtalk/categories
 // 발신프로필 등록 시 필요한 category_code 후보다. 벤더 응답을 그대로 프록시한다.
 
 (async () => {

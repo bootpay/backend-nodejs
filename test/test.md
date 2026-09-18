@@ -193,7 +193,7 @@ node test/commerce/alimtalkWebhookRotateSecret.js
 - `alimtalkOfficial.list({ keyword })` 는 서버 정본 키인 **`q`** 로 나간다.
 - `alimtalkTemplate.export({ format: 'csv' })` 는 JSON 파싱 없이 `{ body, content_type }` 을 돌려준다.
   SDK 기본 `format` 은 `json` 이다(서버 기본은 `csv`).
-- 알림톡 웹훅(`alimtalkWebhook.*`, `/v1/alimtalk/webhook`)은 주문·구독 통합 웹훅(`webhook.sendTest`,
+- 알림톡 웹훅(`alimtalkWebhook.*`, `/alimtalk/webhook`)은 주문·구독 통합 웹훅(`webhook.sendTest`,
   `/v1/webhook/test`)과 **완전히 별개 경로**다.
 세션이 필요한 호출에는 로그인시 받은 JWT 를 `Bootpay-User-JWT` 헤더로 전달한다.
 

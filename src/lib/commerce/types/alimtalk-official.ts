@@ -1,10 +1,10 @@
-// 부트페이 공식 알림톡 템플릿 카탈로그 (GET/POST /v1/alimtalk/official 계열)
+// 부트페이 공식 알림톡 템플릿 카탈로그 (GET/POST /alimtalk/official 계열)
 
 /** 공식 템플릿은 그룹 템플릿이라 BA(기본형)·EX(부가정보형)만 존재한다 (AD/MI 는 쓸 수 없다). */
 export type AlimtalkOfficialMsgType = 'BA' | 'EX'
 
 /**
- * 공식 템플릿 검색 파라미터 (GET /v1/alimtalk/official)
+ * 공식 템플릿 검색 파라미터 (GET /alimtalk/official)
  * keyword 는 본문·이름·분류를 부분일치(대소문자 무시)로 훑는다.
  */
 export interface AlimtalkOfficialListParams {
@@ -20,7 +20,7 @@ export interface AlimtalkOfficialListParams {
 }
 
 /**
- * 공식 템플릿 추천 파라미터 (POST /v1/alimtalk/official/recommend)
+ * 공식 템플릿 추천 파라미터 (POST /alimtalk/official/recommend)
  * 유사도 score(0~1) 내림차순으로 돌려준다.
  */
 export interface AlimtalkOfficialRecommendParams {

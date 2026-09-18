@@ -20,8 +20,12 @@ function header(config, name) {
     return config.headers[name] || config.headers[name.toLowerCase()] || config.headers[name.toUpperCase()];
 }
 
+// 알림톡(/alimtalk/…)은 메시지 API 호스트(dev-m, /v1 없음), 그 외는 커머스 API(dev-api/v1)로 나간다.
+const COMMERCE_BASE = 'https://dev-api.bootapi.com/v1/';
+const MESSAGE_BASE = 'https://dev-m.bootapi.com/';
+
 function relative(config) {
-    return config.url.replace('https://dev-api.bootapi.com/v1/', '');
+    return config.url.replace(COMMERCE_BASE, '').replace(MESSAGE_BASE, '');
 }
 
 (async () => {
@@ -40,6 +44,8 @@ function relative(config) {
         const config = last();
         assert.strictEqual(config.method.toLowerCase(), method, `${label}: method`);
         assert.strictEqual(relative(config).split('?')[0], uri, `${label}: uri`);
+        const base = uri.startsWith('alimtalk') ? MESSAGE_BASE : COMMERCE_BASE;
+        assert.ok(config.url.startsWith(base), `${label}: host ${base} (actual ${config.url})`);
         return config;
     }
 
@@ -450,7 +456,7 @@ function relative(config) {
     const webhook = await expect('webhook.sendTest(params)', () => commerce.webhook.sendTest({ header_content_type: 1 }), 'post', 'webhook/test');
     assert.deepStrictEqual(JSON.parse(webhook.data), { header_content_type: 1 });
 
-    // ── 알림톡 v1 (/v1/alimtalk/…) ──
+    // ── 알림톡 v1 (/alimtalk/…) ──
     // 알림톡 endpoint 는 전부 BOOTPAY-ROLE: user 로 고정된다 (스코프 키가 전부 user:alimtalk_*).
     // ★Idempotency-Key 를 붙이지 않는다★ — 서버가 이 헤더를 읽지 않으므로, 붙이면 주지 않는 멱등을 주는 것처럼 보인다.
     //   (알림톡의 멱등은 발송의 ref_id 로만 성립한다)
@@ -716,6 +722,19 @@ function relative(config) {
     ['page=2', 'limit=100'].forEach((q) => assert.ok(relative(deliveries).includes(q), `alimtalkWebhook.deliveries: ${q}`));
 
     commerce.clearRole();
+
+    // ── 알림톡 호스트 분기 ──
+    // 알림톡만 메시지 API 로 가고, 알림톡이 아닌 경로는 계속 커머스 API(/v1)로 간다.
+    assert.strictEqual(commerce.entrypoints('alimtalk/send'), 'https://dev-m.bootapi.com/alimtalk/send');
+    assert.strictEqual(commerce.entrypoints('webhook/test'), 'https://dev-api.bootapi.com/v1/webhook/test');
+    const byMode = (mode) => new BootpayCommerce({ client_key: 'ck', secret_key: 'sk', mode });
+    assert.strictEqual(byMode('stage').entrypoints('alimtalk/senders'), 'https://stage-m.bootapi.com/alimtalk/senders');
+    assert.strictEqual(byMode('production').entrypoints('alimtalk/senders'), 'https://message.bootapi.com/alimtalk/senders');
+    assert.strictEqual(byMode('production').entrypoints('products'), 'https://api.bootapi.com/v1/products');
+    const custom = byMode('development');
+    custom.setMessageApiUrl('https://localhost:3000');
+    assert.strictEqual(custom.entrypoints('alimtalk/senders'), 'https://localhost:3000/alimtalk/senders');
+    assert.strictEqual(custom.entrypoints('products'), 'https://dev-api.bootapi.com/v1/products');
 
     console.log(`commerce route contract: ${requests.length} requests verified (uri · method · role · payload)`);
 })().catch((error) => {

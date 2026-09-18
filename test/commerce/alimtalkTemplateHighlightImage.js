@@ -1,7 +1,7 @@
 const { getCommerceKeys, ALIMTALK_TEST_DATA, alimtalkSideEffectAllowed } = require('../config.js');
 const keys = getCommerceKeys();
 // Commerce API - 알림톡 아이템리스트형 하이라이트 썸네일 업로드
-// POST /v1/alimtalk/templates/highlight_image
+// POST /alimtalk/templates/highlight_image
 // ⚠️ 본문 이미지와 규격이 다르다 — jpg/png · 500KB 이하 · 가로 108px 이상 · 1:1.
 //    본문 이미지 endpoint(alimtalkTemplateImage.js)로 올리면 거부된다.
 // 돌려받은 image_url 은 item_highlight.storage_image_url 로 넘긴다.

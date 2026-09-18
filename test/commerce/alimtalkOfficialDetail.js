@@ -1,7 +1,7 @@
 const { getCommerceKeys, ALIMTALK_TEST_DATA } = require('../config.js');
 const keys = getCommerceKeys();
 // Commerce API - 공식 알림톡 템플릿 상세 조회
-// GET /v1/alimtalk/official/{code}
+// GET /alimtalk/official/{code}
 // code 는 서버 채번 코드(슬래시를 포함하지 않는다). 없거나 미노출이면 404(3015).
 
 (async () => {

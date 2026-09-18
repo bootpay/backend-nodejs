@@ -1,7 +1,7 @@
 const { getCommerceKeys, ALIMTALK_TEST_DATA } = require('../config.js');
 const keys = getCommerceKeys();
 // Commerce API - 알림톡 채널 변수 예문 사전 갱신
-// PUT /v1/alimtalk/senders/{ksp_id}/variable_examples
+// PUT /alimtalk/senders/{ksp_id}/variable_examples
 // 템플릿 미리보기에서 #{변수} 대신 '홍길동' 처럼 읽히게 하는 표시용 값이다.
 // ⚠️ 발송값이 아니다 — 벤더로 전송되지 않으므로 검수 상태와 무관하다. 보낸 키만 덮어쓴다(부분 갱신).
 

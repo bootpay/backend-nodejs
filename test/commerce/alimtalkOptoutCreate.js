@@ -1,7 +1,7 @@
 const { getCommerceKeys, ALIMTALK_TEST_DATA, alimtalkSideEffectAllowed } = require('../config.js');
 const keys = getCommerceKeys();
 // Commerce API - 알림톡 수신거부 등록
-// POST /v1/alimtalk/optouts
+// POST /alimtalk/optouts
 // 내 프로젝트 스코프로 등록된다(source: api). 같은 번호를 다시 등록해도 멱등이다.
 // ⚠️ 등록하면 그 번호로는 알림톡이 나가지 않는다(3021).
 

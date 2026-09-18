@@ -1,7 +1,7 @@
-// 알림톡 발송 (POST /v1/alimtalk/send · /send/bulk · DELETE /send/:receipt_id)
+// 알림톡 발송 (POST /alimtalk/send · /send/bulk · DELETE /send/:receipt_id)
 
 /**
- * 단건 발송 파라미터 (POST /v1/alimtalk/send)
+ * 단건 발송 파라미터 (POST /alimtalk/send)
  *
  * ⚠️ 실제로 카카오톡이 발송되고 과금된다. 샌드박스가 없다.
  * - **멱등**: 같은 (프로젝트, ref_id) 로 재요청하면 기존 receipt 를 그대로 돌려준다.
@@ -38,7 +38,7 @@ export interface AlimtalkSendBulkRecipient {
 }
 
 /**
- * 벌크 발송 파라미터 (POST /v1/alimtalk/send/bulk) — 1요청 = N수신자
+ * 벌크 발송 파라미터 (POST /alimtalk/send/bulk) — 1요청 = N수신자
  * ⚠️ 수신자 수만큼 실제 발송되고 과금된다.
  * - 쿼터를 넘으면 요청 시점에 **전체 거부**된다(3022) — 일부만 나가지 않는다.
  * - 수신거부 번호는 skipped 이며 과금되지 않고 발송 기록도 만들지 않는다.

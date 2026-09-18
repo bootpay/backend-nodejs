@@ -1,7 +1,7 @@
 const { getCommerceKeys, ALIMTALK_TEST_DATA, alimtalkSideEffectAllowed } = require('../config.js');
 const keys = getCommerceKeys();
 // Commerce API - 알림톡 웹훅 테스트 이벤트 발송
-// POST /v1/alimtalk/webhook/test
+// POST /alimtalk/webhook/test
 // ⚠️ 설정된 URL 로 실제 HTTP 요청이 나간다. 구독 여부와 무관하게 보낸다.
 // 웹훅이 설정돼 있지 않으면 3029.
 

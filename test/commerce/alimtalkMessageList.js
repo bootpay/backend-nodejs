@@ -1,7 +1,7 @@
 const { getCommerceKeys, ALIMTALK_TEST_DATA } = require('../config.js');
 const keys = getCommerceKeys();
 // Commerce API - 알림톡 발송내역 목록 조회
-// GET /v1/alimtalk/messages
+// GET /alimtalk/messages
 // ⚠️ 유료 알림톡만 조회된다(무료 커머스 알림톡은 포함되지 않는다).
 // ⚠️ 기간 기본값은 최근 30일, 최대 조회 폭은 92일이다 — 초과분은 시작일을 당겨 잘라내므로
 //    실제 적용 구간은 응답의 period 로 확인한다.

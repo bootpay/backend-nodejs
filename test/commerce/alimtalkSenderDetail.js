@@ -1,7 +1,7 @@
 const { getCommerceKeys, ALIMTALK_TEST_DATA } = require('../config.js');
 const keys = getCommerceKeys();
 // Commerce API - 알림톡 채널 상세 조회
-// GET /v1/alimtalk/senders/{ksp_id}
+// GET /alimtalk/senders/{ksp_id}
 // ⚠️ 미연동/미존재 채널은 404, 다른 프로젝트의 채널은 403 으로 오며 둘 다 error_code 는 3024 다.
 
 (async () => {

@@ -1,7 +1,7 @@
 const { getCommerceKeys, ALIMTALK_TEST_DATA } = require('../config.js');
 const keys = getCommerceKeys();
 // Commerce API - 알림톡 자체 템플릿 상세 조회
-// GET /v1/alimtalk/templates/{template_id}
+// GET /alimtalk/templates/{template_id}
 // template_id 는 문서 id 이고, ObjectId 형식이 아니면 템플릿 코드로 해석한다.
 // ⚠️ sync 는 서버 기본값이 true 라 조회만 해도 벤더 상태 동기화가 일어난다.
 

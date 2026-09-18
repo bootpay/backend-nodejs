@@ -1,7 +1,7 @@
 const { getCommerceKeys, ALIMTALK_TEST_DATA, alimtalkSideEffectAllowed } = require('../config.js');
 const keys = getCommerceKeys();
 // Commerce API - 알림톡 예약 발송 취소
-// DELETE /v1/alimtalk/send/{receipt_id}
+// DELETE /alimtalk/send/{receipt_id}
 // 접수(READY) 상태의 예약 건만 취소할 수 있다 — 이미 전송에 들어갔으면 3023 이다.
 
 (async () => {

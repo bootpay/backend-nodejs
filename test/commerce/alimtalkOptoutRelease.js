@@ -1,7 +1,7 @@
 const { getCommerceKeys, ALIMTALK_TEST_DATA, alimtalkSideEffectAllowed } = require('../config.js');
 const keys = getCommerceKeys();
 // Commerce API - 알림톡 수신거부 해제
-// DELETE /v1/alimtalk/optouts/{phone}
+// DELETE /alimtalk/optouts/{phone}
 // 내 프로젝트 스코프 건만 해제되며 멱등이다(없어도 성공).
 // ⚠️ 전역 차단은 해제되지 않고 global_blocked: true 로 알려 준다.
 

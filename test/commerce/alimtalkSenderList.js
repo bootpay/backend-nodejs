@@ -1,7 +1,7 @@
 const { getCommerceKeys, ALIMTALK_TEST_DATA } = require('../config.js');
 const keys = getCommerceKeys();
 // Commerce API - 알림톡 연동 채널 목록 조회
-// GET /v1/alimtalk/senders
+// GET /alimtalk/senders
 // 자체 DB 만 조회하며 벤더를 호출하지 않는다.
 
 (async () => {

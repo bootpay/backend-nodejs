@@ -1,7 +1,7 @@
 const { getCommerceKeys, ALIMTALK_TEST_DATA, alimtalkSideEffectAllowed } = require('../config.js');
 const keys = getCommerceKeys();
 // Commerce API - 알림톡 자체 템플릿 수정
-// PUT /v1/alimtalk/templates/{template_id}
+// PUT /alimtalk/templates/{template_id}
 // ⚠️ 부분 수정이 아니다. 보내지 않은 필드는 null 로 덮어써지므로 항상 전체 필드를 보낸다.
 // ⚠️ 수정 가능 상태는 초안 / REG(등록) / REJ(승인반려) / KRR(등록거절) 뿐이다 — APR·REQ 는 거부된다.
 

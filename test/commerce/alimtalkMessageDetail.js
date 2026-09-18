@@ -1,7 +1,7 @@
 const { getCommerceKeys, ALIMTALK_TEST_DATA } = require('../config.js');
 const keys = getCommerceKeys();
 // Commerce API - 알림톡 단건 발송 결과 조회
-// GET /v1/alimtalk/messages/{receipt_id}
+// GET /alimtalk/messages/{receipt_id}
 // 실패 사유는 error_code·error_message 에 담긴다.
 // fallback_type 은 폴백이 꺼진 건이면 null, 켜진 건이면 LMS 다.
 // 다른 프로젝트의 건이거나 없으면 404(3025).

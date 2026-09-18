@@ -1,7 +1,7 @@
 const { getCommerceKeys, ALIMTALK_TEST_DATA } = require('../config.js');
 const keys = getCommerceKeys();
 // Commerce API - 알림톡 기간 집계 조회
-// GET /v1/alimtalk/messages/stats
+// GET /alimtalk/messages/stats
 // ⚠️ billing.unit_price_source 가 'default' 면 잠정 단가다(확정 청구액이 아니다).
 // ⚠️ billing.billable_count 는 성공 − 폴백이다 — 폴백분은 LMS 단가로 따로 계산된다.
 

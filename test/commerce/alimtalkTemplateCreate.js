@@ -1,7 +1,7 @@
 const { getCommerceKeys, ALIMTALK_TEST_DATA, alimtalkSideEffectAllowed } = require('../config.js');
 const keys = getCommerceKeys();
 // Commerce API - 알림톡 자체 템플릿 생성
-// POST /v1/alimtalk/templates
+// POST /alimtalk/templates
 // ⚠️ register 를 false 로 주지 않으면 생성 즉시 대행사·카카오에 실제 등록된다(되돌리려면 삭제해야 한다).
 // ⚠️ 본문 변수는 #{변수명} 형식이고 템플릿 전체에서 최대 40개다.
 

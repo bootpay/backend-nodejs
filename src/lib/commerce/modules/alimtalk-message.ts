@@ -8,7 +8,7 @@ import {
 } from '../types'
 
 /**
- * 알림톡 발송내역·집계 — GET /v1/alimtalk/messages 계열
+ * 알림톡 발송내역·집계 — GET /alimtalk/messages 계열
  *
  * **유료** 알림톡만 조회된다(무료 커머스 알림톡은 포함되지 않는다).
  * 상태는 벤더 결과 동기화로 확정되므로 접수 직후에는 requested 로 보인다.
@@ -22,7 +22,7 @@ export class AlimtalkMessageModule {
 
     /**
      * 발송내역 목록 조회
-     * GET /v1/alimtalk/messages
+     * GET /alimtalk/messages
      * ⚠️ 기간 기본값은 최근 30일이고 최대 조회 폭은 92일이다 — 초과분은 거부하지 않고 시작일을 당겨 잘라낸다.
      *    실제 적용된 구간은 응답의 period 로 확인한다.
      * @param params 조회 파라미터
@@ -35,7 +35,7 @@ export class AlimtalkMessageModule {
 
     /**
      * 기간 집계 조회
-     * GET /v1/alimtalk/messages/stats
+     * GET /alimtalk/messages/stats
      * 일자별 집계 원장에서 읽으므로 응답이 빠르다.
      * ⚠️ billing.unit_price_source 가 'default' 면 **잠정 단가**다(확정 청구액이 아니다).
      * ⚠️ billing.billable_count 는 성공 − 폴백이다 — 폴백분은 LMS 단가로 따로 계산된다.
@@ -49,7 +49,7 @@ export class AlimtalkMessageModule {
 
     /**
      * 단건 발송 결과 조회
-     * GET /v1/alimtalk/messages/{receipt_id}
+     * GET /alimtalk/messages/{receipt_id}
      * 실패 사유는 error_code·error_message 에 담긴다.
      * fallback_type 은 폴백이 꺼진 건이면 null, 켜진 건이면 LMS 다.
      * 다른 프로젝트의 건이거나 없으면 404(3025).

@@ -1,7 +1,7 @@
 const { getCommerceKeys, ALIMTALK_TEST_DATA } = require('../config.js');
 const keys = getCommerceKeys();
 // Commerce API - 알림톡 템플릿 목록 내보내기
-// GET /v1/alimtalk/templates/export
+// GET /alimtalk/templates/export
 // scope: private(기본, 내 채널 자체 템플릿)·official(공식 카탈로그)·all
 // ⚠️ SDK 기본 format 은 json 이다 — 서버 기본은 csv 지만 csv 본문은 JSON 이 아니라 파싱이 깨진다.
 //    csv 를 주면 파싱 없이 { body, content_type } 으로 원문을 돌려준다.

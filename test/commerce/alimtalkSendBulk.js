@@ -1,7 +1,7 @@
 const { getCommerceKeys, ALIMTALK_TEST_DATA, alimtalkSideEffectAllowed } = require('../config.js');
 const keys = getCommerceKeys();
 // Commerce API - 알림톡 벌크 발송
-// POST /v1/alimtalk/send/bulk
+// POST /alimtalk/send/bulk
 // ⚠️ 수신자 수만큼 실제 발송되고 과금된다.
 // - 쿼터를 넘으면 요청 시점에 전체 거부된다(3022) — 일부만 나가지 않는다.
 // - 수신거부 번호는 skipped 이며 과금되지 않고 발송 기록도 만들지 않는다.

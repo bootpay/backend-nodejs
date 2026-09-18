@@ -1,7 +1,7 @@
 const { getCommerceKeys, ALIMTALK_TEST_DATA } = require('../config.js');
 const keys = getCommerceKeys();
 // Commerce API - 부트페이 공식 알림톡 템플릿 검색
-// GET /v1/alimtalk/official
+// GET /alimtalk/official
 // 부트페이가 미리 카카오 승인을 받아 둔 템플릿이라, 그룹키가 등록된 채널이면 검수 없이 즉시 발송된다.
 // msg_type 은 BA(기본형)·EX(부가정보형)만 존재한다 — 그룹 템플릿이라 AD/MI 는 쓸 수 없다.
 

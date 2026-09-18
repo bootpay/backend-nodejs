@@ -1,7 +1,7 @@
 const { getCommerceKeys, ALIMTALK_TEST_DATA, alimtalkSideEffectAllowed } = require('../config.js');
 const keys = getCommerceKeys();
 // Commerce API - 알림톡 웹훅 설정 저장
-// PUT /v1/alimtalk/webhook
+// PUT /alimtalk/webhook
 // url 은 https 만 허용한다(아니면 3028). 최초 저장 시 서명 시크릿이 자동 발급된다.
 // events: 300 발송접수(기본 미구독) / 301 전달성공 / 302 전달실패 / 303 예약취소 /
 //         304 문자(LMS) 대체발송 전환 / 310 검수승인 / 311 검수반려 / 320 수신거부 등록(기본 미구독)

@@ -1,4 +1,4 @@
-// 알림톡 발송결과·검수결과 웹훅 설정 (/v1/alimtalk/webhook 계열)
+// 알림톡 발송결과·검수결과 웹훅 설정 (/alimtalk/webhook 계열)
 //
 // ⚠️ 주문·구독 통합 웹훅(webhook.sendTest)과 완전히 별개다.
 //    알림톡 이벤트를 기존 주문 웹훅 URL 로 태우면 그 수신 서버가 모르는 payload 를 받아 기존 연동이 깨진다.
@@ -25,7 +25,7 @@ export const ALIMTALK_WEBHOOK_EVENT_INSPECT_REJECTED = 311
 export const ALIMTALK_WEBHOOK_EVENT_OPTOUT = 320
 
 /**
- * 웹훅 설정 저장 파라미터 (PUT /v1/alimtalk/webhook)
+ * 웹훅 설정 저장 파라미터 (PUT /alimtalk/webhook)
  * url 은 **https 만** 허용한다(아니면 3028). 최초 저장 시 서명 시크릿이 자동 발급된다.
  */
 export interface AlimtalkWebhookUpdateParams {
@@ -38,7 +38,7 @@ export interface AlimtalkWebhookUpdateParams {
     enabled?: boolean
 }
 
-/** 웹훅 전송 이력 조회 파라미터 (GET /v1/alimtalk/webhook/deliveries) */
+/** 웹훅 전송 이력 조회 파라미터 (GET /alimtalk/webhook/deliveries) */
 export interface AlimtalkWebhookDeliveriesParams {
     page?: number
     /** 서버 기본 20, 최대 100 */

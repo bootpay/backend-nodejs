@@ -1,4 +1,4 @@
-// 가맹점 자체 알림톡 템플릿 CRUD·등록·검수 (/v1/alimtalk/templates 계열)
+// 가맹점 자체 알림톡 템플릿 CRUD·등록·검수 (/alimtalk/templates 계열)
 //
 // 흐름: (초안 생성 → 확인 → 대행사 등록) → 검수 요청 → 승인(APR) → 발송 가능
 // ⚠️ 본문 변수는 `#{변수명}` 형식이고 템플릿 전체에서 최대 40개다.
@@ -9,7 +9,7 @@ export type AlimtalkTemplateEmphasizeType = 'NONE' | 'TEXT' | 'IMAGE' | 'ITEM_LI
 export type AlimtalkTemplateMsgType = 'BA' | 'EX' | 'AD' | 'MI'
 
 /**
- * 자체 템플릿 목록 조회 파라미터 (GET /v1/alimtalk/templates)
+ * 자체 템플릿 목록 조회 파라미터 (GET /alimtalk/templates)
  * ⚠️ 페이지네이션이 없다 — 필터에 걸린 템플릿을 한 번에 모두 돌려준다.
  */
 export interface AlimtalkTemplateListParams {
@@ -57,7 +57,7 @@ export interface AlimtalkTemplateBody {
 }
 
 /**
- * 자체 템플릿 생성 파라미터 (POST /v1/alimtalk/templates)
+ * 자체 템플릿 생성 파라미터 (POST /alimtalk/templates)
  * ⚠️ register 를 false 로 주지 않으면 대행사·카카오에 **실제 등록**된다(되돌리려면 삭제해야 한다).
  */
 export interface AlimtalkTemplateCreateParams extends AlimtalkTemplateBody {
@@ -67,7 +67,7 @@ export interface AlimtalkTemplateCreateParams extends AlimtalkTemplateBody {
 }
 
 /**
- * 자체 템플릿 수정 파라미터 (PUT /v1/alimtalk/templates/:id)
+ * 자체 템플릿 수정 파라미터 (PUT /alimtalk/templates/:id)
  * ⚠️ **부분 수정이 아니다.** 보내지 않은 필드는 null 로 덮어써지므로 항상 전체 필드를 보낸다.
  * ⚠️ 수정 가능 상태는 초안 / REG(등록) / REJ(승인반려) / KRR(등록거절) 뿐이다 — APR·REQ 는 거부된다.
  * storage_image_url 을 빈 값으로 보내면 **이미지 삭제**로 처리되어 벤더에도 전달된다.
@@ -75,7 +75,7 @@ export interface AlimtalkTemplateCreateParams extends AlimtalkTemplateBody {
 export interface AlimtalkTemplateUpdateParams extends AlimtalkTemplateBody {}
 
 /**
- * 템플릿 목록 내보내기 파라미터 (GET /v1/alimtalk/templates/export)
+ * 템플릿 목록 내보내기 파라미터 (GET /alimtalk/templates/export)
  * ⚠️ SDK 기본 format 은 **json** 이다 — 서버 기본은 csv 지만 csv 본문은 JSON 이 아니라서
  *    파싱을 통과하지 못한다. csv 를 주면 파싱 없이 원문 문자열을 담아 돌려준다.
  * 1회 5,000건을 넘으면 3031 로 거부되므로 채널·상태 필터로 좁힌다.

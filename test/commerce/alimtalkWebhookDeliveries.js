@@ -1,7 +1,7 @@
 const { getCommerceKeys, ALIMTALK_TEST_DATA } = require('../config.js');
 const keys = getCommerceKeys();
 // Commerce API - 알림톡 웹훅 전송 이력 조회
-// GET /v1/alimtalk/webhook/deliveries
+// GET /alimtalk/webhook/deliveries
 // 성공·실패를 모두 남긴다.
 
 (async () => {

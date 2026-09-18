@@ -1,7 +1,7 @@
 const { getCommerceKeys, ALIMTALK_TEST_DATA, alimtalkSideEffectAllowed } = require('../config.js');
 const keys = getCommerceKeys();
 // Commerce API - 알림톡 이미지형 템플릿 원본 이미지 업로드
-// POST /v1/alimtalk/templates/image
+// POST /alimtalk/templates/image
 // 돌려받은 image_url 을 템플릿 생성/수정의 storage_image_url 로 넘긴다.
 // 규격을 업로드 전에 서버가 검사한다 — jpg/png · 500KB 이하 · 가로 500px 이상 · 2:1.
 

@@ -1,7 +1,7 @@
 const { getCommerceKeys, ALIMTALK_TEST_DATA, alimtalkSideEffectAllowed } = require('../config.js');
 const keys = getCommerceKeys();
 // Commerce API - 알림톡 단건 발송
-// POST /v1/alimtalk/send
+// POST /alimtalk/send
 // ⚠️ 실제로 카카오톡이 발송되고 과금된다. 샌드박스가 없다.
 // ref_id 는 멱등 키다 — 같은 (프로젝트, ref_id) 로 재요청하면 기존 receipt 를 그대로 돌려준다.
 // ⚠️ fallback 은 미지정과 false 가 다르다 — 미지정이면 프로젝트 기본값, false 는 명시적으로 끈다.
