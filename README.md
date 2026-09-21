@@ -876,8 +876,13 @@ const receipt = await commerce.alimtalkSend.send({
     variables: { user_name: '홍길동' }, // 템플릿의 required_variables 를 모두 채워야 합니다(아니면 3017)
     ref_id: 'order-1001',              // 멱등 키 — 같은 ref_id 로 재요청하면 기존 receipt 를 돌려줍니다
     fallback: false,                   // ⚠️ 미지정과 false 는 다릅니다 (미지정 = 프로젝트 기본값)
-    reserved_at: '2026-09-01T10:00:00+09:00' // 생략하면 즉시 발송
+    reserved_at: '2026-09-01T10:00:00+09:00', // 생략하면 즉시 발송
+    webhook_url: 'https://example.com/hooks/alimtalk' // 이 건의 결과 웹훅만 이 주소로 받습니다
 })
+// webhook_url 을 주면 발송 성공·실패·문자 대체발송·예약취소 웹훅이 그 주소로만 가고
+// 프로젝트 웹훅 설정은 쓰이지 않습니다. https 만 허용하며 2,000자를 넘으면 3028 입니다.
+// 서명은 프로젝트 시크릿으로 하므로, 시크릿만 필요하면 alimtalkWebhook.rotateSecret() 으로 설정 없이 발급받습니다.
+// ⚠️ 같은 ref_id 로 이미 접수·성공한 건을 다시 요청하면 기존 접수가 그대로 돌아와 새 주소는 무시됩니다.
 
 // 벌크 발송 (1요청 = N수신자) — ⚠️ 수신자 수만큼 실제 발송되고 과금됩니다
 // 쿼터를 넘으면 요청 시점에 전체 거부되고(3022), 수신거부 번호는 skipped 로 과금되지 않습니다
@@ -886,7 +891,10 @@ await commerce.alimtalkSend.bulk({
     recipients: [
         { to: '01012345678', ref_id: 'bulk-0001', variables: { user_name: '홍길동' } },
         { to: '01087654321', ref_id: 'bulk-0002', variables: { user_name: '김철수' } }
-    ]
+    ],
+    // webhook_url 도 요청 단위 하나입니다 — 이 요청으로 나간 모든 수신자 건의 결과 웹훅이 그 주소로 갑니다.
+    // 형식이 틀리면(https 아님·2,000자 초과) 요청 전체가 3028 로 거부됩니다.
+    webhook_url: 'https://example.com/hooks/alimtalk'
 })
 
 // 예약 발송 취소 — 접수(READY) 상태의 예약 건만 취소할 수 있습니다(전송 시작 후에는 3023)

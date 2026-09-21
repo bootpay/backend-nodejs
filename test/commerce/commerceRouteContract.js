@@ -547,7 +547,7 @@ function relative(config) {
     // 발송 — ⚠️ fallback 은 false 와 미지정이 다르다. false 는 반드시 실려야 한다.
     const send = await expect(
         'alimtalkSend.send',
-        () => commerce.alimtalkSend.send({ template_code: 'T1', to: '01012345678', variables: { user_name: '홍길동' }, ref_id: 'ref-1', fallback: false }),
+        () => commerce.alimtalkSend.send({ template_code: 'T1', to: '01012345678', variables: { user_name: '홍길동' }, ref_id: 'ref-1', fallback: false, webhook_url: 'https://example.com/hook' }),
         'post',
         'alimtalk/send'
     );
@@ -556,17 +556,19 @@ function relative(config) {
         to: '01012345678',
         variables: { user_name: '홍길동' },
         ref_id: 'ref-1',
-        fallback: false
+        fallback: false,
+        webhook_url: 'https://example.com/hook'
     });
     assertAlimtalkHeaders('alimtalkSend.send', send);
 
     const sendBare = await expect('alimtalkSend.send(bare)', () => commerce.alimtalkSend.send({ template_code: 'T1', to: '01012345678' }), 'post', 'alimtalk/send');
     assert.deepStrictEqual(JSON.parse(sendBare.data), { template_code: 'T1', to: '01012345678' });
     assert.ok(!('fallback' in JSON.parse(sendBare.data)), 'alimtalkSend.send: 미지정 fallback 은 보내지 않는다(프로젝트 기본값을 따른다)');
+    assert.ok(!('webhook_url' in JSON.parse(sendBare.data)), 'alimtalkSend.send: 미지정 webhook_url 은 보내지 않는다(프로젝트 웹훅 설정을 따른다)');
 
     const sendBulk = await expect(
         'alimtalkSend.bulk',
-        () => commerce.alimtalkSend.bulk({ template_code: 'T1', recipients: [{ to: '01012345678', ref_id: 'b-1' }], fallback: true, sender_key: 'sk1' }),
+        () => commerce.alimtalkSend.bulk({ template_code: 'T1', recipients: [{ to: '01012345678', ref_id: 'b-1' }], fallback: true, sender_key: 'sk1', webhook_url: 'https://example.com/hook' }),
         'post',
         'alimtalk/send/bulk'
     );
@@ -574,8 +576,17 @@ function relative(config) {
         template_code: 'T1',
         recipients: [{ to: '01012345678', ref_id: 'b-1' }],
         fallback: true,
-        sender_key: 'sk1'
+        sender_key: 'sk1',
+        webhook_url: 'https://example.com/hook'
     });
+
+    const sendBulkBare = await expect(
+        'alimtalkSend.bulk(bare)',
+        () => commerce.alimtalkSend.bulk({ template_code: 'T1', recipients: [{ to: '01012345678' }] }),
+        'post',
+        'alimtalk/send/bulk'
+    );
+    assert.ok(!('webhook_url' in JSON.parse(sendBulkBare.data)), 'alimtalkSend.bulk: 미지정 webhook_url 은 보내지 않는다');
 
     assertAlimtalkHeaders(
         'alimtalkSend.cancel',

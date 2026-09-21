@@ -28,6 +28,10 @@ export class AlimtalkSendModule {
      * POST /alimtalk/send
      * ⚠️ fallback 은 **미지정(undefined)과 false 가 다르다** — 미지정이면 프로젝트 기본값을 따르고,
      *    false 는 명시적으로 끈다. compact 는 null/undefined 만 걷어내므로 false 는 그대로 전달된다.
+     * webhook_url 을 주면 이 건의 발송 성공·실패·문자 대체발송·예약취소 웹훅이 **그 주소로만** 간다(26-09-21).
+     *    프로젝트 웹훅 설정은 쓰이지 않으며, https 만 허용하고 2,000자를 넘으면 3028 로 거부된다.
+     *    서명은 프로젝트 시크릿으로 하므로 시크릿만 필요하면 alimtalkWebhook.rotateSecret 으로 설정 없이 발급받는다.
+     *    ⚠️ 같은 ref_id 로 이미 접수·성공한 건을 다시 요청하면 기존 접수가 그대로 돌아와 새 주소는 무시된다.
      * @param params 발송 파라미터
      */
     async send(params: AlimtalkSendParams): Promise<BootpayCommerceResponse<AlimtalkSendReceipt>> {
@@ -44,6 +48,8 @@ export class AlimtalkSendModule {
      * - 개별 수신자의 실패는 건별 rejected 로 표시되고 나머지는 정상 발송된다.
      * - 수신거부 번호는 skipped 이며 **과금되지 않고 발송 기록도 만들지 않는다**.
      * - fallback 은 요청 단위로 한 번만 판정한다 — 발신번호가 없으면 요청 전체가 3030 으로 거부된다.
+     * - webhook_url 도 요청 단위 하나다 — 이 요청으로 나간 모든 수신자 건의 결과 웹훅이 그 주소로 간다.
+     *   형식이 틀리면(https 아님·2,000자 초과) 요청 전체가 3028 로 거부된다(26-09-21).
      * @param params 벌크 발송 파라미터
      */
     async bulk(params: AlimtalkSendBulkParams): Promise<BootpayCommerceResponse<AlimtalkSendBulkResponse>> {

@@ -190,6 +190,9 @@ node test/commerce/alimtalkWebhookRotateSecret.js
   주는 것처럼 보인다. 알림톡의 멱등은 발송의 `ref_id` 로만 성립한다.
 - `alimtalkSend.send({ fallback: false })` 의 `false` 는 **미지정과 다르다.** 미지정이면 프로젝트
   기본값을 따르고, `false` 는 문자(LMS) 대체발송을 명시적으로 끈다 — `compact` 가 `false` 를 걷어내면 안 된다.
+- `alimtalkSend.send/bulk` 의 `webhook_url` 은 **그 발송 건의 결과 웹훅만** 그 주소로 보낸다
+  (프로젝트 웹훅 설정은 쓰이지 않는다). `https` 만 허용하고 2,000자를 넘으면 `3028` 이며,
+  벌크는 요청 단위 값 하나라 형식이 틀리면 요청 전체가 거부된다. 미지정이면 키 자체를 보내지 않는다.
 - `alimtalkOfficial.list({ keyword })` 는 서버 정본 키인 **`q`** 로 나간다.
 - `alimtalkTemplate.export({ format: 'csv' })` 는 JSON 파싱 없이 `{ body, content_type }` 을 돌려준다.
   SDK 기본 `format` 은 `json` 이다(서버 기본은 `csv`).

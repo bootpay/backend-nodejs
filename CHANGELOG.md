@@ -1,5 +1,20 @@
 ### Unreleased
 
+#### 알림톡 발송의 건별 웹훅 주소 `webhook_url`
+
+`alimtalkSend.send()` · `alimtalkSend.bulk()` 에 `webhook_url` 을 추가했다. 지금까지 결과 웹훅은
+프로젝트 웹훅 설정으로만 받을 수 있어, 발송 성격별로 다른 주소에서 받으려면 설정을 바꿔야 했다.
+
+- `webhook_url` 을 주면 그 발송의 성공·실패·문자 대체발송·예약취소 웹훅이 **그 주소로만** 간다
+  (프로젝트 웹훅 설정은 쓰이지 않는다). 생략하면 종전대로 프로젝트 설정을 따른다.
+- `https` 만 허용하며 2,000자를 넘으면 **3028** 로 거부된다. 벌크는 요청 단위 값 하나라
+  형식이 틀리면 요청 전체가 3028 이다.
+- 서명은 프로젝트 시크릿으로 한다 — 시크릿만 필요하면 `alimtalkWebhook.rotateSecret()` 으로
+  웹훅 설정 없이 발급받을 수 있다.
+- ⚠️ 같은 `ref_id` 로 이미 접수·성공한 건을 다시 요청하면 기존 접수가 그대로 돌아와 새 주소는 무시된다.
+- 테스트: `test/commerce/commerceRouteContract.js` 가 `webhook_url` 이 그대로 실리는지와
+  미지정시 키가 아예 빠지는지(단건·벌크)를 고정한다.
+
 #### 알림톡 API 를 메시지 호스트로
 
 알림톡 API 는 이제 커머스 API(`api.bootapi.com/v1`)가 아니라 메시지 API(`message.bootapi.com`, 경로에 `/v1` 없음)가 받는다.
