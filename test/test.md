@@ -109,7 +109,55 @@ node test/commerce/webhookSendTest.js
 # 구독 중도인수 / 이전·승계 요청
 node test/commerce/orderSubscriptionPurchase.js
 node test/commerce/orderSubscriptionTransfer.js
+
+# 게시판 — FAQ (쓰기는 supervisor 전용)
+node test/commerce/faqList.js
+node test/commerce/faqListSupervisor.js
+node test/commerce/faqDetail.js
+node test/commerce/faqCreate.js
+node test/commerce/faqUpdate.js
+node test/commerce/faqDelete.js
+
+# 게시판 — 공지사항 (쓰기는 supervisor 전용)
+node test/commerce/noticeList.js
+node test/commerce/noticeListSupervisor.js
+node test/commerce/noticeDetail.js
+node test/commerce/noticeCreate.js
+node test/commerce/noticeUpdate.js
+node test/commerce/noticeDelete.js
+
+# 게시판 — 1:1 문의 (답변은 supervisor 전용)
+node test/commerce/inquiryList.js
+node test/commerce/inquiryListSupervisor.js
+node test/commerce/inquiryDetail.js
+node test/commerce/inquiryCreate.js
+node test/commerce/inquiryUpdate.js
+node test/commerce/inquiryDelete.js
+node test/commerce/inquiryAnswer.js
+
+# 게시판 — 상품문의 (답변은 supervisor 전용)
+node test/commerce/productQnaList.js
+node test/commerce/productQnaListSupervisor.js
+node test/commerce/productQnaDetail.js
+node test/commerce/productQnaCreate.js
+node test/commerce/productQnaCreateGuest.js
+node test/commerce/productQnaUpdate.js
+node test/commerce/productQnaDelete.js
+node test/commerce/productQnaAnswer.js
+
+# 게시판 — 상품평 (판매자 답글은 supervisor 전용)
+node test/commerce/productReviewList.js
+node test/commerce/productReviewListSupervisor.js
+node test/commerce/productReviewDetail.js
+node test/commerce/productReviewCreate.js
+node test/commerce/productReviewUpdate.js
+node test/commerce/productReviewDelete.js
+node test/commerce/productReviewReply.js
 ```
+
+게시판 테스트는 `.env` 의 `BOOTPAY_TEST_COMMERCE_FAQ_ID` · `_NOTICE_ID` · `_INQUIRY_ID` ·
+`_PRODUCT_QNA_ID` · `_PRODUCT_REVIEW_ID` fixture 를 쓴다. 비워 두면 placeholder 가 그대로 나가
+`POST_NOT_FOUND` 등으로 실패한다.
 
 ### 알림톡 테스트 실행 (commerce/ 폴더)
 
@@ -179,8 +227,23 @@ node test/commerce/alimtalkWebhookRotateSecret.js
 ### 라우트 표기 주의
 
 - 언더스코어: `order_subscriptions`, `order_subscription_bills`
-- 하이픈: `order-subscription-requests`, `user-groups`
+- 하이픈: `order-subscription-requests`, `user-groups`, `product-qnas`
+- 상품평은 `product-reviews` 가 아니라 **`reviews`** 다.
 - `requests/ing` 계열은 `resume` 만 `PUT` 이고 나머지(`pause`/`purchase`/`termination`/`transfer`)는 `POST` 다.
+
+### 게시판 endpoint 주의 (`faq` · `notice` · `inquiry` · `productQna` · `productReview`)
+
+- `supervisor: true` 는 전송 값이 아니라 **`BOOTPAY-ROLE: supervisor` 헤더**다. 마찬가지로
+  `user_jwt` 는 **`Bootpay-User-JWT` 헤더**, `idempotency_key` 는 `Idempotency-Key` 헤더로 나간다 —
+  쿼리·바디에 실리면 안 된다.
+- role 은 호출마다 고정된다. FAQ·공지 쓰기와 답변(`inquiry.answer`/`productQna.answer`/
+  `productReview.reply`)은 `supervisor`, 문의·상품평 작성/수정은 `user` 다. 인스턴스 role 을
+  `asManager()` 로 바꿔 놔도 이 값은 바뀌지 않는다.
+- 고객 모드 조회는 몰 설정에서 해당 게시판 사용여부가 꺼져 있으면 `BOARD_FEATURE_DISABLED` 로 거절된다.
+- `inquiry.list({ answered: false })` 는 **미답변만**이고 미지정은 전체다 — `false` 가 걷어내지면 뜻이 바뀐다.
+  `is_display: false` · `is_secret: false` 도 같은 이유로 그대로 실어 보낸다.
+- `productQna.delete` 의 `guest_password` 는 액세스 로그 노출을 막기 위해 **쿼리가 아니라 본문**으로 나간다.
+- `faq.update`/`notice.update`/`productReview.update` 의 `images` 는 보내면 목록 전체를 교체한다(`[]` 면 모두 삭제).
 
 ### 알림톡 endpoint 주의
 

@@ -20,6 +20,11 @@ import { PointModule } from './lib/commerce/modules/point'
 import { CartModule } from './lib/commerce/modules/cart'
 import { StoreModule } from './lib/commerce/modules/store'
 import { MallSettingModule } from './lib/commerce/modules/mall-setting'
+import { FaqModule } from './lib/commerce/modules/faq'
+import { NoticeModule } from './lib/commerce/modules/notice'
+import { InquiryModule } from './lib/commerce/modules/inquiry'
+import { ProductQnaModule } from './lib/commerce/modules/product-qna'
+import { ProductReviewModule } from './lib/commerce/modules/product-review'
 import { WebhookModule } from './lib/commerce/modules/webhook'
 import { AlimtalkMessageModule } from './lib/commerce/modules/alimtalk-message'
 import { AlimtalkOfficialModule } from './lib/commerce/modules/alimtalk-official'
@@ -51,6 +56,11 @@ export class BootpayCommerce extends BootpayCommerceResource {
     public cart!: CartModule
     public store!: StoreModule
     public mallSetting!: MallSettingModule
+    public faq!: FaqModule
+    public notice!: NoticeModule
+    public inquiry!: InquiryModule
+    public productQna!: ProductQnaModule
+    public productReview!: ProductReviewModule
     public webhook!: WebhookModule
     public alimtalkMessage!: AlimtalkMessageModule
     public alimtalkOfficial!: AlimtalkOfficialModule
@@ -85,6 +95,11 @@ export class BootpayCommerce extends BootpayCommerceResource {
         this.cart = new CartModule(this)
         this.store = new StoreModule(this)
         this.mallSetting = new MallSettingModule(this)
+        this.faq = new FaqModule(this)
+        this.notice = new NoticeModule(this)
+        this.inquiry = new InquiryModule(this)
+        this.productQna = new ProductQnaModule(this)
+        this.productReview = new ProductReviewModule(this)
         this.webhook = new WebhookModule(this)
         this.alimtalkMessage = new AlimtalkMessageModule(this)
         this.alimtalkOfficial = new AlimtalkOfficialModule(this)
