@@ -36,6 +36,8 @@ export interface AlimtalkWebhookUpdateParams {
      */
     events?: number[]
     enabled?: boolean
+    /** 건별 재시도 횟수(1~25, 기본 10). 범위 밖이면 11304. 생략하면 기존 값을 유지한다. */
+    retry_count?: number
 }
 
 /** 웹훅 전송 이력 조회 파라미터 (GET /alimtalk/webhook/deliveries) */
@@ -51,6 +53,8 @@ export interface AlimtalkWebhookSetting {
     url?: string
     events?: number[]
     enabled?: boolean
+    /** 건별 재시도 횟수(1~25, 기본 10) */
+    retry_count?: number
     /** 조회시에는 앞 12자만 노출된다 — 원문은 rotateSecret 응답에서만 볼 수 있다 */
     secret?: string
 }

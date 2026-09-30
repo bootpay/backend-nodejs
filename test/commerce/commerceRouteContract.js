@@ -963,11 +963,20 @@ function relative(config) {
 
     const alimtalkWebhookUpdate = await expect(
         'alimtalkWebhook.update',
-        () => commerce.alimtalkWebhook.update({ url: 'https://example.com/hook', events: [301, 302], enabled: true }),
+        () => commerce.alimtalkWebhook.update({ url: 'https://example.com/hook', events: [301, 302], enabled: true, retry_count: 25 }),
         'put',
         'alimtalk/webhook'
     );
-    assert.deepStrictEqual(JSON.parse(alimtalkWebhookUpdate.data), { url: 'https://example.com/hook', events: [301, 302], enabled: true });
+    assert.deepStrictEqual(JSON.parse(alimtalkWebhookUpdate.data), { url: 'https://example.com/hook', events: [301, 302], enabled: true, retry_count: 25 });
+
+    // retry_count 를 생략하면 키 자체가 빠져야 한다 — 서버가 기존 값을 유지하도록
+    const alimtalkWebhookUpdateNoRetry = await expect(
+        'alimtalkWebhook.update (retry_count 생략)',
+        () => commerce.alimtalkWebhook.update({ url: 'https://example.com/hook', enabled: true }),
+        'put',
+        'alimtalk/webhook'
+    );
+    assert.deepStrictEqual(JSON.parse(alimtalkWebhookUpdateNoRetry.data), { url: 'https://example.com/hook', enabled: true });
 
     await expect('alimtalkWebhook.test', () => commerce.alimtalkWebhook.test(), 'post', 'alimtalk/webhook/test');
     await expect('alimtalkWebhook.rotateSecret', () => commerce.alimtalkWebhook.rotateSecret(), 'post', 'alimtalk/webhook/secret');

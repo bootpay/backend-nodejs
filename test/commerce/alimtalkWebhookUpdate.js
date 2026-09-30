@@ -6,6 +6,7 @@ const keys = getCommerceKeys();
 // events: 300 발송접수(기본 미구독) / 301 전달성공 / 302 전달실패 / 303 예약취소 /
 //         304 문자(LMS) 대체발송 전환 / 310 검수승인 / 311 검수반려 / 320 수신거부 등록(기본 미구독)
 // events 를 비우면 기본 구독셋(301·302·303·304·310·311)이 적용된다.
+// retry_count: 건별 재시도 횟수(1~25, 기본 10). 범위 밖이면 11304. 생략하면 기존 값을 유지한다.
 
 (async () => {
     const { BootpayCommerce } = require('../../dist/bootpay-commerce.js')
@@ -24,7 +25,8 @@ const keys = getCommerceKeys();
         const response = await commerce.alimtalkWebhook.update({
             url: ALIMTALK_TEST_DATA.webhook_url,
             events: [301, 302, 304, 310, 311],
-            enabled: true
+            enabled: true,
+            retry_count: 10
         })
         console.log('Alimtalk Webhook Update:', JSON.stringify(response, null, 2))
     } catch (e) {

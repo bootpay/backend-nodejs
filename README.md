@@ -1015,10 +1015,12 @@ await commerce.alimtalkWebhook.detail()
 // events: 300 발송접수(기본 미구독) / 301 전달성공 / 302 전달실패 / 303 예약취소 /
 //         304 문자(LMS) 대체발송 전환 / 310 검수승인 / 311 검수반려 / 320 수신거부 등록(기본 미구독)
 // 비우면 기본 구독셋(301·302·303·304·310·311)이 적용됩니다
+// retry_count: 건별 재시도 횟수(1~25, 기본 10). 범위 밖이면 11304. 생략하면 기존 값을 유지합니다
 await commerce.alimtalkWebhook.update({
     url: 'https://example.com/alimtalk/webhook',
     events: [301, 302, 304, 310, 311],
-    enabled: true
+    enabled: true,
+    retry_count: 10
 })
 
 // 테스트 이벤트 1건 발송 — ⚠️ 설정된 URL 로 실제 HTTP 요청이 나갑니다
