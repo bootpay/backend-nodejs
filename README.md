@@ -43,6 +43,7 @@ node환경에서 작성된 어플리케이션, 프레임워크 등에서 사용�
    - [10-8. 쇼핑몰 회원 세션 관리](#10-8-쇼핑몰-회원-세션-관리)
    - [10-9. 가맹점 정보 조회](#10-9-가맹점-정보-조회)
    - [10-10. 알림톡 (카카오 알림톡)](#10-10-알림톡-카카오-알림톡)
+   - [10-11. 게시판 (공지사항 · FAQ · 1:1문의 · 상품문의 · 상품평)](#10-11-게시판-공지사항--faq--11문의--상품문의--상품평)
 - [Example 프로젝트](#example-프로젝트)
 - [Documentation](#documentation)
 - [기술문의](#기술문의)
@@ -1028,6 +1029,128 @@ await commerce.alimtalkWebhook.rotateSecret()
 
 // 전송 이력 (성공·실패 모두)
 await commerce.alimtalkWebhook.deliveries({ page: 1, limit: 20 })
+```
+
+### 10-11. 게시판 (공지사항 · FAQ · 1:1문의 · 상품문의 · 상품평)
+
+몰 게시판 API 입니다. 조회는 고객 모드(`BOOTPAY-ROLE: user`)가 기본이고,
+운영자로 볼 때는 각 메서드에 `supervisor: true` 를 넘깁니다(전송 값이 아니라 헤더로 나갑니다).
+
+> ⚠️ 고객 모드 조회는 몰 설정에서 해당 게시판 사용여부가 꺼져 있으면 `BOARD_FEATURE_DISABLED` 로 거절됩니다.
+> ⚠️ 회원 식별은 `user_id` · `login_id` · `user_jwt` 중 하나입니다. `user_jwt` 는 `Bootpay-User-JWT` 헤더로 나갑니다.
+
+#### 공지사항 · FAQ
+
+등록·수정·삭제는 supervisor 전용입니다.
+
+```javascript
+// 목록 — 기본 page 1 · limit 20. 운영자는 view: 'all' 로 비공개 글까지 봅니다
+await commerce.notice.list({ page: 1, limit: 20 })
+await commerce.notice.list({ view: 'all', supervisor: true })
+await commerce.faq.list({ keyword: '배송' })
+
+// 단건 — 비공개 글은 supervisor: true 일 때만 보입니다(아니면 404 POST_NOT_FOUND)
+await commerce.notice.detail('NOTICE_ID')
+await commerce.faq.detail('FAQ_ID', { supervisor: true })
+
+// 등록 / 수정 / 삭제 (supervisor 전용)
+// ⚠️ 수정은 보낸 필드만 바뀌고, images 는 보내면 목록 전체를 교체합니다([] 면 모두 삭제)
+await commerce.notice.create({ title: 'SDK 테스트 공지', content: '내용', is_notice: true, is_display: true })
+await commerce.notice.update('NOTICE_ID', { title: 'SDK 테스트 공지 (수정)', is_display: false })
+await commerce.notice.delete('NOTICE_ID')
+
+await commerce.faq.create({ title: '배송은 얼마나 걸리나요?', content: '2~3일 내 도착합니다.', is_display: true })
+await commerce.faq.update('FAQ_ID', { content: '1~2일 내 도착합니다.' })
+await commerce.faq.delete('FAQ_ID')
+```
+
+#### 1:1 문의
+
+```javascript
+// 회원 본인 문의만 조회 / 운영자는 몰 전체 (answered: true 답변완료 · false 미답변 · 미지정 전체)
+await commerce.inquiry.list({ user_id: 'USER_ID', page: 1, limit: 20 })
+await commerce.inquiry.list({ answered: false, supervisor: true })
+
+await commerce.inquiry.detail('INQUIRY_ID', { user_id: 'USER_ID' })
+
+// 작성 — product_id 는 이 몰의 상품, order_id 는 작성 회원의 주문이어야 합니다
+await commerce.inquiry.create({ user_id: 'USER_ID', title: '배송 문의', content: '언제 출고되나요?' })
+
+// 수정은 답변 전만 가능합니다 (답변이 달렸으면 409 INQUIRY_ALREADY_ANSWERED)
+await commerce.inquiry.update('INQUIRY_ID', { user_id: 'USER_ID', content: '출고일을 알려주세요.' })
+await commerce.inquiry.delete('INQUIRY_ID', { user_id: 'USER_ID' })
+
+// 답변 등록·수정 (supervisor 전용) — 없으면 만들고 있으면 바꿉니다
+await commerce.inquiry.answer('INQUIRY_ID', '내일 출고 예정입니다. 감사합니다.')
+```
+
+#### 상품문의
+
+```javascript
+// 고객 모드는 product_id 필수. 다른 사람의 비밀글은 is_viewable: false 로 본문 없이 옵니다
+await commerce.productQna.list({ product_id: 'PRODUCT_ID', page: 1, limit: 20 })
+await commerce.productQna.list({ view: 'all', supervisor: true })
+
+await commerce.productQna.detail('PRODUCT_QNA_ID', { user_id: 'USER_ID' })
+
+// 회원 작성
+await commerce.productQna.create({
+    product_id: 'PRODUCT_ID',
+    user_id: 'USER_ID',
+    title: '사이즈 문의',
+    content: '어떤 사이즈가 맞을까요?',
+    is_secret: false
+})
+
+// 비회원 작성 — 몰이 비회원 작성을 허용할 때만 가능합니다
+await commerce.productQna.create({
+    product_id: 'PRODUCT_ID',
+    title: '재입고 문의',
+    content: '재입고 예정이 있나요?',
+    is_secret: true,
+    guest_name: '비회원',
+    guest_password: '1234'
+})
+
+await commerce.productQna.update('PRODUCT_QNA_ID', { user_id: 'USER_ID', content: '수정한 문의 내용' })
+// guest_password 는 액세스 로그 노출을 막기 위해 쿼리가 아니라 본문으로 나갑니다
+await commerce.productQna.delete('PRODUCT_QNA_ID', { guest_password: '1234' })
+
+// 답변 등록·수정 (supervisor 전용)
+await commerce.productQna.answer('PRODUCT_QNA_ID', '정사이즈로 M 을 추천드립니다.')
+```
+
+#### 상품평
+
+> 상품 상세에 노출하는 공개 상품평 목록은 기존 `GET /v1/products/{product_id}/reviews` 를 씁니다.
+
+```javascript
+// 회원이 쓴 상품평 / 운영자는 몰 전체
+await commerce.productReview.list({ user_id: 'USER_ID', page: 1, limit: 20 })
+await commerce.productReview.list({ view: 'all', supervisor: true, product_id: 'PRODUCT_ID' })
+
+await commerce.productReview.detail('PRODUCT_REVIEW_ID', { user_id: 'USER_ID' })
+
+// 작성 — order_id 는 회원의 구매확정 주문, product_id 는 그 주문에 담긴 상품이어야 합니다
+// images 는 사진 URL 최대 5개입니다 (파일 업로드는 지원하지 않습니다)
+await commerce.productReview.create({
+    user_id: 'USER_ID',
+    order_id: 'ORDER_ID',
+    product_id: 'PRODUCT_ID',
+    rating: 5,
+    content: '배송도 빠르고 품질도 좋아요.',
+    images: ['https://example.com/review-1.jpg']
+})
+
+// 수정은 작성 후 7일 이내만 가능합니다 (지나면 REVIEW_EDIT_TIME_EXPIRED)
+await commerce.productReview.update('PRODUCT_REVIEW_ID', { user_id: 'USER_ID', rating: 4, content: '수정한 후기' })
+
+// 삭제 — 지급된 적립금 회수·상품 통계 차감이 함께 일어납니다
+await commerce.productReview.delete('PRODUCT_REVIEW_ID', { user_id: 'USER_ID' })
+await commerce.productReview.delete('PRODUCT_REVIEW_ID', { reason: '부적절한 내용', supervisor: true })
+
+// 판매자 답글 등록·수정 (supervisor 전용, 10자 이상)
+await commerce.productReview.reply('PRODUCT_REVIEW_ID', '소중한 후기 감사합니다. 또 방문해주세요!')
 ```
 
 더 자세한 Commerce API 사용 예제는 [test/commerce](./test/commerce) 디렉토리를 참고해주세요.

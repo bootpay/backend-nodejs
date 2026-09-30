@@ -1,5 +1,32 @@
 ### 2.14.0
 
+#### 게시판 API 28종 — 공지사항 · FAQ · 1:1문의 · 상품문의 · 상품평
+
+몰 게시판 API 를 SDK 에 추가했다. `commerce.notice` · `commerce.faq` · `commerce.inquiry` ·
+`commerce.productQna` · `commerce.productReview` 5개 모듈이다.
+
+- `notice` / `faq` — `list` / `detail` / `create` / `update` / `delete`.
+  조회는 고객 모드가 기본이고 `supervisor: true` 로 운영자 모드(`view: 'all'` 이면 비공개 글까지)가 된다.
+  등록·수정·삭제는 supervisor 전용이다.
+- `inquiry` — `list` / `detail` / `create` / `update` / `delete` / `answer`.
+  회원 모드는 본인 문의만 보고, `supervisor: true` 면 몰 전체다. 답변(`answer`)은 supervisor 전용이며
+  없으면 만들고 있으면 바꾼다.
+- `productQna` — `list` / `detail` / `create` / `update` / `delete` / `answer`.
+  회원(`user_id`·`login_id`·`user_jwt`) 또는 비회원(`guest_name` + `guest_password`)이 작성한다.
+  ⚠️ `delete` 의 `guest_password` 는 액세스 로그 노출을 막기 위해 **쿼리가 아니라 본문**으로 보낸다.
+- `productReview` — `list` / `detail` / `create` / `update` / `delete` / `reply`.
+  경로가 `product-reviews` 가 아니라 **`reviews`** 다. 상품 상세의 공개 상품평 목록은 기존
+  `GET /v1/products/{product_id}/reviews` 를 그대로 쓴다.
+- `supervisor` · `user_jwt` · `idempotency_key` 는 전송 값이 아니라 헤더(`BOOTPAY-ROLE` ·
+  `Bootpay-User-JWT` · `Idempotency-Key`)로 나간다. role 은 호출마다 고정되므로 인스턴스 role 을
+  `asManager()` 로 바꿔 놔도 게시판 요청의 role 은 바뀌지 않는다.
+- ⚠️ `inquiry.list({ answered: false })`(미답변만) · `is_display: false` · `is_secret: false` 처럼
+  `false` 는 미지정과 뜻이 다르다 — `compact` 가 `null`/`undefined` 만 걷어내므로 그대로 전달된다.
+- 테스트: `test/commerce/commerceRouteContract.js` 가 경로·동사·role·헤더/쿼리/바디 분리를 고정하고,
+  모듈별 실행 스크립트 34종(`faq*` · `notice*` · `inquiry*` · `productQna*` · `productReview*`)을 추가했다.
+  fixture 는 `.env` 의 `BOOTPAY_TEST_COMMERCE_FAQ_ID` · `_NOTICE_ID` · `_INQUIRY_ID` ·
+  `_PRODUCT_QNA_ID` · `_PRODUCT_REVIEW_ID` 로 주입한다.
+
 #### 알림톡 발송의 건별 웹훅 주소 `webhook_url`
 
 `alimtalkSend.send()` · `alimtalkSend.bulk()` 에 `webhook_url` 을 추가했다. 지금까지 결과 웹훅은

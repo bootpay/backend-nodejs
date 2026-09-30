@@ -12,6 +12,8 @@ const { BootpayCommerce } = require('../../dist/bootpay-commerce.js');
 //   · order_subscriptions · order_subscription_bills 는 언더스코어,
 //     order-subscription-requests · user-groups 는 하이픈
 //   · 조정항목 삭제 대상 ID 는 query 가 아니라 body
+//   · 게시판은 faqs · notices · inquiries · product-qnas(하이픈) · reviews(상품평) 다
+//   · 게시판의 supervisor · user_jwt 는 전송 값이 아니라 헤더(BOOTPAY-ROLE · Bootpay-User-JWT)다
 //   · multipart 전송 시 boundary 가 살아 있어야 한다 (인터셉터가 Content-Type 을 덮어쓰면 안 된다)
 
 function header(config, name) {
@@ -449,6 +451,252 @@ function relative(config) {
     assert.strictEqual(header(explicitKey, 'Idempotency-Key'), 'fixed-key');
     // idempotency_key 는 바디에 실리지 않는다
     assert.deepStrictEqual(JSON.parse(explicitKey.data), { name: '카테고리' });
+
+    // ── 게시판: 공지사항 · FAQ · 1:1문의 · 상품문의 · 상품평 ──
+    // 경로가 섞이기 쉽다 — faqs · notices · inquiries 는 그대로지만
+    // 상품문의는 하이픈(product-qnas), 상품평은 product-reviews 가 아니라 reviews 다.
+    // supervisor / user_jwt / idempotency_key 는 전송 값이 아니라 헤더로만 나가야 한다.
+    const faqList = await expect('faq.list', () => commerce.faq.list(), 'get', 'faqs');
+    ['page=1', 'limit=20'].forEach((q) => assert.ok(relative(faqList).includes(q), `faq.list: ${q} 기본값`));
+    assert.strictEqual(header(faqList, 'BOOTPAY-ROLE'), 'user');
+    assert.ok(header(faqList, 'Idempotency-Key'), 'faq.list: Idempotency-Key 자동 생성');
+
+    const faqListSupervisor = await expect(
+        'faq.list(supervisor)',
+        () => commerce.faq.list({ view: 'all', supervisor: true }),
+        'get',
+        'faqs'
+    );
+    assert.strictEqual(header(faqListSupervisor, 'BOOTPAY-ROLE'), 'supervisor');
+    assert.ok(relative(faqListSupervisor).includes('view=all'), 'faq.list: view');
+    assert.ok(!relative(faqListSupervisor).includes('supervisor='), 'faq.list: supervisor 는 헤더지 쿼리가 아니다');
+
+    await expect('faq.detail', () => commerce.faq.detail('f1'), 'get', 'faqs/f1');
+    const faqDetailSupervisor = await expect('faq.detail(supervisor)', () => commerce.faq.detail('f1', { supervisor: true }), 'get', 'faqs/f1');
+    assert.strictEqual(header(faqDetailSupervisor, 'BOOTPAY-ROLE'), 'supervisor', 'faq.detail: 비공개 FAQ 는 supervisor 로만 보인다');
+
+    const faqCreate = await expect(
+        'faq.create',
+        () => commerce.faq.create({ title: '배송 문의', content: '2~3일 걸립니다', is_display: true, idempotency_key: 'faq-key' }),
+        'post',
+        'faqs'
+    );
+    assert.strictEqual(header(faqCreate, 'BOOTPAY-ROLE'), 'supervisor', 'faq.create: 쓰기는 supervisor 전용');
+    assert.strictEqual(header(faqCreate, 'Idempotency-Key'), 'faq-key');
+    assert.deepStrictEqual(JSON.parse(faqCreate.data), { title: '배송 문의', content: '2~3일 걸립니다', is_display: true });
+
+    const faqUpdate = await expect('faq.update', () => commerce.faq.update('f1', { content: '1~2일 걸립니다' }), 'put', 'faqs/f1');
+    assert.strictEqual(header(faqUpdate, 'BOOTPAY-ROLE'), 'supervisor');
+    assert.deepStrictEqual(JSON.parse(faqUpdate.data), { content: '1~2일 걸립니다' });
+    // images 는 [] 도 그대로 실려야 한다 — 빼 버리면 "전부 삭제" 가 조용히 무시된다
+    const faqImagesClear = await expect('faq.update(images: [])', () => commerce.faq.update('f1', { images: [] }), 'put', 'faqs/f1');
+    assert.deepStrictEqual(JSON.parse(faqImagesClear.data), { images: [] });
+
+    const faqDelete = await expect('faq.delete', () => commerce.faq.delete('f1'), 'delete', 'faqs/f1');
+    assert.strictEqual(header(faqDelete, 'BOOTPAY-ROLE'), 'supervisor');
+
+    const noticeList = await expect('notice.list', () => commerce.notice.list(), 'get', 'notices');
+    ['page=1', 'limit=20'].forEach((q) => assert.ok(relative(noticeList).includes(q), `notice.list: ${q} 기본값`));
+    assert.strictEqual(header(noticeList, 'BOOTPAY-ROLE'), 'user');
+
+    const noticeListSupervisor = await expect(
+        'notice.list(supervisor)',
+        () => commerce.notice.list({ view: 'all', supervisor: true }),
+        'get',
+        'notices'
+    );
+    assert.strictEqual(header(noticeListSupervisor, 'BOOTPAY-ROLE'), 'supervisor');
+
+    await expect('notice.detail', () => commerce.notice.detail('n1'), 'get', 'notices/n1');
+
+    const noticeCreate = await expect(
+        'notice.create',
+        () => commerce.notice.create({ title: '공지', content: '내용', is_notice: true, is_display: false }),
+        'post',
+        'notices'
+    );
+    assert.strictEqual(header(noticeCreate, 'BOOTPAY-ROLE'), 'supervisor');
+    // is_display: false 는 미지정과 다르다 — compact 가 걷어내면 비공개 공지가 공개로 등록된다
+    assert.deepStrictEqual(JSON.parse(noticeCreate.data), { title: '공지', content: '내용', is_notice: true, is_display: false });
+
+    const noticeUpdate = await expect('notice.update', () => commerce.notice.update('n1', { title: '공지 (수정)' }), 'put', 'notices/n1');
+    assert.deepStrictEqual(JSON.parse(noticeUpdate.data), { title: '공지 (수정)' });
+    await expect('notice.delete', () => commerce.notice.delete('n1'), 'delete', 'notices/n1');
+
+    // 1:1 문의 — 회원 식별은 쿼리/바디, JWT 는 헤더
+    const inquiryList = await expect(
+        'inquiry.list',
+        () => commerce.inquiry.list({ user_id: 'u1', user_jwt: 'jwt' }),
+        'get',
+        'inquiries'
+    );
+    assert.ok(relative(inquiryList).includes('user_id=u1'), 'inquiry.list: user_id');
+    assert.ok(!relative(inquiryList).includes('user_jwt='), 'inquiry.list: user_jwt 는 헤더지 쿼리가 아니다');
+    assert.strictEqual(header(inquiryList, 'Bootpay-User-JWT'), 'jwt');
+    assert.strictEqual(header(inquiryList, 'BOOTPAY-ROLE'), 'user');
+
+    // answered: false 는 "미답변만" 이다 — 빠지면 전체 조회가 되어 버린다
+    const inquiryUnanswered = await expect(
+        'inquiry.list(answered: false)',
+        () => commerce.inquiry.list({ answered: false, supervisor: true }),
+        'get',
+        'inquiries'
+    );
+    assert.ok(relative(inquiryUnanswered).includes('answered=false'), 'inquiry.list: answered=false');
+    assert.strictEqual(header(inquiryUnanswered, 'BOOTPAY-ROLE'), 'supervisor');
+    const inquiryAll = await expect('inquiry.list(answered 미지정)', () => commerce.inquiry.list(), 'get', 'inquiries');
+    assert.ok(!relative(inquiryAll).includes('answered='), 'inquiry.list: answered 미지정이면 보내지 않는다(전체)');
+
+    const inquiryDetail = await expect('inquiry.detail', () => commerce.inquiry.detail('i1', { user_id: 'u1' }), 'get', 'inquiries/i1');
+    assert.ok(relative(inquiryDetail).includes('user_id=u1'), 'inquiry.detail: user_id');
+
+    const inquiryCreate = await expect(
+        'inquiry.create',
+        () => commerce.inquiry.create({ user_id: 'u1', title: '배송 문의', content: '언제 출고되나요?', user_jwt: 'jwt' }),
+        'post',
+        'inquiries'
+    );
+    assert.strictEqual(header(inquiryCreate, 'BOOTPAY-ROLE'), 'user', 'inquiry.create: 회원 전용');
+    assert.strictEqual(header(inquiryCreate, 'Bootpay-User-JWT'), 'jwt');
+    assert.deepStrictEqual(JSON.parse(inquiryCreate.data), { user_id: 'u1', title: '배송 문의', content: '언제 출고되나요?' });
+
+    // title: '' 는 "제목 삭제" 다 — compact 가 걷어내면 안 된다
+    const inquiryUpdate = await expect(
+        'inquiry.update',
+        () => commerce.inquiry.update('i1', { user_id: 'u1', title: '', content: '출고일을 알려주세요' }),
+        'put',
+        'inquiries/i1'
+    );
+    assert.deepStrictEqual(JSON.parse(inquiryUpdate.data), { user_id: 'u1', title: '', content: '출고일을 알려주세요' });
+
+    const inquiryDelete = await expect('inquiry.delete', () => commerce.inquiry.delete('i1', { user_id: 'u1' }), 'delete', 'inquiries/i1');
+    assert.ok(relative(inquiryDelete).includes('user_id=u1'), 'inquiry.delete: user_id 는 쿼리로 보낸다');
+
+    const inquiryAnswer = await expect('inquiry.answer', () => commerce.inquiry.answer('i1', '내일 출고됩니다'), 'put', 'inquiries/i1/answer');
+    assert.strictEqual(header(inquiryAnswer, 'BOOTPAY-ROLE'), 'supervisor', 'inquiry.answer: 답변은 supervisor 전용');
+    assert.deepStrictEqual(JSON.parse(inquiryAnswer.data), { content: '내일 출고됩니다' });
+
+    // 상품문의 — 경로는 하이픈(product-qnas)
+    const productQnaList = await expect(
+        'productQna.list',
+        () => commerce.productQna.list({ product_id: 'p1' }),
+        'get',
+        'product-qnas'
+    );
+    ['product_id=p1', 'page=1', 'limit=20'].forEach((q) => assert.ok(relative(productQnaList).includes(q), `productQna.list: ${q}`));
+
+    const productQnaAll = await expect(
+        'productQna.list(supervisor)',
+        () => commerce.productQna.list({ view: 'all', supervisor: true }),
+        'get',
+        'product-qnas'
+    );
+    assert.strictEqual(header(productQnaAll, 'BOOTPAY-ROLE'), 'supervisor');
+
+    await expect('productQna.detail', () => commerce.productQna.detail('q1', { user_id: 'u1' }), 'get', 'product-qnas/q1');
+
+    // is_secret: false 는 미지정과 다르다 — 걷어내면 몰 기본값(비밀글)으로 등록될 수 있다
+    const productQnaCreate = await expect(
+        'productQna.create',
+        () => commerce.productQna.create({ product_id: 'p1', content: '사이즈 문의', is_secret: false, user_id: 'u1' }),
+        'post',
+        'product-qnas'
+    );
+    assert.strictEqual(header(productQnaCreate, 'BOOTPAY-ROLE'), 'user');
+    assert.deepStrictEqual(JSON.parse(productQnaCreate.data), { product_id: 'p1', content: '사이즈 문의', is_secret: false, user_id: 'u1' });
+
+    const productQnaGuest = await expect(
+        'productQna.create(guest)',
+        () => commerce.productQna.create({ product_id: 'p1', content: '재입고 문의', guest_name: '비회원', guest_password: '1234' }),
+        'post',
+        'product-qnas'
+    );
+    assert.deepStrictEqual(JSON.parse(productQnaGuest.data), {
+        product_id: 'p1',
+        content: '재입고 문의',
+        guest_name: '비회원',
+        guest_password: '1234'
+    });
+
+    const productQnaUpdate = await expect('productQna.update', () => commerce.productQna.update('q1', { content: '수정' }), 'put', 'product-qnas/q1');
+    assert.deepStrictEqual(JSON.parse(productQnaUpdate.data), { content: '수정' });
+
+    // ⚠️ guest_password 는 쿼리로 나가면 액세스 로그에 남는다 — 본문으로만 보낸다
+    const productQnaDelete = await expect(
+        'productQna.delete',
+        () => commerce.productQna.delete('q1', { guest_password: '1234' }),
+        'delete',
+        'product-qnas/q1'
+    );
+    assert.ok(!relative(productQnaDelete).includes('?'), 'productQna.delete: 쿼리로 보내면 안 된다');
+    assert.deepStrictEqual(JSON.parse(productQnaDelete.data), { guest_password: '1234' });
+
+    const productQnaAnswer = await expect('productQna.answer', () => commerce.productQna.answer('q1', 'M 을 추천드립니다'), 'put', 'product-qnas/q1/answer');
+    assert.strictEqual(header(productQnaAnswer, 'BOOTPAY-ROLE'), 'supervisor');
+    assert.deepStrictEqual(JSON.parse(productQnaAnswer.data), { content: 'M 을 추천드립니다' });
+
+    // 상품평 — 경로는 product-reviews 가 아니라 reviews 다
+    const reviewList = await expect('productReview.list', () => commerce.productReview.list({ user_id: 'u1' }), 'get', 'reviews');
+    ['user_id=u1', 'page=1', 'limit=20'].forEach((q) => assert.ok(relative(reviewList).includes(q), `productReview.list: ${q}`));
+    assert.strictEqual(header(reviewList, 'BOOTPAY-ROLE'), 'user');
+
+    const reviewListSupervisor = await expect(
+        'productReview.list(supervisor)',
+        () => commerce.productReview.list({ view: 'all', supervisor: true, product_id: 'p1' }),
+        'get',
+        'reviews'
+    );
+    assert.strictEqual(header(reviewListSupervisor, 'BOOTPAY-ROLE'), 'supervisor');
+
+    await expect('productReview.detail', () => commerce.productReview.detail('r1', { user_id: 'u1' }), 'get', 'reviews/r1');
+
+    const reviewCreate = await expect(
+        'productReview.create',
+        () => commerce.productReview.create({
+            order_id: 'o1',
+            product_id: 'p1',
+            rating: 5,
+            content: '만족합니다',
+            images: ['https://example.com/review-1.jpg'],
+            user_id: 'u1'
+        }),
+        'post',
+        'reviews'
+    );
+    assert.strictEqual(header(reviewCreate, 'BOOTPAY-ROLE'), 'user', 'productReview.create: 회원 전용');
+    assert.deepStrictEqual(JSON.parse(reviewCreate.data), {
+        order_id: 'o1',
+        product_id: 'p1',
+        rating: 5,
+        content: '만족합니다',
+        images: ['https://example.com/review-1.jpg'],
+        user_id: 'u1'
+    });
+
+    const reviewUpdate = await expect('productReview.update', () => commerce.productReview.update('r1', { rating: 4 }), 'put', 'reviews/r1');
+    assert.deepStrictEqual(JSON.parse(reviewUpdate.data), { rating: 4 });
+
+    const reviewDelete = await expect(
+        'productReview.delete',
+        () => commerce.productReview.delete('r1', { reason: '부적절', supervisor: true }),
+        'delete',
+        'reviews/r1'
+    );
+    assert.ok(relative(reviewDelete).includes('reason='), 'productReview.delete: reason 은 쿼리로 보낸다');
+    assert.strictEqual(header(reviewDelete, 'BOOTPAY-ROLE'), 'supervisor');
+
+    const reviewReply = await expect('productReview.reply', () => commerce.productReview.reply('r1', '소중한 후기 감사합니다'), 'put', 'reviews/r1/reply');
+    assert.strictEqual(header(reviewReply, 'BOOTPAY-ROLE'), 'supervisor');
+    assert.deepStrictEqual(JSON.parse(reviewReply.data), { content: '소중한 후기 감사합니다' });
+
+    // 인스턴스 role 이 바뀌어 있어도 게시판은 호출별 role 로 나간다 (Ruby SDK 와 같은 동작)
+    commerce.asManager();
+    assert.strictEqual(header(await expect('faq.list(asManager)', () => commerce.faq.list(), 'get', 'faqs'), 'BOOTPAY-ROLE'), 'user');
+    assert.strictEqual(
+        header(await expect('notice.create(asManager)', () => commerce.notice.create({ title: '공지', content: '내용' }), 'post', 'notices'), 'BOOTPAY-ROLE'),
+        'supervisor'
+    );
+    commerce.clearRole();
 
     // ── 테스트 웹훅 ──
     const webhookBare = await expect('webhook.sendTest', () => commerce.webhook.sendTest(), 'post', 'webhook/test');
