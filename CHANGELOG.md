@@ -1,4 +1,4 @@
-### Unreleased
+### 2.14.0
 
 #### 알림톡 발송의 건별 웹훅 주소 `webhook_url`
 
@@ -26,6 +26,14 @@
 - 알림톡이 아닌 경로는 기존 `API_ENTRYPOINTS`(`/v1`)로 그대로 나간다.
 - 테스트: `test/commerce/commerceRouteContract.js` 가 경로별 호스트(알림톡 → dev-m, 그 외 → dev-api/v1)와
   mode 별 주소·`setMessageApiUrl` 를 검증한다.
+
+#### 주문 발주 단위 배송 — `order.purchases` · `order.updatePurchases`
+
+- `order.purchases(orderNumber)` — `GET /v1/orders/{order_number}/purchases`. 발주 단위 배송 상태(`d_ts`)를 조회한다.
+- `order.updatePurchases(orderNumber, params)` — `PUT /v1/orders/{order_number}/purchases`. 발송처리(상태·운송장 갱신).
+  발송 완료로 넘기면서 운송장을 넣으면 배송 추적이 자동으로 붙는다.
+- 배송은 주문이 아니라 발주 단위라 `CommerceOrderPurchase` 타입을 따로 둔다. `status`(가맹점 처리 단계)와
+  `d_ts`(택배사가 알려준 단계)는 따로 움직인다.
 
 ### 2.13.1
 
