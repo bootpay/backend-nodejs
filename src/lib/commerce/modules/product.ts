@@ -86,7 +86,7 @@ export class ProductModule {
         idempotencyKey?: string
     ): Promise<BootpayCommerceResponse<CommerceProduct>> {
         const payload = this.compact(product as Record<string, any>)
-        const headers = this.managerHeaders(idempotencyKey)
+        const headers = this.writeHeaders(idempotencyKey)
 
         if (!imagePaths || imagePaths.length === 0) {
             return this.bootpay.post<CommerceProduct>('products', payload, { headers })
@@ -154,7 +154,7 @@ export class ProductModule {
         return this.bootpay.put<CommerceProduct>(
             `products/${product.product_id}`,
             this.compact(product as Record<string, any>),
-            { headers: this.managerHeaders(idempotencyKey) }
+            { headers: this.writeHeaders(idempotencyKey) }
         )
     }
 
@@ -170,7 +170,7 @@ export class ProductModule {
         }
         const { product_id, idempotency_key, ...payload } = params
         return this.bootpay.put<CommerceProduct>(`products/${product_id}/status`, this.compact(payload), {
-            headers: this.managerHeaders(idempotency_key)
+            headers: this.writeHeaders(idempotency_key)
         })
     }
 
@@ -182,18 +182,20 @@ export class ProductModule {
      */
     async delete(productId: string, idempotencyKey?: string): Promise<BootpayCommerceResponse<null>> {
         return this.bootpay.delete<null>(`products/${productId}`, {
-            headers: this.managerHeaders(idempotencyKey)
+            headers: this.writeHeaders(idempotencyKey)
         })
     }
 
     /**
      * 상품 쓰기(등록/수정/삭제/상태변경) 요청 헤더
-     * 서버가 manager scope 를 요구한다.
+     * 26-11-02 BOOTPAY-ROLE manager → user. 서버 스코프는 user:product_create/update/delete/status 뿐이라
+     * manager 로 보내면 manager:product_* 를 찾다 401 API_ROLE_NOT_SUPPORT(-50) 로 막혔다.
+     * 인스턴스 role(asManager() 등)과 무관하게 항상 user 로 고정한다.
      */
-    private managerHeaders(idempotencyKey?: string): Record<string, string> {
+    private writeHeaders(idempotencyKey?: string): Record<string, string> {
         return {
             'Idempotency-Key': idempotencyKey || randomUUID(),
-            'BOOTPAY-ROLE': 'manager'
+            'BOOTPAY-ROLE': 'user'
         }
     }
 

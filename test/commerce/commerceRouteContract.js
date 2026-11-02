@@ -95,9 +95,9 @@ function relative(config) {
     const notify = await expect('invoice.notify(send_types)', () => commerce.invoice.notify('inv1', [1, 3]), 'post', 'invoices/inv1/notify');
     assert.deepStrictEqual(JSON.parse(notify.data), { send_types: [1, 3] });
 
-    // ── 상품 쓰기: manager scope ──
+    // ── 상품 쓰기: user scope (서버 스코프는 user:product_* 뿐 — manager 로 보내면 401 API_ROLE_NOT_SUPPORT) ──
     const productCreate = await expect('product.create', () => commerce.product.create({ name: '상품', display_price: 1000 }), 'post', 'products');
-    assert.strictEqual(header(productCreate, 'BOOTPAY-ROLE'), 'manager');
+    assert.strictEqual(header(productCreate, 'BOOTPAY-ROLE'), 'user');
     assert.ok(String(header(productCreate, 'Content-Type')).includes('application/json'), 'product.create: 이미지 없으면 JSON');
     assert.deepStrictEqual(JSON.parse(productCreate.data), { name: '상품', display_price: 1000 });
 
@@ -126,7 +126,7 @@ function relative(config) {
     assert.strictEqual(header(productDetailJwt, 'Bootpay-User-JWT'), 'jwt-1');
 
     const productUpdate = await expect('product.update', () => commerce.product.update({ product_id: 'p1', stock: 5 }), 'put', 'products/p1');
-    assert.strictEqual(header(productUpdate, 'BOOTPAY-ROLE'), 'manager');
+    assert.strictEqual(header(productUpdate, 'BOOTPAY-ROLE'), 'user');
 
     const productStatus = await expect(
         'product.status',
@@ -134,11 +134,11 @@ function relative(config) {
         'put',
         'products/p1/status'
     );
-    assert.strictEqual(header(productStatus, 'BOOTPAY-ROLE'), 'manager');
+    assert.strictEqual(header(productStatus, 'BOOTPAY-ROLE'), 'user');
     assert.deepStrictEqual(JSON.parse(productStatus.data), { status_sale: true, status_display: false });
 
     const productDelete = await expect('product.delete', () => commerce.product.delete('p1'), 'delete', 'products/p1');
-    assert.strictEqual(header(productDelete, 'BOOTPAY-ROLE'), 'manager');
+    assert.strictEqual(header(productDelete, 'BOOTPAY-ROLE'), 'user');
 
     // ── 상품 multipart: boundary 가 살아 있어야 한다 ──
     const imagePath = path.join(os.tmpdir(), 'bootpay-commerce-route-contract.png');
@@ -153,7 +153,7 @@ function relative(config) {
         const contentType = String(header(multipart, 'Content-Type'));
         assert.ok(contentType.startsWith('multipart/form-data'), 'multipart Content-Type 이 유지되어야 한다');
         assert.ok(contentType.includes('boundary='), 'boundary 가 유실되면 서버가 본문을 null 로 읽는다');
-        assert.strictEqual(header(multipart, 'BOOTPAY-ROLE'), 'manager');
+        assert.strictEqual(header(multipart, 'BOOTPAY-ROLE'), 'user');
     } finally {
         fs.unlinkSync(imagePath);
     }
@@ -715,6 +715,10 @@ function relative(config) {
 
     // 인스턴스 role 이 manager 로 바뀌어 있어도 알림톡은 user 로 나가야 한다
     commerce.asManager();
+
+    // 상품 쓰기도 인스턴스 role 과 무관하게 user 로 고정된다 (서버 스코프가 user:product_* 뿐)
+    const productUpdateAsManager = await expect('product.update(asManager)', () => commerce.product.update({ product_id: 'p1', stock: 1 }), 'put', 'products/p1');
+    assert.strictEqual(header(productUpdateAsManager, 'BOOTPAY-ROLE'), 'user', 'product.update: asManager() 여도 user');
 
     // 발송내역·집계
     const messageList = await expect(
