@@ -33,6 +33,8 @@ import { AlimtalkSendModule } from './lib/commerce/modules/alimtalk-send'
 import { AlimtalkSenderModule } from './lib/commerce/modules/alimtalk-sender'
 import { AlimtalkTemplateModule } from './lib/commerce/modules/alimtalk-template'
 import { AlimtalkWebhookModule } from './lib/commerce/modules/alimtalk-webhook'
+import { DepositModule } from './lib/commerce/modules/deposit'
+import { PayoutModule } from './lib/commerce/modules/payout'
 
 export interface CommerceTokenResponse {
     access_token: string
@@ -69,6 +71,8 @@ export class BootpayCommerce extends BootpayCommerceResource {
     public alimtalkSender!: AlimtalkSenderModule
     public alimtalkTemplate!: AlimtalkTemplateModule
     public alimtalkWebhook!: AlimtalkWebhookModule
+    public deposit!: DepositModule
+    public payout!: PayoutModule
 
     constructor(configuration?: CommerceConfiguration) {
         super()
@@ -108,6 +112,8 @@ export class BootpayCommerce extends BootpayCommerceResource {
         this.alimtalkSender = new AlimtalkSenderModule(this)
         this.alimtalkTemplate = new AlimtalkTemplateModule(this)
         this.alimtalkWebhook = new AlimtalkWebhookModule(this)
+        this.deposit = new DepositModule(this)
+        this.payout = new PayoutModule(this)
     }
 
     /**

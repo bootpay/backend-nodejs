@@ -1155,6 +1155,64 @@ await commerce.productReview.delete('PRODUCT_REVIEW_ID', { reason: '부적절한
 await commerce.productReview.reply('PRODUCT_REVIEW_ID', '소중한 후기 감사합니다. 또 방문해주세요!')
 ```
 
+### 10-12. 뱅크알람 입금대기 (무통장 입금 자동 확인)
+
+가맹점 서버가 아직 입금되지 않은 주문을 등록하면, 판매자 폰의 입금 알림 중 **금액 · 입금자명**이 맞는 것을
+뱅크알람이 그 주문에 연결해 입금을 확인하고 입금 웹훅으로 알립니다.
+전부 supervisor 전용이며, 인스턴스 role 과 무관하게 `BOOTPAY-ROLE: supervisor` 로 나갑니다.
+
+```javascript
+// 판매자 입금 계좌 목록 — { accounts: [{ id, bank_name, account_no, holder, primary }] }, 첫 계좌가 대표 계좌
+const accounts = await commerce.deposit.accounts()
+
+// 웹훅 서명 비밀값 발급 — { secret }. ⚠️ 원문은 이 응답에서만 받습니다. 다시 부르면 바뀝니다
+const webhookSecret = await commerce.deposit.webhookSecret()
+
+// 입금대기 등록 — 같은 merchant_order_id 로 같은 금액·입금자명·계좌를 다시 보내면 기존 주문을 돌려줍니다
+// (하나라도 다르면 18110 BANK_DEPOSIT_MERCHANT_ID_CONFLICT)
+await commerce.deposit.create({
+    merchant_order_id: 'ORDER_1234',
+    price: 15000,
+    depositor: '홍길동',              // 은행 입금 알림과 맞춰 볼 이름
+    buyer_name: '홍길동',             // 미지정시 입금자명
+    buyer_email: 'buyer@example.com', // 주면 입금 안내 · 확인 메일 (무료)
+    account_id: 'ACCOUNT_ID',         // accounts() 의 id. 미지정시 대표 계좌
+    webhook_url: 'https://example.com/hooks/deposit', // 비밀값을 먼저 발급받아야 합니다(18131)
+    // 구매자 알림톡 (유료) — buyer_phone 필수, link 는 https
+    // notify: { deposit_guide: true, deposit_paid: true, link: 'https://example.com/orders/ORDER_1234' },
+})
+
+// 조회 · 취소 — 가맹점 주문번호 또는 부트페이 주문번호
+await commerce.deposit.detail('ORDER_1234')   // status: awaiting · paid · expired · cancelled
+await commerce.deposit.cancel('ORDER_1234')   // 이미 닫힌 주문은 그대로 돌려줍니다
+```
+
+> 입금 웹훅은 `X-Bootpay-Signature: sha256=HMAC_SHA256(secret, "{X-Bootpay-Timestamp}.{raw_body}")` 로 서명됩니다.
+> 이벤트 코드는 `BANK_DEPOSIT_WEBHOOK_EVENT_*` 상수(400~407)를 참고하세요.
+
+### 10-13. 입점사 지급 요청
+
+가맹점 지정 금액(`manual`) 정산 방식의 쇼핑몰이 입점사와 지급액을 정해 지급을 요청합니다.
+요청은 지급 원장에 등록되고, 실제 송금은 부트페이 배치가 약 5분 간격으로 처리합니다.
+전부 supervisor 전용이며, 인스턴스 role 과 무관하게 `BOOTPAY-ROLE: supervisor` 로 나갑니다.
+
+```javascript
+// 지급 요청 — 같은 merchant_payout_id 로 다시 보내면 처음 만든 항목을 그대로 돌려줍니다
+await commerce.payout.create({
+    sub_seller_id: 'SUB_SELLER_ID',        // PG 판매자 등록을 마친 입점사
+    amount: 150000,                         // 1원 이상 정수
+    merchant_payout_id: 'PAYOUT_20261112_001',
+    order_number: 'ORDER_1234',             // 선택
+    payout_date: '2026-11-20',              // 선택, YYYY-MM-DD (미지정시 오늘)
+})
+
+// 조회 — merchant_payout_id 또는 지급 항목 id. status: ready · held · sending · requested · processing · succeeded · failed · cancelled · unknown · void
+await commerce.payout.detail('PAYOUT_20261112_001')
+
+// 목록 — 최근 생성 순, 응답은 항목 배열입니다(전체 개수 없음)
+await commerce.payout.list({ status: 'ready', sub_seller_id: 'SUB_SELLER_ID', from: '2026-11-01', to: '2026-11-30', page: 1, limit: 20 })
+```
+
 더 자세한 Commerce API 사용 예제는 [test/commerce](./test/commerce) 디렉토리를 참고해주세요.
 
 ## Example 프로젝트

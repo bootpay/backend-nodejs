@@ -26,5 +26,7 @@ export * from './alimtalk-send'
 export * from './alimtalk-sender'
 export * from './alimtalk-template'
 export * from './alimtalk-webhook'
+export * from './deposit'
+export * from './payout'
 
 export * from './store'

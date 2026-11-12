@@ -121,6 +121,9 @@ const COMMERCE_TEST_DATA = {
     inquiry_id:                       env('BOOTPAY_TEST_COMMERCE_INQUIRY_ID', 'INQUIRY_ID_HERE'),
     product_qna_id:                   env('BOOTPAY_TEST_COMMERCE_PRODUCT_QNA_ID', 'PRODUCT_QNA_ID_HERE'),
     product_review_id:                env('BOOTPAY_TEST_COMMERCE_PRODUCT_REVIEW_ID', 'PRODUCT_REVIEW_ID_HERE'),
+    deposit_id:                       env('BOOTPAY_TEST_COMMERCE_DEPOSIT_ID', 'DEPOSIT_ID_HERE'),
+    payout_id:                        env('BOOTPAY_TEST_COMMERCE_PAYOUT_ID', 'PAYOUT_ID_HERE'),
+    sub_seller_id:                    env('BOOTPAY_TEST_COMMERCE_SUB_SELLER_ID', 'SUB_SELLER_ID_HERE'),
     charge_key:                       env('BOOTPAY_TEST_COMMERCE_CHARGE_KEY', 'CHARGE_KEY_HERE'),
     keyword:                          env('BOOTPAY_TEST_COMMERCE_KEYWORD', '테스트'),
     s_at:                             env('BOOTPAY_TEST_COMMERCE_S_AT', '2024-01-01'),
@@ -155,6 +158,26 @@ const ALIMTALK_ALLOW_SIDE_EFFECTS = (env('BOOTPAY_TEST_ALIMTALK_LIVE', 'false') 
 function alimtalkSideEffectAllowed(label) {
     if (ALIMTALK_ALLOW_SIDE_EFFECTS) return true;
     console.log(`[skip] ${label} — 실제 발송/등록이 일어난다. 실행하려면 BOOTPAY_TEST_ALIMTALK_LIVE=true 를 설정하세요.`);
+    return false;
+}
+
+// ⚠️ 뱅크알람 입금대기 등록·취소는 실제 주문을 만들거나 닫고, 웹훅 비밀값 발급은 부를 때마다 비밀값을 바꾼다.
+//    그래서 이 스크립트들은 BOOTPAY_TEST_DEPOSIT_LIVE=true 일 때만 실행한다.
+const DEPOSIT_ALLOW_SIDE_EFFECTS = (env('BOOTPAY_TEST_DEPOSIT_LIVE', 'false') || 'false').toLowerCase() === 'true';
+
+function depositSideEffectAllowed(label) {
+    if (DEPOSIT_ALLOW_SIDE_EFFECTS) return true;
+    console.log(`[skip] ${label} — 실제 주문·비밀값이 바뀐다. 실행하려면 BOOTPAY_TEST_DEPOSIT_LIVE=true 를 설정하세요.`);
+    return false;
+}
+
+// ⚠️ 입점사 지급 요청은 지급 원장에 등록되고 배치가 실제로 송금한다.
+//    그래서 이 스크립트는 BOOTPAY_TEST_PAYOUT_LIVE=true 일 때만 실행한다.
+const PAYOUT_ALLOW_SIDE_EFFECTS = (env('BOOTPAY_TEST_PAYOUT_LIVE', 'false') || 'false').toLowerCase() === 'true';
+
+function payoutSideEffectAllowed(label) {
+    if (PAYOUT_ALLOW_SIDE_EFFECTS) return true;
+    console.log(`[skip] ${label} — 실제 지급이 등록·송금된다. 실행하려면 BOOTPAY_TEST_PAYOUT_LIVE=true 를 설정하세요.`);
     return false;
 }
 
@@ -215,6 +238,8 @@ module.exports = {
     ALIMTALK_TEST_DATA,
     ALIMTALK_ALLOW_SIDE_EFFECTS,
     alimtalkSideEffectAllowed,
+    depositSideEffectAllowed,
+    payoutSideEffectAllowed,
     isAlimtalkPlaceholder,
     isCommercePlaceholder,
     getPgKeys,

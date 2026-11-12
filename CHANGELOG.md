@@ -1,3 +1,46 @@
+### 2.15.0
+
+#### 뱅크알람 입금대기 API 5종 — `commerce.deposit`
+
+가맹점 서버가 아직 입금되지 않은 주문을 등록하면, 판매자 폰의 입금 알림 중 금액·입금자명이 맞는 것을
+뱅크알람이 그 주문에 연결해 입금을 확인하고 입금 웹훅으로 알린다.
+
+- `accounts()` — `GET /v1/sdk/deposits/accounts`. 판매자 입금 계좌 목록(첫 계좌가 대표, `primary: true`).
+- `webhookSecret()` — `POST /v1/sdk/deposits/webhook_secret`. 웹훅 서명 비밀값을 새로 발급한다.
+  ⚠️ 원문은 이 응답에서만 오고, 부를 때마다 바뀐다.
+- `create(params)` — `POST /v1/sdk/deposits`. `merchant_order_id` · `price` · `depositor` 필수,
+  `order_name`(미지정시 '무통장 입금') · `memo` · `buyer_name` · `buyer_phone` · `buyer_email` · `account_id` · `webhook_url` ·
+  `notify`(구매자 알림톡, 유료) 선택.
+  같은 `merchant_order_id` 로 금액·입금자명·계좌가 같은 재호출은 기존 주문을 돌려주고, 하나라도 다르면 `18110` 으로 거절된다.
+- `detail(id)` / `cancel(id)` — `GET` · `DELETE /v1/sdk/deposits/{id}`. id 는 가맹점 주문번호 또는 부트페이 주문번호이며
+  경로 구분자가 섞일 수 있어 URL 인코딩한다.
+- 전부 supervisor scope(`order_deposit_*`)라 인스턴스 role 과 무관하게 `BOOTPAY-ROLE: supervisor` 로 나간다.
+  `Idempotency-Key` 는 다른 커머스 요청처럼 미지정 시 자동 생성한다.
+- 웹훅 이벤트 상수 `BANK_DEPOSIT_WEBHOOK_EVENT_*`(400~407)와 응답 타입 `CommerceDeposit` 을 추가했다.
+- 테스트: `commerceRouteContract.js` 에 경로·동사·role·본문을 고정했고, 실행 스크립트 `deposit*.js` 5종을 추가했다.
+
+- `create` 의 `notify` 안에 있는 `null` 도 본문에서 뺀다 (`false` 는 유지).
+
+#### 입점사 지급 요청 API 3종 — `commerce.payout`
+
+가맹점 지정 금액(`manual`) 정산 방식의 쇼핑몰이 입점사와 지급액을 정해 지급 원장에 등록한다. 실제 송금은 부트페이 배치가 한다.
+
+- `create(params)` — `POST /v1/sdk/payouts`. `sub_seller_id` · `amount` · `merchant_payout_id` 필수, `order_number` · `payout_date`(YYYY-MM-DD) 선택.
+  같은 `merchant_payout_id` 재호출은 처음 항목을 돌려준다.
+- `detail(id)` — `GET /v1/sdk/payouts/{id}`. id 는 `merchant_payout_id` 또는 지급 항목 id, URL 인코딩한다.
+- `list(params)` — `GET /v1/sdk/payouts`. `status` · `sub_seller_id` · `from` · `to` · `page` · `limit` 필터. 응답은 항목 배열이다(전체 개수 없음).
+- 전부 supervisor scope(`payout_*`)라 인스턴스 role 과 무관하게 `BOOTPAY-ROLE: supervisor` 로 나간다. `Idempotency-Key` 는 미지정 시 자동 생성한다.
+- 응답 타입 `CommercePayout` · 상태 타입 `PayoutStatus`. 실행 스크립트 `payout*.js` 3종 (`payoutCreate` 는 `BOOTPAY_TEST_PAYOUT_LIVE=true` 일 때만).
+
+#### 상품 등록·수정·삭제·상태변경 `BOOTPAY-ROLE` manager → user (봇 sync `9a8bb2bf`)
+
+`product.create` · `update` · `delete` · `status` 가 `BOOTPAY-ROLE: manager` 로 나가던 것을 `user` 로 바꿨다.
+서버 스코프는 `user:product_*` 만 있어 manager 로 보내면 401 `API_ROLE_NOT_SUPPORT(-50)` 로 막혔다. 인스턴스 role 과 무관하게 항상 `user` 로 보낸다.
+
+#### 알림톡 웹훅 설정에 `retry_count` (봇 sync `e424a9d8`)
+
+`alimtalkWebhook.update` 가 건별 재시도 횟수 `retry_count`(1~25, 기본 10)를 받는다. 생략하면 기존 값을 유지한다.
+
 ### 2.14.0
 
 #### 게시판 API 28종 — 공지사항 · FAQ · 1:1문의 · 상품문의 · 상품평

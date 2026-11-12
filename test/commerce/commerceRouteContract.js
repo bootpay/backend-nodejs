@@ -995,6 +995,92 @@ function relative(config) {
 
     commerce.clearRole();
 
+    // ── 뱅크알람 입금대기: sdk/deposits, 인스턴스 role 과 무관하게 supervisor ──
+    commerce.asManager();
+    const depositAccounts = await expect('deposit.accounts', () => commerce.deposit.accounts(), 'get', 'sdk/deposits/accounts');
+    assert.strictEqual(header(depositAccounts, 'BOOTPAY-ROLE'), 'supervisor');
+    const depositSecret = await expect('deposit.webhookSecret', () => commerce.deposit.webhookSecret(), 'post', 'sdk/deposits/webhook_secret');
+    assert.strictEqual(header(depositSecret, 'BOOTPAY-ROLE'), 'supervisor');
+    const depositCreate = await expect(
+        'deposit.create',
+        () => commerce.deposit.create({
+            merchant_order_id: 'm-1', price: 15000, depositor: '홍길동', account_id: 'acc1', buyer_email: undefined,
+            notify: { deposit_guide: true, deposit_paid: false, link: 'https://example.com/o/m-1' },
+            idempotency_key: 'idem-deposit'
+        }),
+        'post',
+        'sdk/deposits'
+    );
+    assert.strictEqual(header(depositCreate, 'BOOTPAY-ROLE'), 'supervisor');
+    assert.strictEqual(header(depositCreate, 'Idempotency-Key'), 'idem-deposit');
+    assert.deepStrictEqual(JSON.parse(depositCreate.data), {
+        merchant_order_id: 'm-1', price: 15000, depositor: '홍길동', account_id: 'acc1',
+        notify: { deposit_guide: true, deposit_paid: false, link: 'https://example.com/o/m-1' }
+    });
+    const depositDetail = await expect('deposit.detail', () => commerce.deposit.detail('m-1'), 'get', 'sdk/deposits/m-1');
+    assert.strictEqual(header(depositDetail, 'BOOTPAY-ROLE'), 'supervisor');
+    // 가맹점 주문번호는 자유 문자열이라 경로 구분자·쿼리 문자까지 이스케이프한다
+    const escapedId = 'a/b c?d#e한';
+    const escapedUri = 'sdk/deposits/a%2Fb%20c%3Fd%23e%ED%95%9C';
+    await expect('deposit.detail(escape)', () => commerce.deposit.detail(escapedId), 'get', escapedUri);
+    await expect('deposit.cancel(escape)', () => commerce.deposit.cancel(escapedId), 'delete', escapedUri);
+    const depositCancel = await expect('deposit.cancel', () => commerce.deposit.cancel('m-1'), 'delete', 'sdk/deposits/m-1');
+    assert.strictEqual(header(depositCancel, 'BOOTPAY-ROLE'), 'supervisor');
+    const depositCancelKeyed = await expect('deposit.cancel(key)', () => commerce.deposit.cancel('m-1', 'idem-cancel'), 'delete', 'sdk/deposits/m-1');
+    assert.strictEqual(header(depositCancelKeyed, 'Idempotency-Key'), 'idem-cancel');
+    // Idempotency-Key 미지정시 호출마다 새로 만든다
+    const autoKeys = [depositAccounts, depositSecret, depositDetail, depositCancel].map((config) => header(config, 'Idempotency-Key'));
+    autoKeys.forEach((key) => assert.ok(key, 'deposit: Idempotency-Key 자동 생성'));
+    assert.strictEqual(new Set(autoKeys).size, autoKeys.length, 'deposit: 자동 Idempotency-Key 는 호출마다 다르다');
+    assert.strictEqual(commerce.getCurrentRole(), 'manager', 'deposit: 인스턴스 role 은 바뀌지 않는다');
+    // notify 안의 null 은 빼고 false 는 남긴다
+    const depositNotifyNull = await expect(
+        'deposit.create(notify null)',
+        () => commerce.deposit.create({ merchant_order_id: 'm-2', price: 1000, depositor: '홍길동', notify: { deposit_guide: null, deposit_paid: false, link: null } }),
+        'post',
+        'sdk/deposits'
+    );
+    assert.deepStrictEqual(JSON.parse(depositNotifyNull.data), {
+        merchant_order_id: 'm-2', price: 1000, depositor: '홍길동', notify: { deposit_paid: false }
+    });
+    commerce.clearRole();
+
+    // ── 입점사 지급 요청: sdk/payouts, 인스턴스 role 과 무관하게 supervisor ──
+    commerce.asManager();
+    const payoutCreate = await expect(
+        'payout.create',
+        () => commerce.payout.create({
+            sub_seller_id: 'ss-1', amount: 150000, merchant_payout_id: 'mp-1', order_number: undefined,
+            payout_date: '2026-11-20', idempotency_key: 'idem-payout'
+        }),
+        'post',
+        'sdk/payouts'
+    );
+    assert.strictEqual(header(payoutCreate, 'BOOTPAY-ROLE'), 'supervisor');
+    assert.strictEqual(header(payoutCreate, 'Idempotency-Key'), 'idem-payout');
+    assert.deepStrictEqual(JSON.parse(payoutCreate.data), {
+        sub_seller_id: 'ss-1', amount: 150000, merchant_payout_id: 'mp-1', payout_date: '2026-11-20'
+    });
+    const payoutDetail = await expect('payout.detail', () => commerce.payout.detail('mp-1'), 'get', 'sdk/payouts/mp-1');
+    assert.strictEqual(header(payoutDetail, 'BOOTPAY-ROLE'), 'supervisor');
+    await expect('payout.detail(escape)', () => commerce.payout.detail('a/b c?d#e한'), 'get', 'sdk/payouts/a%2Fb%20c%3Fd%23e%ED%95%9C');
+    const payoutListBare = await expect('payout.list', () => commerce.payout.list(), 'get', 'sdk/payouts');
+    assert.strictEqual(header(payoutListBare, 'BOOTPAY-ROLE'), 'supervisor');
+    assert.ok(!relative(payoutListBare).includes('?'), 'payout.list: 미지정 필터는 쿼리에 넣지 않는다');
+    const payoutList = await expect(
+        'payout.list(filter)',
+        () => commerce.payout.list({ status: 'ready', sub_seller_id: 'ss-1', from: '2026-11-01', to: '2026-11-30', page: 2, limit: 50 }),
+        'get',
+        'sdk/payouts'
+    );
+    ['status=ready', 'sub_seller_id=ss-1', 'from=2026-11-01', 'to=2026-11-30', 'page=2', 'limit=50']
+        .forEach((q) => assert.ok(relative(payoutList).includes(q), `payout.list: ${q}`));
+    const payoutKeys = [payoutDetail, payoutListBare, payoutList].map((config) => header(config, 'Idempotency-Key'));
+    payoutKeys.forEach((key) => assert.ok(key, 'payout: Idempotency-Key 자동 생성'));
+    assert.strictEqual(new Set(payoutKeys).size, payoutKeys.length, 'payout: 자동 Idempotency-Key 는 호출마다 다르다');
+    assert.strictEqual(commerce.getCurrentRole(), 'manager', 'payout: 인스턴스 role 은 바뀌지 않는다');
+    commerce.clearRole();
+
     // ── 알림톡 호스트 분기 ──
     // 알림톡만 메시지 API 로 가고, 알림톡이 아닌 경로는 계속 커머스 API(/v1)로 간다.
     assert.strictEqual(commerce.entrypoints('alimtalk/send'), 'https://dev-m.bootapi.com/alimtalk/send');
