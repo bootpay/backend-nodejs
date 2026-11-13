@@ -47,16 +47,17 @@ export class UserModule {
     /**
      * 본인인증 데이터 조회
      * @param standId 인증 ID
+     * @deprecated userAuthenticate 를 쓴다 (같은 엔드포인트 GET /v1/users/authenticate/{id}). 호환용으로 남겨 두며 userAuthenticate 로 위임한다.
      */
     async authenticationData(standId: string): Promise<BootpayCommerceResponse<any>> {
-        return this.bootpay.get<any>(`users/authenticate/${standId}`)
+        return this.userAuthenticate(standId)
     }
 
     /**
      * 가입 이메일 인증 대기 상태 조회 (V1 API)
      * GET /v1/users/authenticate/{user_standby_id}
      * 서버는 이 조회에 스코프 검사를 걸지 않는다(기존 계약 유지). role 은 다른 회원 API 와 맞춰 user 로 보낸다.
-     * ⚠️ authenticationData(standId) 와 같은 엔드포인트다. 이쪽은 verification_context·Idempotency-Key·BOOTPAY-ROLE 을 함께 보낸다.
+     * authenticationData(standId) 는 이 메서드로 위임하는 호환용 별칭이다 (deprecated).
      * @param userStandbyId 가입 대기(user_standby) ID
      * @param verificationContext 인증 컨텍스트 (선택, 미지정시 전송하지 않는다)
      * @param idempotencyKey 미지정시 자동 생성

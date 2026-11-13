@@ -5,7 +5,7 @@
 - `userAuthenticate(userStandbyId, verificationContext?, idempotencyKey?)` — `GET /v1/users/authenticate/{user_standby_id}`.
   `verification_context` 는 선택(미지정시 query 에 넣지 않는다). 서버는 이 조회에 스코프 검사를 걸지 않지만,
   다른 회원 API 와 맞춰 `BOOTPAY-ROLE: user` + `Idempotency-Key`(미지정시 자동 생성)로 보낸다.
-- 같은 엔드포인트를 부르는 기존 `authenticationData(standId)` 는 그대로 유지한다.
+- 기존 `authenticationData(standId)` 는 `userAuthenticate` 로 위임하는 호환용 별칭이 됐다(deprecated) — 이제 `BOOTPAY-ROLE: user`·`Idempotency-Key` 를 함께 보낸다.
 - 테스트: `commerceRouteContract.js` 에 경로·동사·role·query 를 고정했고, 실행 스크립트 `userAuthenticate.js` 를 추가했다.
 
 ### 2.15.1
