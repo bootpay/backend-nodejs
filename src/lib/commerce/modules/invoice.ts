@@ -35,10 +35,17 @@ export class InvoiceModule {
 
     /**
      * 청구서 생성
+     * POST /v1/invoices
+     * 26-11-13 BOOTPAY-ROLE user·Idempotency-Key 고정. 헤더를 안 넘겨 인스턴스 role 을 타던 탓에
+     * asManager() 뒤 호출하면 manager:invoice_create 로 나가 401 API_ROLE_NOT_SUPPORT(-50) 가 났다
+     * (서버 스코프는 user:invoice_create 뿐). list·detail·notify 와 같은 invoiceHeaders 를 쓴다.
      * @param invoice 청구서 정보
+     * @param idempotencyKey 미지정시 자동 생성
      */
-    async create(invoice: CommerceInvoice): Promise<BootpayCommerceResponse<CommerceInvoice>> {
-        return this.bootpay.post<CommerceInvoice>('invoices', invoice)
+    async create(invoice: CommerceInvoice, idempotencyKey?: string): Promise<BootpayCommerceResponse<CommerceInvoice>> {
+        return this.bootpay.post<CommerceInvoice>('invoices', invoice, {
+            headers: this.invoiceHeaders(idempotencyKey)
+        })
     }
 
     /**

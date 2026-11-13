@@ -89,6 +89,14 @@ function relative(config) {
 
     await expect('invoice.detail', () => commerce.invoice.detail('inv1'), 'get', 'invoices/inv1');
 
+    // 청구서 생성도 user 로 고정한다 (서버 스코프는 user:invoice_create 뿐). Idempotency-Key 는 헤더로만 가고 본문엔 넣지 않는다
+    const invoiceCreate = await expect('invoice.create', () => commerce.invoice.create({ name: '청구서', price: 1000 }), 'post', 'invoices');
+    assert.strictEqual(header(invoiceCreate, 'BOOTPAY-ROLE'), 'user');
+    assert.ok(header(invoiceCreate, 'Idempotency-Key'), 'invoice.create: Idempotency-Key 자동 생성');
+    assert.deepStrictEqual(JSON.parse(invoiceCreate.data), { name: '청구서', price: 1000 });
+    const invoiceCreateKeyed = await expect('invoice.create(idempotencyKey)', () => commerce.invoice.create({ name: '청구서', price: 1000 }, 'idem-1'), 'post', 'invoices');
+    assert.strictEqual(header(invoiceCreateKeyed, 'Idempotency-Key'), 'idem-1', 'invoice.create: 넘긴 Idempotency-Key 를 그대로 쓴다');
+
     // send_types 미전달시 body 에 키를 넣지 않는다 (서버가 빈 배열로 처리)
     const notifyBare = await expect('invoice.notify', () => commerce.invoice.notify('inv1'), 'post', 'invoices/inv1/notify');
     assert.deepStrictEqual(JSON.parse(notifyBare.data), {});
@@ -719,6 +727,10 @@ function relative(config) {
     // 상품 쓰기도 인스턴스 role 과 무관하게 user 로 고정된다 (서버 스코프가 user:product_* 뿐)
     const productUpdateAsManager = await expect('product.update(asManager)', () => commerce.product.update({ product_id: 'p1', stock: 1 }), 'put', 'products/p1');
     assert.strictEqual(header(productUpdateAsManager, 'BOOTPAY-ROLE'), 'user', 'product.update: asManager() 여도 user');
+
+    // 청구서 생성도 같다 — 헤더를 안 넘기던 시절엔 asManager() 뒤 manager:invoice_create 로 나가 401 API_ROLE_NOT_SUPPORT(-50) 가 났다
+    const invoiceCreateAsManager = await expect('invoice.create(asManager)', () => commerce.invoice.create({ name: '청구서', price: 1000 }), 'post', 'invoices');
+    assert.strictEqual(header(invoiceCreateAsManager, 'BOOTPAY-ROLE'), 'user', 'invoice.create: asManager() 여도 user');
 
     // 발송내역·집계
     const messageList = await expect(
