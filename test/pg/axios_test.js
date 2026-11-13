@@ -9,8 +9,8 @@ const keys = getPgKeys('production');
     })
     // Legacy fallback:
     // RestClient.setConfiguration({
-    //     application_id: '5b8f6a4d396fa665fdc2b5ea',
-    //     private_key: 'rm6EYECr6aroQVG2ntW0A6LpWnkTgP4uQ3H18sDDUYw='
+    //     application_id: process.env.BOOTPAY_APPLICATION_ID,
+    //     private_key: process.env.BOOTPAY_PRIVATE_KEY
     // })
     let response = await RestClient.getAccessToken()
     // console.log(response)

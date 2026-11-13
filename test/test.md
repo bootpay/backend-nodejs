@@ -13,7 +13,7 @@ const CURRENT_ENV = 'production';
 
 ### 빌드 먼저 실행
 ```bash
-cd /Users/taesupyoon/bootpay/server/sdk/nodejs
+cd backend-nodejs  # 리포 루트
 npm run build
 ```
 
