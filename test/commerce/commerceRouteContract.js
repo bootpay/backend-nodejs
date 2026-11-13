@@ -742,6 +742,20 @@ function relative(config) {
     const invoiceCreateAsManager = await expect('invoice.create(asManager)', () => commerce.invoice.create({ name: '청구서', price: 1000 }), 'post', 'invoices');
     assert.strictEqual(header(invoiceCreateAsManager, 'BOOTPAY-ROLE'), 'user', 'invoice.create: asManager() 여도 user');
 
+    // 발송 정보 조회·발송처리도 같다 — 서버 스코프가 user:order_detail · user:order_purchase_update 뿐이라 asManager() 여도 user 로 고정
+    const purchasesAsManager = await expect('order.purchases(asManager)', () => commerce.order.purchases('ORD-1'), 'get', 'orders/ORD-1/purchases');
+    assert.strictEqual(header(purchasesAsManager, 'BOOTPAY-ROLE'), 'user', 'order.purchases: asManager() 여도 user');
+    assert.ok(header(purchasesAsManager, 'Idempotency-Key'), 'order.purchases: Idempotency-Key 자동 생성');
+    const updatePurchasesAsManager = await expect(
+        'order.updatePurchases(asManager)',
+        () => commerce.order.updatePurchases('ORD-1', [{ order_purchase_number: 'P1', status: 4 }], 'idem-2'),
+        'put',
+        'orders/ORD-1/purchases'
+    );
+    assert.strictEqual(header(updatePurchasesAsManager, 'BOOTPAY-ROLE'), 'user', 'order.updatePurchases: asManager() 여도 user');
+    assert.strictEqual(header(updatePurchasesAsManager, 'Idempotency-Key'), 'idem-2', 'order.updatePurchases: 지정한 Idempotency-Key');
+    assert.deepStrictEqual(JSON.parse(updatePurchasesAsManager.data), { purchases: [{ order_purchase_number: 'P1', status: 4 }] });
+
     // 발송내역·집계
     const messageList = await expect(
         'alimtalkMessage.list',

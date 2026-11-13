@@ -1,5 +1,6 @@
 import { BootpayCommerceResource, BootpayCommerceResponse } from '../../commerce-resource'
 import { CommerceOrder, CommerceOrderPurchase, OrderListParams, OrderPurchaseUpdateItem } from '../types'
+import { randomUUID } from 'crypto'
 
 export class OrderModule {
     private bootpay: BootpayCommerceResource
@@ -59,10 +60,15 @@ export class OrderModule {
      * 주문 상세의 order_purchases 와 같은 값이다. 배송만 확인하려는 서버가
      * 결제·상품·고객까지 받지 않도록 이 면만 떼어 둔 것이다.
      *
+     * BOOTPAY-ROLE 은 인스턴스 역할(asManager 등)과 무관하게 user 로 고정한다 — 서버 스코프가 user 뿐이다.
+     *
      * @param orderNumber 주문번호 (order_id 아님)
+     * @param idempotencyKey 미지정시 자동 생성
      */
-    async purchases(orderNumber: string): Promise<BootpayCommerceResponse<CommerceOrderPurchase[]>> {
-        return this.bootpay.get<CommerceOrderPurchase[]>(`orders/${ orderNumber }/purchases`)
+    async purchases(orderNumber: string, idempotencyKey?: string): Promise<BootpayCommerceResponse<CommerceOrderPurchase[]>> {
+        return this.bootpay.get<CommerceOrderPurchase[]>(`orders/${encodeURIComponent(orderNumber)}/purchases`, {
+            headers: this.userHeaders(idempotencyKey)
+        })
     }
 
     /**
@@ -76,14 +82,20 @@ export class OrderModule {
      * ⚠️ 배송은 주문이 아니라 발주 단위다. 경로의 주문에 딸리지 않은
      *    order_purchase_number 를 섞으면 요청 전체가 ORDER_PURCHASE_NOT_FOUND 로 거절된다.
      *
+     * BOOTPAY-ROLE 은 인스턴스 역할(asManager 등)과 무관하게 user 로 고정한다 — 서버 스코프가 user 뿐이다.
+     *
      * @param orderNumber 주문번호 (order_id 아님)
      * @param purchases 갱신할 발주 목록 (한 번에 최대 50건)
+     * @param idempotencyKey 미지정시 자동 생성
      */
     async updatePurchases(
         orderNumber: string,
-        purchases: OrderPurchaseUpdateItem[]
+        purchases: OrderPurchaseUpdateItem[],
+        idempotencyKey?: string
     ): Promise<BootpayCommerceResponse<CommerceOrderPurchase[]>> {
-        return this.bootpay.put<CommerceOrderPurchase[]>(`orders/${ orderNumber }/purchases`, { purchases })
+        return this.bootpay.put<CommerceOrderPurchase[]>(`orders/${encodeURIComponent(orderNumber)}/purchases`, { purchases }, {
+            headers: this.userHeaders(idempotencyKey)
+        })
     }
 
     /**
@@ -96,5 +108,15 @@ export class OrderModule {
         queryParams.append('user_group_id', userGroupId)
         queryParams.append('search_date', searchDate)
         return this.bootpay.get<any>(`orders/month?${queryParams.toString()}`)
+    }
+
+    /**
+     * 요청 헤더 — Idempotency-Key 는 미지정시 매 호출마다 생성된다.
+     */
+    private userHeaders(idempotencyKey?: string): Record<string, string> {
+        return {
+            'Idempotency-Key': idempotencyKey || randomUUID(),
+            'BOOTPAY-ROLE': 'user'
+        }
     }
 }

@@ -1,5 +1,9 @@
 ### Unreleased
 
+#### 발송 정보 조회·발송처리 role 고정
+
+- `order.purchases` / `order.updatePurchases` 가 인스턴스 역할(asManager 등)을 그대로 실어 401 API_ROLE_NOT_SUPPORT 가 날 수 있었다 → BOOTPAY-ROLE user + Idempotency-Key(선택 인자, 미지정시 자동 생성)로 고정.
+
 #### 가입 이메일 인증 대기 상태 조회 — `commerce.user.userAuthenticate` (`eb76d9c4`)
 
 - `userAuthenticate(userStandbyId, verificationContext?, idempotencyKey?)` — `GET /v1/users/authenticate/{user_standby_id}`.
