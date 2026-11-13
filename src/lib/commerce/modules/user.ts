@@ -53,6 +53,26 @@ export class UserModule {
     }
 
     /**
+     * 가입 이메일 인증 대기 상태 조회 (V1 API)
+     * GET /v1/users/authenticate/{user_standby_id}
+     * 서버는 이 조회에 스코프 검사를 걸지 않는다(기존 계약 유지). role 은 다른 회원 API 와 맞춰 user 로 보낸다.
+     * ⚠️ authenticationData(standId) 와 같은 엔드포인트다. 이쪽은 verification_context·Idempotency-Key·BOOTPAY-ROLE 을 함께 보낸다.
+     * @param userStandbyId 가입 대기(user_standby) ID
+     * @param verificationContext 인증 컨텍스트 (선택, 미지정시 전송하지 않는다)
+     * @param idempotencyKey 미지정시 자동 생성
+     */
+    async userAuthenticate(
+        userStandbyId: string,
+        verificationContext?: string,
+        idempotencyKey?: string
+    ): Promise<BootpayCommerceResponse<any>> {
+        return this.bootpay.get<any>(`users/authenticate/${userStandbyId}`, {
+            headers: { ...this.mallHeaders(undefined, idempotencyKey), 'BOOTPAY-ROLE': 'user' },
+            params: this.compact({ verification_context: verificationContext })
+        })
+    }
+
+    /**
      * 로그인
      * @param loginId 로그인 ID
      * @param loginPw 비밀번호

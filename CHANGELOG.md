@@ -1,3 +1,13 @@
+### Unreleased
+
+#### 가입 이메일 인증 대기 상태 조회 — `commerce.user.userAuthenticate` (`eb76d9c4`)
+
+- `userAuthenticate(userStandbyId, verificationContext?, idempotencyKey?)` — `GET /v1/users/authenticate/{user_standby_id}`.
+  `verification_context` 는 선택(미지정시 query 에 넣지 않는다). 서버는 이 조회에 스코프 검사를 걸지 않지만,
+  다른 회원 API 와 맞춰 `BOOTPAY-ROLE: user` + `Idempotency-Key`(미지정시 자동 생성)로 보낸다.
+- 같은 엔드포인트를 부르는 기존 `authenticationData(standId)` 는 그대로 유지한다.
+- 테스트: `commerceRouteContract.js` 에 경로·동사·role·query 를 고정했고, 실행 스크립트 `userAuthenticate.js` 를 추가했다.
+
 ### 2.15.1
 
 #### 청구서 생성 `BOOTPAY-ROLE` 을 user 로 고정 (`40b5d45`)

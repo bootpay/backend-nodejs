@@ -62,6 +62,16 @@ function relative(config) {
     assert.ok(relative(uidExist).includes('pk=ex_uid_1'), 'uidExist: pk in query');
     assert.strictEqual(header(uidExist, 'BOOTPAY-ROLE'), 'user');
 
+    // 가입 이메일 인증 대기 상태 조회 — verification_context 는 선택(미지정시 query 에 없다)
+    const userAuth = await expect('userAuthenticate', () => commerce.user.userAuthenticate('standby_1', 'join'), 'get', 'users/authenticate/standby_1');
+    assert.strictEqual((userAuth.params || {}).verification_context, 'join', 'userAuthenticate: verification_context in query');
+    assert.strictEqual(header(userAuth, 'BOOTPAY-ROLE'), 'user');
+    assert.ok(header(userAuth, 'Idempotency-Key'), 'userAuthenticate: Idempotency-Key 자동 생성');
+    const userAuthNoCtx = await expect('userAuthenticate(no ctx)', () => commerce.user.userAuthenticate('standby_1'), 'get', 'users/authenticate/standby_1');
+    assert.ok(!('verification_context' in (userAuthNoCtx.params || {})), 'userAuthenticate: verification_context 미지정시 전송 안 함');
+    const userAuthKey = await expect('userAuthenticate(key)', () => commerce.user.userAuthenticate('standby_1', undefined, 'idem-1'), 'get', 'users/authenticate/standby_1');
+    assert.strictEqual(header(userAuthKey, 'Idempotency-Key'), 'idem-1');
+
     // 회원등급 필터는 membership_type 으로 나가야 한다 (member_type 을 보내면 서버가 조용히 무시한다)
     const userList = await expect('user.list(membership_type)', () => commerce.user.list({ membership_type: 2 }), 'get', 'users');
     assert.ok(relative(userList).includes('membership_type=2'), 'user.list: membership_type in query');
