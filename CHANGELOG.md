@@ -1,3 +1,12 @@
+### Unreleased
+
+#### 청구서 생성 `BOOTPAY-ROLE` 을 user 로 고정 (`40b5d45`)
+
+`invoice.create` 가 헤더를 넘기지 않아 인스턴스 role 을 탔다 — `asManager()` 뒤 호출하면 `manager:invoice_create` 로 나가
+401 `API_ROLE_NOT_SUPPORT(-50)` 였다(Sentry #2132). 서버 스코프는 `user:invoice_create` 뿐이다.
+이제 list·detail·notify 와 같이 `user` + `Idempotency-Key`(선택 인자 `idempotencyKey`, 미지정시 자동 생성)로 보낸다.
+go·python·php·java·dotnet 도 같은 수정을 넣었다.
+
 ### 2.15.0
 
 #### 뱅크알람 입금대기 API 5종 — `commerce.deposit`
