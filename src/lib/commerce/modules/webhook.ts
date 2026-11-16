@@ -18,7 +18,7 @@ export class WebhookModule {
     async sendTest(params?: SendTestWebhookParams): Promise<BootpayCommerceResponse<any>> {
         const { idempotency_key, ...payload } = params || {}
         return this.bootpay.post<any>('webhook/test', this.compact(payload), {
-            headers: { 'Idempotency-Key': idempotency_key || randomUUID() }
+            headers: { 'Idempotency-Key': idempotency_key || randomUUID(), 'BOOTPAY-ROLE': 'supervisor' }
         })
     }
 

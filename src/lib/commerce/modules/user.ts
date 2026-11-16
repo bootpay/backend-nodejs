@@ -23,7 +23,9 @@ export class UserModule {
      * @param userId 사용자 ID
      */
     async token(userId: string): Promise<BootpayCommerceResponse<UserTokenResponse>> {
-        return this.bootpay.post<UserTokenResponse>('users/login/token', { user_id: userId })
+        return this.bootpay.post<UserTokenResponse>('users/login/token', { user_id: userId }, {
+            headers: { 'BOOTPAY-ROLE': 'user' }
+        })
     }
 
     /**
@@ -31,7 +33,9 @@ export class UserModule {
      * @param user 사용자 정보
      */
     async join(user: CommerceUser): Promise<BootpayCommerceResponse<CommerceUser>> {
-        return this.bootpay.post<CommerceUser>('users/join', user)
+        return this.bootpay.post<CommerceUser>('users/join', user, {
+            headers: { 'BOOTPAY-ROLE': 'user' }
+        })
     }
 
     /**
@@ -41,7 +45,9 @@ export class UserModule {
      */
     async checkExist(key: string, value: string): Promise<BootpayCommerceResponse<{ exists: boolean }>> {
         const encodedValue = encodeURIComponent(value)
-        return this.bootpay.get<{ exists: boolean }>(`users/join/${key}?pk=${encodedValue}`)
+        return this.bootpay.get<{ exists: boolean }>(`users/join/${key}?pk=${encodedValue}`, {
+            headers: { 'BOOTPAY-ROLE': 'user' }
+        })
     }
 
     /**
@@ -82,7 +88,7 @@ export class UserModule {
         return this.bootpay.post<UserLoginResponse>('users/login', {
             login_id: loginId,
             login_pw: loginPw
-        })
+        }, { headers: { 'BOOTPAY-ROLE': 'user' } })
     }
 
     /**
@@ -182,7 +188,7 @@ export class UserModule {
      * 사용자 목록 조회
      * @param params 조회 파라미터
      */
-    async list(params?: UserListParams): Promise<BootpayCommerceResponse<{ items: CommerceUser[]; total: number }>> {
+    async list(params?: UserListParams): Promise<BootpayCommerceResponse<{ list: CommerceUser[]; count: number }>> {
         const queryParams = new URLSearchParams()
         if (params) {
             if (params.page !== undefined) queryParams.append('page', params.page.toString())
@@ -193,7 +199,9 @@ export class UserModule {
             if (params.type) queryParams.append('type', params.type)
         }
         const query = queryParams.toString()
-        return this.bootpay.get<{ items: CommerceUser[]; total: number }>(`users${query ? `?${query}` : ''}`)
+        return this.bootpay.get<{ list: CommerceUser[]; count: number }>(`users${query ? `?${query}` : ''}`, {
+            headers: { 'BOOTPAY-ROLE': 'user' }
+        })
     }
 
     /**
@@ -201,7 +209,9 @@ export class UserModule {
      * @param userId 사용자 ID
      */
     async detail(userId: string): Promise<BootpayCommerceResponse<CommerceUser>> {
-        return this.bootpay.get<CommerceUser>(`users/${userId}`)
+        return this.bootpay.get<CommerceUser>(`users/${userId}`, {
+            headers: { 'BOOTPAY-ROLE': 'user' }
+        })
     }
 
     /**
@@ -212,7 +222,9 @@ export class UserModule {
         if (!user.user_id) {
             return Promise.reject({ success: false, error: 'user_id is required' })
         }
-        return this.bootpay.put<CommerceUser>(`users/${user.user_id}`, user)
+        return this.bootpay.put<CommerceUser>(`users/${user.user_id}`, user, {
+            headers: { 'BOOTPAY-ROLE': 'user' }
+        })
     }
 
     /**
@@ -220,7 +232,9 @@ export class UserModule {
      * @param userId 사용자 ID
      */
     async delete(userId: string): Promise<BootpayCommerceResponse<null>> {
-        return this.bootpay.delete<null>(`users/${userId}`)
+        return this.bootpay.delete<null>(`users/${userId}`, {
+            headers: { 'BOOTPAY-ROLE': 'user' }
+        })
     }
 
     /**
@@ -238,7 +252,8 @@ export class UserModule {
      */
     private mallHeaders(userJwt?: string, idempotencyKey?: string): Record<string, string> {
         const headers: Record<string, string> = {
-            'Idempotency-Key': idempotencyKey || randomUUID()
+            'Idempotency-Key': idempotencyKey || randomUUID(),
+            'BOOTPAY-ROLE': 'user'
         }
         if (userJwt !== undefined && userJwt !== null && userJwt !== '') {
             headers['Bootpay-User-JWT'] = userJwt

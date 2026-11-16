@@ -23,7 +23,7 @@ export class ProductModule {
      *    keyword 는 26-08-26 서버 변경부터 적용된다 — 그 이전 배포본에서는 무시된다.
      * @param params 조회 파라미터
      */
-    async list(params?: ProductListParams): Promise<BootpayCommerceResponse<{ items: CommerceProduct[]; total: number }>> {
+    async list(params?: ProductListParams): Promise<BootpayCommerceResponse<{ list: CommerceProduct[]; count: number; page?: number; limit?: number; server_now?: string }>> {
         const queryParams = new URLSearchParams()
         if (params) {
             if (params.page !== undefined) queryParams.append('page', params.page.toString())
@@ -40,7 +40,9 @@ export class ProductModule {
             if (params.category_code) queryParams.append('category_code', params.category_code)
         }
         const query = queryParams.toString()
-        return this.bootpay.get<{ items: CommerceProduct[]; total: number }>(`products${query ? `?${query}` : ''}`)
+        return this.bootpay.get<{ list: CommerceProduct[]; count: number; page?: number; limit?: number; server_now?: string }>(`products${query ? `?${query}` : ''}`, {
+            headers: { 'BOOTPAY-ROLE': 'user' }
+        })
     }
 
 
@@ -52,7 +54,7 @@ export class ProductModule {
      *    keyword 를 보내도 조용히 무시된다. 하위호환 때문에 인자는 남겨두되, 검색이 필요하면 서버 지원이 선행되어야 한다.
      * @param params 조회 파라미터
      */
-    async products(params?: MallProductListParams): Promise<BootpayCommerceResponse<{ items: CommerceProduct[]; total: number }>> {
+    async products(params?: MallProductListParams): Promise<BootpayCommerceResponse<{ list: CommerceProduct[]; count: number; page?: number; limit?: number; server_now?: string }>> {
         const { user_jwt, idempotency_key, ...rest } = params || {}
         const queryParams = new URLSearchParams()
         queryParams.append('page', (rest.page === undefined ? 1 : rest.page).toString())
@@ -67,7 +69,7 @@ export class ProductModule {
         if (rest.e_at) queryParams.append('e_at', rest.e_at)
         if (rest.category_code) queryParams.append('category_code', rest.category_code)
 
-        return this.bootpay.get<{ items: CommerceProduct[]; total: number }>(`products?${queryParams.toString()}`, {
+        return this.bootpay.get<{ list: CommerceProduct[]; count: number; page?: number; limit?: number; server_now?: string }>(`products?${queryParams.toString()}`, {
             headers: this.mallHeaders(user_jwt, idempotency_key)
         })
     }
@@ -222,7 +224,8 @@ export class ProductModule {
      */
     private mallHeaders(userJwt?: string, idempotencyKey?: string): Record<string, string> {
         const headers: Record<string, string> = {
-            'Idempotency-Key': idempotencyKey || randomUUID()
+            'Idempotency-Key': idempotencyKey || randomUUID(),
+            'BOOTPAY-ROLE': 'user'
         }
         if (userJwt !== undefined && userJwt !== null && userJwt !== '') {
             headers['Bootpay-User-JWT'] = userJwt

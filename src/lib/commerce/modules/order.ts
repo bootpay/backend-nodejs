@@ -15,7 +15,7 @@ export class OrderModule {
      * limit 은 서버 기본 20 · 최대 50 (초과분은 서버가 50 으로 클램프한다).
      * @param params 조회 파라미터
      */
-    async list(params?: OrderListParams): Promise<BootpayCommerceResponse<{ items: CommerceOrder[]; total: number }>> {
+    async list(params?: OrderListParams): Promise<BootpayCommerceResponse<{ list: CommerceOrder[]; count: number }>> {
         const queryParams = new URLSearchParams()
         if (params) {
             if (params.page !== undefined) queryParams.append('page', params.page.toString())
@@ -42,7 +42,9 @@ export class OrderModule {
             }
         }
         const query = queryParams.toString()
-        return this.bootpay.get<{ items: CommerceOrder[]; total: number }>(`orders${query ? `?${query}` : ''}`)
+        return this.bootpay.get<{ list: CommerceOrder[]; count: number }>(`orders${query ? `?${query}` : ''}`, {
+            headers: { 'BOOTPAY-ROLE': 'user' }
+        })
     }
 
     /**
@@ -50,7 +52,9 @@ export class OrderModule {
      * @param orderId 주문 ID
      */
     async detail(orderId: string): Promise<BootpayCommerceResponse<CommerceOrder>> {
-        return this.bootpay.get<CommerceOrder>(`orders/${orderId}`)
+        return this.bootpay.get<CommerceOrder>(`orders/${orderId}`, {
+            headers: { 'BOOTPAY-ROLE': 'user' }
+        })
     }
 
     /**
@@ -107,7 +111,9 @@ export class OrderModule {
         const queryParams = new URLSearchParams()
         queryParams.append('user_group_id', userGroupId)
         queryParams.append('search_date', searchDate)
-        return this.bootpay.get<any>(`orders/month?${queryParams.toString()}`)
+        return this.bootpay.get<any>(`orders/month?${queryParams.toString()}`, {
+            headers: { 'BOOTPAY-ROLE': 'user' }
+        })
     }
 
     /**

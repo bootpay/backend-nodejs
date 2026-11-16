@@ -42,7 +42,8 @@ export class StoreModule {
      */
     private storeHeaders(idempotencyKey?: string): Record<string, string> {
         return {
-            'Idempotency-Key': idempotencyKey || randomUUID()
+            'Idempotency-Key': idempotencyKey || randomUUID(),
+            'BOOTPAY-ROLE': 'user'
         }
     }
 }

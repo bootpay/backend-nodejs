@@ -98,7 +98,11 @@ export class ProductQnaModule {
         const { supervisor, user_jwt, idempotency_key, ...payload } = params || {}
         return this.bootpay.delete<null>(`product-qnas/${productQnaId}`, {
             data: this.compact(payload),
-            headers: this.productQnaHeaders(supervisor, user_jwt, idempotency_key)
+            headers: this.productQnaHeaders(
+                supervisor || this.bootpay.userOrSupervisorRole() === 'supervisor',
+                user_jwt,
+                idempotency_key
+            )
         })
     }
 

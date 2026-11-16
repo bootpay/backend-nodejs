@@ -16,7 +16,7 @@ export class OrderSubscriptionBillModule {
      * page/limit 미지정시 각각 1 / 20 이 적용된다.
      * @param params 조회 파라미터
      */
-    async list(params?: OrderSubscriptionBillListParams): Promise<BootpayCommerceResponse<{ items: CommerceOrderSubscriptionBill[]; total: number }>> {
+    async list(params?: OrderSubscriptionBillListParams): Promise<BootpayCommerceResponse<{ list: CommerceOrderSubscriptionBill[]; count: number }>> {
         const { idempotency_key, ...rest } = params || {}
         const queryParams = new URLSearchParams()
         if (rest.order_subscription_id) queryParams.append('order_subscription_id', rest.order_subscription_id)
@@ -26,9 +26,9 @@ export class OrderSubscriptionBillModule {
         if (rest.status && rest.status.length > 0) {
             queryParams.append('status', rest.status.join(','))
         }
-        return this.bootpay.get<{ items: CommerceOrderSubscriptionBill[]; total: number }>(
+        return this.bootpay.get<{ list: CommerceOrderSubscriptionBill[]; count: number }>(
             `order_subscription_bills?${queryParams.toString()}`,
-            { headers: this.userHeaders(idempotency_key) }
+            { headers: this.userOrSupervisorHeaders(idempotency_key) }
         )
     }
 
@@ -37,7 +37,9 @@ export class OrderSubscriptionBillModule {
      * @param orderSubscriptionBillId 청구 ID
      */
     async detail(orderSubscriptionBillId: string): Promise<BootpayCommerceResponse<CommerceOrderSubscriptionBill>> {
-        return this.bootpay.get<CommerceOrderSubscriptionBill>(`order_subscription_bills/${orderSubscriptionBillId}`)
+        return this.bootpay.get<CommerceOrderSubscriptionBill>(`order_subscription_bills/${orderSubscriptionBillId}`, {
+            headers: { 'BOOTPAY-ROLE': this.bootpay.userOrSupervisorRole() }
+        })
     }
 
     /**
@@ -50,7 +52,8 @@ export class OrderSubscriptionBillModule {
         }
         return this.bootpay.put<CommerceOrderSubscriptionBill>(
             `order_subscription_bills/${orderSubscriptionBill.order_subscription_bill_id}`,
-            orderSubscriptionBill
+            orderSubscriptionBill,
+            { headers: { 'BOOTPAY-ROLE': 'supervisor' } }
         )
     }
 
@@ -58,10 +61,10 @@ export class OrderSubscriptionBillModule {
      * 빌 조회 요청 헤더
      * Idempotency-Key 는 미지정시 매 호출마다 생성된다.
      */
-    private userHeaders(idempotencyKey?: string): Record<string, string> {
+    private userOrSupervisorHeaders(idempotencyKey?: string): Record<string, string> {
         return {
             'Idempotency-Key': idempotencyKey || randomUUID(),
-            'BOOTPAY-ROLE': 'user'
+            'BOOTPAY-ROLE': this.bootpay.userOrSupervisorRole()
         }
     }
 }

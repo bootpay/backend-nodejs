@@ -33,7 +33,7 @@ export class OrderSubscriptionRequestModule {
      */
     async list(
         params?: OrderSubscriptionRequestListParams
-    ): Promise<BootpayCommerceResponse<{ items: OrderSubscriptionRequest[]; total: number }>> {
+    ): Promise<BootpayCommerceResponse<{ list: OrderSubscriptionRequest[]; count: number; [key: string]: any }>> {
         const { idempotency_key, ...rest } = params || {}
         const queryParams = new URLSearchParams()
         if (rest.project_id) queryParams.append('project_id', rest.project_id)
@@ -48,7 +48,7 @@ export class OrderSubscriptionRequestModule {
         if (rest.user_id) queryParams.append('user_id', rest.user_id)
         if (rest.user_group_id) queryParams.append('user_group_id', rest.user_group_id)
 
-        return this.bootpay.get<{ items: OrderSubscriptionRequest[]; total: number }>(
+        return this.bootpay.get<{ list: OrderSubscriptionRequest[]; count: number; [key: string]: any }>(
             `order-subscription-requests?${queryParams.toString()}`,
             { headers: this.requestHeaders(rest.project_id, idempotency_key) }
         )
@@ -105,7 +105,7 @@ export class OrderSubscriptionRequestModule {
     private requestHeaders(projectId?: string, idempotencyKey?: string): Record<string, string> {
         return {
             'Idempotency-Key': idempotencyKey || randomUUID(),
-            'BOOTPAY-ROLE': projectId ? 'supervisor' : 'user'
+            'BOOTPAY-ROLE': projectId ? 'supervisor' : this.bootpay.userOrSupervisorRole()
         }
     }
 

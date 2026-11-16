@@ -19,20 +19,26 @@ export class CouponModule {
             if (params.limit !== undefined) queryParams.append('limit', params.limit.toString())
         }
         const query = queryParams.toString()
-        return this.bootpay.get<CommerceCoupon[]>(`coupon${query ? `?${query}` : ''}`)
+        return this.bootpay.get<CommerceCoupon[]>(`coupon${query ? `?${query}` : ''}`, {
+            headers: { 'BOOTPAY-ROLE': this.bootpay.userOrSupervisorRole() }
+        })
     }
 
     /**
      * 다운로드 가능한 쿠폰 목록
      */
     async available(): Promise<BootpayCommerceResponse<CommerceCoupon[]>> {
-        return this.bootpay.get<CommerceCoupon[]>('coupon/available')
+        return this.bootpay.get<CommerceCoupon[]>('coupon/available', {
+            headers: { 'BOOTPAY-ROLE': this.bootpay.userOrSupervisorRole() }
+        })
     }
 
     /**
      * 쿠폰 다운로드 (issue_from_template)
      */
     async download(params: CouponDownloadParams): Promise<BootpayCommerceResponse<CommerceCoupon>> {
-        return this.bootpay.post<CommerceCoupon>('coupon/download', params)
+        return this.bootpay.post<CommerceCoupon>('coupon/download', params, {
+            headers: { 'BOOTPAY-ROLE': 'user' }
+        })
     }
 }

@@ -18,6 +18,8 @@ export class CartModule {
     async orderPreview(
         params: OrderPreviewParams = {}
     ): Promise<BootpayCommerceResponse<OrderPreviewResponse>> {
-        return this.bootpay.post<OrderPreviewResponse>('cart/order-preview', params)
+        return this.bootpay.post<OrderPreviewResponse>('cart/order-preview', params, {
+            headers: { 'BOOTPAY-ROLE': 'user' }
+        })
     }
 }

@@ -14,14 +14,16 @@ export class UserGroupModule {
      * @param userGroup 그룹 정보
      */
     async create(userGroup: CommerceUserGroup): Promise<BootpayCommerceResponse<CommerceUserGroup>> {
-        return this.bootpay.post<CommerceUserGroup>('user-groups', userGroup)
+        return this.bootpay.post<CommerceUserGroup>('user-groups', userGroup, {
+            headers: { 'BOOTPAY-ROLE': 'user' }
+        })
     }
 
     /**
      * 사용자 그룹 목록 조회
      * @param params 조회 파라미터
      */
-    async list(params?: UserGroupListParams): Promise<BootpayCommerceResponse<{ items: CommerceUserGroup[]; total: number }>> {
+    async list(params?: UserGroupListParams): Promise<BootpayCommerceResponse<{ list: CommerceUserGroup[]; count: number }>> {
         const queryParams = new URLSearchParams()
         if (params) {
             if (params.page !== undefined) queryParams.append('page', params.page.toString())
@@ -30,7 +32,9 @@ export class UserGroupModule {
             if (params.corporate_type !== undefined) queryParams.append('corporate_type', params.corporate_type.toString())
         }
         const query = queryParams.toString()
-        return this.bootpay.get<{ items: CommerceUserGroup[]; total: number }>(`user-groups${query ? `?${query}` : ''}`)
+        return this.bootpay.get<{ list: CommerceUserGroup[]; count: number }>(`user-groups${query ? `?${query}` : ''}`, {
+            headers: { 'BOOTPAY-ROLE': 'user' }
+        })
     }
 
     /**
@@ -38,7 +42,9 @@ export class UserGroupModule {
      * @param userGroupId 그룹 ID
      */
     async detail(userGroupId: string): Promise<BootpayCommerceResponse<CommerceUserGroup>> {
-        return this.bootpay.get<CommerceUserGroup>(`user-groups/${userGroupId}`)
+        return this.bootpay.get<CommerceUserGroup>(`user-groups/${userGroupId}`, {
+            headers: { 'BOOTPAY-ROLE': 'user' }
+        })
     }
 
     /**
@@ -49,7 +55,9 @@ export class UserGroupModule {
         if (!userGroup.user_group_id) {
             return Promise.reject({ success: false, error: 'user_group_id is required' })
         }
-        return this.bootpay.put<CommerceUserGroup>(`user-groups/${userGroup.user_group_id}`, userGroup)
+        return this.bootpay.put<CommerceUserGroup>(`user-groups/${userGroup.user_group_id}`, userGroup, {
+            headers: { 'BOOTPAY-ROLE': 'user' }
+        })
     }
 
     /**

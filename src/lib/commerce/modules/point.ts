@@ -16,7 +16,9 @@ export class PointModule {
      * 적립금 잔액 조회
      */
     async balance(): Promise<BootpayCommerceResponse<PointBalance>> {
-        return this.bootpay.get<PointBalance>('point/balance')
+        return this.bootpay.get<PointBalance>('point/balance', {
+            headers: { 'BOOTPAY-ROLE': 'user' }
+        })
     }
 
     /**
@@ -35,7 +37,8 @@ export class PointModule {
         }
         const query = queryParams.toString()
         return this.bootpay.get<PointTransactionsResponse>(
-            `point/transactions${query ? `?${query}` : ''}`
+            `point/transactions${query ? `?${query}` : ''}`,
+            { headers: { 'BOOTPAY-ROLE': 'user' } }
         )
     }
 

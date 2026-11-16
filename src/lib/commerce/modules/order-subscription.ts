@@ -176,7 +176,7 @@ export class OrderSubscriptionModule {
      * order_number 로 주문번호 역조회를 할 수 있다.
      * @param params 조회 파라미터
      */
-    async list(params?: OrderSubscriptionListParams): Promise<BootpayCommerceResponse<{ items: CommerceOrderSubscription[]; total: number }>> {
+    async list(params?: OrderSubscriptionListParams): Promise<BootpayCommerceResponse<{ list: CommerceOrderSubscription[]; count: number; [key: string]: any }>> {
         const queryParams = new URLSearchParams()
         if (params) {
             if (params.page !== undefined) queryParams.append('page', params.page.toString())
@@ -193,7 +193,9 @@ export class OrderSubscriptionModule {
             if (params.order_number) queryParams.append('order_number', params.order_number)
         }
         const query = queryParams.toString()
-        return this.bootpay.get<{ items: CommerceOrderSubscription[]; total: number }>(`order_subscriptions${query ? `?${query}` : ''}`)
+        return this.bootpay.get<{ list: CommerceOrderSubscription[]; count: number; [key: string]: any }>(`order_subscriptions${query ? `?${query}` : ''}`, {
+            headers: { 'BOOTPAY-ROLE': 'user' }
+        })
     }
 
     /**
@@ -201,7 +203,9 @@ export class OrderSubscriptionModule {
      * @param orderSubscriptionId 정기구독 ID
      */
     async detail(orderSubscriptionId: string): Promise<BootpayCommerceResponse<CommerceOrderSubscription>> {
-        return this.bootpay.get<CommerceOrderSubscription>(`order_subscriptions/${orderSubscriptionId}`)
+        return this.bootpay.get<CommerceOrderSubscription>(`order_subscriptions/${orderSubscriptionId}`, {
+            headers: { 'BOOTPAY-ROLE': 'user' }
+        })
     }
 
     /**

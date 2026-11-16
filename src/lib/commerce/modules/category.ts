@@ -13,14 +13,18 @@ export class CategoryModule {
      * 카테고리 트리 조회
      */
     async list(): Promise<BootpayCommerceResponse<CommerceCategory[]>> {
-        return this.bootpay.get<CommerceCategory[]>('categories')
+        return this.bootpay.get<CommerceCategory[]>('categories', {
+            headers: { 'BOOTPAY-ROLE': 'user' }
+        })
     }
 
     /**
      * 카테고리 단건 조회
      */
     async detail(categoryId: string): Promise<BootpayCommerceResponse<CommerceCategory>> {
-        return this.bootpay.get<CommerceCategory>(`categories/${categoryId}`)
+        return this.bootpay.get<CommerceCategory>(`categories/${categoryId}`, {
+            headers: { 'BOOTPAY-ROLE': 'user' }
+        })
     }
 
     /**

@@ -18,6 +18,16 @@
 - 기존 `authenticationData(standId)` 는 `userAuthenticate` 로 위임하는 호환용 별칭이 됐다(deprecated) — 이제 `BOOTPAY-ROLE: user`·`Idempotency-Key` 를 함께 보낸다.
 - 테스트: `commerceRouteContract.js` 에 경로·동사·role·query 를 고정했고, 실행 스크립트 `userAuthenticate.js` 를 추가했다.
 
+#### 엔드포인트별 BOOTPAY-ROLE 고정
+
+- 서버가 `"<role>:<scope>"` 를 정확히 비교하므로, role 헤더를 안 넘기던 메서드가 `asManager()` 뒤 401 `API_ROLE_NOT_SUPPORT(-50)` 가 날 수 있었다.
+  → 서버 규칙표대로 모든 commerce 메서드가 인스턴스 role 과 무관하게 `user` / `supervisor` / `manager` 를 명시한다
+  (`order_subscription_bills.update` 는 supervisor 로 고정, `order_subscriptions/{}` 수정은 supervisor).
+- `user_or_supervisor` 엔드포인트(`coupon.list/available`, `faq·notice.detail`, `orderCancel.request`, `orderSubscriptionBill.list/detail`,
+  `orderSubscriptionRequest.list/detail`, `productQna.delete`)는 인스턴스가 supervisor 일 때만 supervisor, 그 밖(manager 등)은 user 로 보낸다.
+  `BootpayCommerceResource.userOrSupervisorRole()` 을 추가했다. 기존 supervisor 호출자는 그대로 동작한다.
+- 테스트: `commerceRouteContract.js` 에 규칙표 기반 점검을 넣었다(manager 모드 → supervisor 모드).
+
 #### SDK 버전 헤더를 package.json 버전으로
 
 - `BOOTPAY-SDK-VERSION` 이 commerce `1.0.0`, PG `2.3.0` 으로 낡아 있었다 → `src/lib/version.ts` 가 `package.json` 의 `version` 을 읽어 둘 다 기본값으로 쓴다(`sdkVersion` 속성명 유지).
@@ -26,6 +36,13 @@
 #### 입금대기 `accounts()`·`detail()` Idempotency-Key
 
 - `deposit.accounts(idempotencyKey?)`, `deposit.detail(depositId, idempotencyKey?)` — 선택 인자. 미지정시 자동 생성, supervisor role 은 그대로.
+
+#### 응답 타입을 실제 응답에 맞춤 (⚠️ 타입만 변경)
+
+- ⚠️ 타입만 바뀌고 런타임 동작은 같다 — `.data`/`.items`/`.total` 을 쓰던 TS 코드는 원래 런타임에서 undefined 였고 이제 컴파일 오류로 드러난다.
+- `BootpayCommerceResponse<T>` 는 `{ success, data }` 래퍼가 아니라 서버 본문 자체(`= T`)다(응답 인터셉터가 `response.data` 를 돌려준다).
+- 목록 응답 타입을 `{ items, total }` → `{ list, count }` 로 고쳤다: `user.list`, `userGroup.list`, `product.list/products`(+ `page`·`limit`·`server_now`),
+  `order.list`, `orderCancel.list`, `orderSubscription.list`(+ 합계 키), `orderSubscriptionBill.list`, `orderSubscriptionRequest.list`(+ 합계 키).
 
 ### 2.15.1
 

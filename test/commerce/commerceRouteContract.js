@@ -1124,6 +1124,139 @@ function relative(config) {
     assert.strictEqual(commerce.getCurrentRole(), 'manager', 'payout: 인스턴스 role 은 바뀌지 않는다');
     commerce.clearRole();
 
+    // ── 엔드포인트별 고정 BOOTPAY-ROLE (서버 role_rules 정본) ──
+    // 인스턴스 role 이 manager 여도 각 endpoint 가 서버가 받는 role 로 나가야 한다(아니면 401 API_ROLE_NOT_SUPPORT -50).
+    //   user · supervisor · manager = 항상 그 값, user_or_supervisor = 인스턴스가 supervisor 일 때만 supervisor(그 밖은 user).
+    // 한 endpoint 당 대표 메서드 하나. 이 SDK 에서 호출 메서드가 없는 규칙 행은 넣지 않는다.
+    const roleRules = [
+        ['cart.orderPreview', () => commerce.cart.orderPreview({ cart_items: [] }), 'post', 'cart/order-preview', 'user'],
+        ['category.list', () => commerce.category.list(), 'get', 'categories', 'user'],
+        ['category.create', () => commerce.category.create({ name: 'c' }), 'post', 'categories', 'supervisor'],
+        ['category.detail', () => commerce.category.detail('c1'), 'get', 'categories/c1', 'user'],
+        ['category.destroy', () => commerce.category.destroy('c1'), 'delete', 'categories/c1', 'supervisor'],
+        ['category.update', () => commerce.category.update({ category_id: 'c1', name: 'x' }), 'put', 'categories/c1', 'supervisor'],
+        ['coupon.list', () => commerce.coupon.list(), 'get', 'coupon', 'user_or_supervisor'],
+        ['coupon.available', () => commerce.coupon.available(), 'get', 'coupon/available', 'user_or_supervisor'],
+        ['coupon.download', () => commerce.coupon.download({ coupon_template_id: 't1' }), 'post', 'coupon/download', 'user'],
+        ['deposit.create', () => commerce.deposit.create({ merchant_order_id: 'm1' }), 'post', 'sdk/deposits', 'supervisor'],
+        ['deposit.accounts', () => commerce.deposit.accounts(), 'get', 'sdk/deposits/accounts', 'supervisor'],
+        ['deposit.webhookSecret', () => commerce.deposit.webhookSecret(), 'post', 'sdk/deposits/webhook_secret', 'supervisor'],
+        ['deposit.detail', () => commerce.deposit.detail('d1'), 'get', 'sdk/deposits/d1', 'supervisor'],
+        ['deposit.cancel', () => commerce.deposit.cancel('d1'), 'delete', 'sdk/deposits/d1', 'supervisor'],
+        ['faq.create', () => commerce.faq.create({ title: 't', content: 'c' }), 'post', 'faqs', 'supervisor'],
+        ['faq.delete', () => commerce.faq.delete('f1'), 'delete', 'faqs/f1', 'supervisor'],
+        ['faq.detail', () => commerce.faq.detail('f1'), 'get', 'faqs/f1', 'user_or_supervisor'],
+        ['faq.update', () => commerce.faq.update('f1', { title: 't' }), 'put', 'faqs/f1', 'supervisor'],
+        ['inquiry.create', () => commerce.inquiry.create({ title: 't', content: 'c' }), 'post', 'inquiries', 'user'],
+        ['inquiry.update', () => commerce.inquiry.update('i1', { title: 't' }), 'put', 'inquiries/i1', 'user'],
+        ['inquiry.answer', () => commerce.inquiry.answer('i1', '답변'), 'put', 'inquiries/i1/answer', 'supervisor'],
+        ['invoice.create', () => commerce.invoice.create({ name: '청구서', price: 1000 }), 'post', 'invoices', 'user'],
+        ['invoice.list', () => commerce.invoice.list(), 'get', 'invoices', 'user'],
+        ['invoice.detail', () => commerce.invoice.detail('inv1'), 'get', 'invoices/inv1', 'user'],
+        ['invoice.notify', () => commerce.invoice.notify('inv1'), 'post', 'invoices/inv1/notify', 'user'],
+        ['mallSetting.getMallSetting', () => commerce.mallSetting.getMallSetting(), 'get', 'mall-setting', 'supervisor'],
+        ['mallSetting.updateMallSetting', () => commerce.mallSetting.updateMallSetting({}), 'put', 'mall-setting', 'supervisor'],
+        ['notice.create', () => commerce.notice.create({ title: 't', content: 'c' }), 'post', 'notices', 'supervisor'],
+        ['notice.detail', () => commerce.notice.detail('n1'), 'get', 'notices/n1', 'user_or_supervisor'],
+        ['notice.delete', () => commerce.notice.delete('n1'), 'delete', 'notices/n1', 'supervisor'],
+        ['notice.update', () => commerce.notice.update('n1', { title: 't' }), 'put', 'notices/n1', 'supervisor'],
+        ['orderCancel.request', () => commerce.orderCancel.request({ order_number: 'o1' }), 'post', 'order/cancel', 'user_or_supervisor'],
+        ['orderCancel.list', () => commerce.orderCancel.list({ order_number: 'o1' }), 'get', 'order/cancel', 'user'],
+        ['orderCancel.approve', () => commerce.orderCancel.approve({ order_cancellation_request_id: 'c1' }), 'put', 'order/cancel/c1/approve', 'supervisor'],
+        ['orderCancel.reject', () => commerce.orderCancel.reject({ order_cancellation_request_id: 'c1' }), 'put', 'order/cancel/c1/reject', 'supervisor'],
+        ['orderCancel.withdraw', () => commerce.orderCancel.withdraw('c1'), 'put', 'order/cancel/c1/withdraw', 'user'],
+        ['orderSubscriptionAdjustment.create', () => commerce.orderSubscriptionAdjustment.create('s1', { name: '할인' }), 'post', 'order_subscriptions/s1/adjustments', 'supervisor'],
+        ['orderSubscriptionAdjustment.delete', () => commerce.orderSubscriptionAdjustment.delete('s1', 'a1'), 'delete', 'order_subscriptions/s1/adjustments', 'supervisor'],
+        ['orderSubscriptionAdjustment.update', () => commerce.orderSubscriptionAdjustment.update({ order_subscription_id: 's1', order_subscription_adjustment_id: 'a1' }), 'put', 'order_subscriptions/s1/adjustments', 'supervisor'],
+        ['orderSubscriptionBill.list', () => commerce.orderSubscriptionBill.list(), 'get', 'order_subscription_bills', 'user_or_supervisor'],
+        ['orderSubscriptionBill.detail', () => commerce.orderSubscriptionBill.detail('b1'), 'get', 'order_subscription_bills/b1', 'user_or_supervisor'],
+        ['orderSubscriptionBill.update', () => commerce.orderSubscriptionBill.update({ order_subscription_bill_id: 'b1' }), 'put', 'order_subscription_bills/b1', 'supervisor'],
+        ['orderSubscriptionRequest.list', () => commerce.orderSubscriptionRequest.list(), 'get', 'order-subscription-requests', 'user_or_supervisor'],
+        ['orderSubscriptionRequest.detail', () => commerce.orderSubscriptionRequest.detail('r1'), 'get', 'order-subscription-requests/r1', 'user_or_supervisor'],
+        ['orderSubscriptionRequest.update', () => commerce.orderSubscriptionRequest.update({ order_subscription_request_history_id: 'r1' }), 'put', 'order-subscription-requests/r1', 'supervisor'],
+        ['orderSubscription.list', () => commerce.orderSubscription.list(), 'get', 'order_subscriptions', 'user'],
+        ['orderSubscription.supervisorChargeRevoke', () => commerce.orderSubscription.supervisorChargeRevoke({ order_subscription_id: 's1' }), 'delete', 'order_subscriptions/charge', 'supervisor'],
+        ['orderSubscription.supervisorCharge', () => commerce.orderSubscription.supervisorCharge({ order_subscription_id: 's1' }), 'post', 'order_subscriptions/charge', 'supervisor'],
+        ['orderSubscription.requestIng.calculateTerminationFee', () => commerce.orderSubscription.requestIng.calculateTerminationFee('s1'), 'get', 'order_subscriptions/requests/ing/calculate_termination_fee', 'user'],
+        ['orderSubscription.requestIng.pause', () => commerce.orderSubscription.requestIng.pause({ order_subscription_id: 's1' }), 'post', 'order_subscriptions/requests/ing/pause', 'user'],
+        ['orderSubscription.requestIng.purchase', () => commerce.orderSubscription.requestIng.purchase({ order_subscription_id: 's1' }), 'post', 'order_subscriptions/requests/ing/purchase', 'user'],
+        ['orderSubscription.requestIng.resume', () => commerce.orderSubscription.requestIng.resume({ order_subscription_id: 's1' }), 'put', 'order_subscriptions/requests/ing/resume', 'user'],
+        ['orderSubscription.requestIng.termination', () => commerce.orderSubscription.requestIng.termination({ order_subscription_id: 's1' }), 'post', 'order_subscriptions/requests/ing/termination', 'user'],
+        ['orderSubscription.requestIng.transfer', () => commerce.orderSubscription.requestIng.transfer({ order_subscription_id: 's1' }), 'post', 'order_subscriptions/requests/ing/transfer', 'user'],
+        ['orderSubscription.update', () => commerce.orderSubscription.update({ order_subscription_id: 's1', quantity: 2 }), 'put', 'order_subscriptions/s1', 'supervisor'],
+        ['orderSubscription.detail', () => commerce.orderSubscription.detail('s1'), 'get', 'order_subscriptions/s1', 'user'],
+        ['orderSubscription.supervisorApprove', () => commerce.orderSubscription.supervisorApprove('s1'), 'put', 'order_subscriptions/s1/approve', 'supervisor'],
+        ['orderSubscription.supervisorPause', () => commerce.orderSubscription.supervisorPause('s1', { paused_at: '2026-01-01' }), 'put', 'order_subscriptions/s1/pause', 'supervisor'],
+        ['orderSubscription.supervisorReject', () => commerce.orderSubscription.supervisorReject('s1'), 'put', 'order_subscriptions/s1/reject', 'supervisor'],
+        ['orderSubscription.supervisorResume', () => commerce.orderSubscription.supervisorResume('s1'), 'put', 'order_subscriptions/s1/resume', 'supervisor'],
+        ['orderSubscription.supervisorTerminate', () => commerce.orderSubscription.supervisorTerminate('s1'), 'put', 'order_subscriptions/s1/terminate', 'supervisor'],
+        ['order.list', () => commerce.order.list(), 'get', 'orders', 'user'],
+        ['order.month', () => commerce.order.month('g1', '2026-01'), 'get', 'orders/month', 'user'],
+        ['order.detail', () => commerce.order.detail('o1'), 'get', 'orders/o1', 'user'],
+        ['order.updatePurchases', () => commerce.order.updatePurchases('o1', []), 'put', 'orders/o1/purchases', 'user'],
+        ['order.purchases', () => commerce.order.purchases('o1'), 'get', 'orders/o1/purchases', 'user'],
+        ['payout.create', () => commerce.payout.create({ merchant_payout_id: 'p1' }), 'post', 'sdk/payouts', 'supervisor'],
+        ['payout.detail', () => commerce.payout.detail('p1'), 'get', 'sdk/payouts/p1', 'supervisor'],
+        ['point.balance', () => commerce.point.balance(), 'get', 'point/balance', 'user'],
+        ['point.transactions', () => commerce.point.transactions(), 'get', 'point/transactions', 'user'],
+        ['productQna.create', () => commerce.productQna.create({ product_id: 'p1', content: 'c' }), 'post', 'product-qnas', 'user'],
+        ['productQna.delete', () => commerce.productQna.delete('q1'), 'delete', 'product-qnas/q1', 'user_or_supervisor'],
+        ['productQna.update', () => commerce.productQna.update('q1', { content: 'c' }), 'put', 'product-qnas/q1', 'user'],
+        ['productQna.answer', () => commerce.productQna.answer('q1', '답변'), 'put', 'product-qnas/q1/answer', 'supervisor'],
+        ['productReview.create', () => commerce.productReview.create({ product_id: 'p1', content: 'c' }), 'post', 'reviews', 'user'],
+        ['productReview.update', () => commerce.productReview.update('r1', { content: 'c' }), 'put', 'reviews/r1', 'user'],
+        ['productReview.reply', () => commerce.productReview.reply('r1', '감사'), 'put', 'reviews/r1/reply', 'supervisor'],
+        ['product.create', () => commerce.product.create({ name: '상품' }), 'post', 'products', 'user'],
+        ['product.list', () => commerce.product.list(), 'get', 'products', 'user'],
+        ['product.update', () => commerce.product.update({ product_id: 'p1', stock: 1 }), 'put', 'products/p1', 'user'],
+        ['product.detail', () => commerce.product.detail('p1'), 'get', 'products/p1', 'user'],
+        ['product.delete', () => commerce.product.delete('p1'), 'delete', 'products/p1', 'user'],
+        ['product.status', () => commerce.product.status({ product_id: 'p1', status_sale: true }), 'put', 'products/p1/status', 'user'],
+        ['store.getStore', () => commerce.store.getStore(), 'get', 'store', 'user'],
+        ['store.getStoreDetail', () => commerce.store.getStoreDetail(), 'get', 'store/detail', 'user'],
+        ['userGroup.create', () => commerce.userGroup.create({ name: 'g' }), 'post', 'user-groups', 'user'],
+        ['userGroup.list', () => commerce.userGroup.list(), 'get', 'user-groups', 'user'],
+        ['userGroup.update', () => commerce.userGroup.update({ user_group_id: 'g1', name: 'g' }), 'put', 'user-groups/g1', 'user'],
+        ['userGroup.detail', () => commerce.userGroup.detail('g1'), 'get', 'user-groups/g1', 'user'],
+        ['userGroup.aggregateTransaction', () => commerce.userGroup.aggregateTransaction({ user_group_id: 'g1' }), 'put', 'user-groups/g1/aggregate-transaction', 'manager'],
+        ['userGroup.limit', () => commerce.userGroup.limit({ user_group_id: 'g1' }), 'put', 'user-groups/g1/limit', 'manager'],
+        ['userGroup.userCreate', () => commerce.userGroup.userCreate('g1', 'u1'), 'post', 'user-groups/g1/user', 'manager'],
+        ['userGroup.userDelete', () => commerce.userGroup.userDelete('g1', 'u1'), 'delete', 'user-groups/g1/user/u1', 'manager'],
+        ['user.list', () => commerce.user.list(), 'get', 'users', 'user'],
+        ['user.userAuthenticate', () => commerce.user.userAuthenticate('st1'), 'get', 'users/authenticate/st1', 'user'],
+        ['user.userJoin', () => commerce.user.userJoin({ login_id: 'id', password: 'pw', name: 'n' }), 'post', 'users/join', 'user'],
+        ['user.uidExist', () => commerce.user.uidExist('u1'), 'get', 'users/join/uid-exist', 'user'],
+        ['user.userJoinCheck', () => commerce.user.userJoinCheck('email-exist', 'a@b.com'), 'get', 'users/join/email-exist', 'user'],
+        ['user.userLogin', () => commerce.user.userLogin({ login_id: 'id', password: 'pw' }), 'post', 'users/login', 'user'],
+        ['user.token', () => commerce.user.token('u1'), 'post', 'users/login/token', 'user'],
+        ['user.userSession', () => commerce.user.userSession('jwt'), 'get', 'users/session', 'user'],
+        ['user.userLogout', () => commerce.user.userLogout('jwt'), 'delete', 'users/session', 'user'],
+        ['user.detail', () => commerce.user.detail('u1'), 'get', 'users/u1', 'user'],
+        ['user.delete', () => commerce.user.delete('u1'), 'delete', 'users/u1', 'user'],
+        ['user.update', () => commerce.user.update({ user_id: 'u1', name: 'n' }), 'put', 'users/u1', 'user'],
+        ['webhook.sendTest', () => commerce.webhook.sendTest(), 'post', 'webhook/test', 'supervisor']
+    ];
+    // manager 모드: user_or_supervisor 는 user 로 나가야 한다(manager 가 새면 안 된다)
+    commerce.asManager();
+    for (const [label, call, method, uri, rule] of roleRules) {
+        const config = await expect(`${label}(asManager)`, call, method, uri);
+        assert.strictEqual(header(config, 'BOOTPAY-ROLE'), rule === 'user_or_supervisor' ? 'user' : rule, `${label}: asManager() 일 때 BOOTPAY-ROLE`);
+    }
+    // supervisor 모드: user_or_supervisor 는 supervisor, 나머지는 규칙 그대로
+    commerce.asSupervisor();
+    for (const [label, call, method, uri, rule] of roleRules) {
+        const config = await expect(`${label}(asSupervisor)`, call, method, uri);
+        assert.strictEqual(header(config, 'BOOTPAY-ROLE'), rule === 'user_or_supervisor' ? 'supervisor' : rule, `${label}: asSupervisor() 일 때 BOOTPAY-ROLE`);
+    }
+    // 게시판 detail 의 supervisor: true 는 인스턴스 role 과 무관하게 supervisor
+    commerce.asManager();
+    assert.strictEqual(header(await expect('faq.detail(supervisor)', () => commerce.faq.detail('f1', { supervisor: true }), 'get', 'faqs/f1'), 'BOOTPAY-ROLE'), 'supervisor');
+    commerce.clearRole();
+
+    // ── SDK 버전 헤더는 package.json 의 version 이다 ──
+    const sdkVersionConfig = await expect('sdk version header', () => commerce.category.list(), 'get', 'categories');
+    assert.strictEqual(header(sdkVersionConfig, 'BOOTPAY-SDK-VERSION'), require('../../package.json').version, 'BOOTPAY-SDK-VERSION == package.json version');
+
     // ── 알림톡 호스트 분기 ──
     // 알림톡만 메시지 API 로 가고, 알림톡이 아닌 경로는 계속 커머스 API(/v1)로 간다.
     assert.strictEqual(commerce.entrypoints('alimtalk/send'), 'https://dev-m.bootapi.com/alimtalk/send');

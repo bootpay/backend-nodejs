@@ -19,11 +19,12 @@ export interface CommerceConfiguration {
     mode?: 'development' | 'production' | 'stage'
 }
 
-export interface BootpayCommerceResponse<T = any> {
-    success: boolean
-    data: T
-    error?: string
-}
+/**
+ * 응답 본문 타입.
+ * 응답 인터셉터가 `response.data`(서버 원문 본문)를 그대로 돌려주므로 { success, data } 래퍼는 없다.
+ * 서버가 주는 JSON 자체가 T 다 (목록은 { list, count } 등).
+ */
+export type BootpayCommerceResponse<T = any> = T
 
 /**
  * JSON 이 아닌 본문(CSV 등)을 파싱하지 않고 그대로 담아 돌려주는 응답.
@@ -160,6 +161,15 @@ export class BootpayCommerceResource {
 
     getRole(): string {
         return this.$role
+    }
+
+    /**
+     * user_or_supervisor 엔드포인트용 role.
+     * 인스턴스 role 이 supervisor 일 때만 supervisor, 그 밖(manager 등)은 user 로 보낸다.
+     * 서버가 "<role>:<scope>" 를 정확히 비교하므로 manager 가 그대로 새면 401 API_ROLE_NOT_SUPPORT(-50) 가 난다.
+     */
+    userOrSupervisorRole(): 'user' | 'supervisor' {
+        return this.$role === 'supervisor' ? 'supervisor' : 'user'
     }
 
     /**

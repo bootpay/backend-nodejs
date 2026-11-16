@@ -22,13 +22,13 @@ export class OrderCancelModule {
      * approve / reject / withdraw 에 넘길 order_cancellation_request_id 를 여기서 얻는다.
      * @param params 조회 파라미터
      */
-    async list(params?: OrderCancelListParams): Promise<BootpayCommerceResponse<{ items: CommerceOrderCancelRequestHistory[]; total: number }>> {
+    async list(params?: OrderCancelListParams): Promise<BootpayCommerceResponse<{ list: CommerceOrderCancelRequestHistory[]; count: number }>> {
         const { idempotency_key, ...rest } = params || {}
         const queryParams = new URLSearchParams()
         if (rest.order_number) queryParams.append('order_number', rest.order_number)
         if (rest.order_id) queryParams.append('order_id', rest.order_id)
         const query = queryParams.toString()
-        return this.bootpay.get<{ items: CommerceOrderCancelRequestHistory[]; total: number }>(
+        return this.bootpay.get<{ list: CommerceOrderCancelRequestHistory[]; count: number }>(
             `order/cancel${query ? `?${query}` : ''}`,
             { headers: this.userHeaders(idempotency_key) }
         )
@@ -39,7 +39,9 @@ export class OrderCancelModule {
      * @param params 취소 요청 파라미터
      */
     async request(params: OrderCancelParams): Promise<BootpayCommerceResponse<CommerceOrderCancelRequestHistory>> {
-        return this.bootpay.post<CommerceOrderCancelRequestHistory>('order/cancel', params)
+        return this.bootpay.post<CommerceOrderCancelRequestHistory>('order/cancel', params, {
+            headers: { 'BOOTPAY-ROLE': this.bootpay.userOrSupervisorRole() }
+        })
     }
 
     /**
