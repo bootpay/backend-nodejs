@@ -1130,6 +1130,30 @@ function relative(config) {
     assert.strictEqual(custom.entrypoints('alimtalk/senders'), 'https://localhost:3000/alimtalk/senders');
     assert.strictEqual(custom.entrypoints('products'), 'https://dev-api.bootapi.com/v1/products');
 
+    // ── 빈 id 경로 조각 ──
+    // 빈 id 로 상세 메서드를 부르면 orders/ 나 orders//purchases 가 되어 서버가 목록·다른 endpoint 로 라우팅한다.
+    // 요청을 보내지 않고 success false 로 reject 해야 한다.
+    async function expectBlankRejected(label, call) {
+        const before = requests.length;
+        let rejected;
+        try { await call(); } catch (e) { rejected = e; }
+        assert.ok(rejected, `${label}: reject 되어야 한다`);
+        assert.strictEqual(rejected.success, false, `${label}: success false`);
+        assert.ok(String(rejected.message).includes('빈 id'), `${label}: 빈 id 메시지`);
+        assert.strictEqual(requests.length, before, `${label}: 요청을 보내면 안 된다`);
+    }
+    await expectBlankRejected('order.detail(\'\')', () => commerce.order.detail(''));
+    await expectBlankRejected('get(orders/)', () => commerce.get('orders/'));
+    await expectBlankRejected('get(orders//purchases)', () => commerce.get('orders//purchases'));
+    await expectBlankRejected('get(orders/?a=1)', () => commerce.get('orders/?a=1'));
+    await expectBlankRejected('get(\'\')', () => commerce.get(''));
+    await expectBlankRejected('getRaw(alimtalk/templates/)', () => commerce.getRaw('alimtalk/templates/'));
+    await expectBlankRejected('post(orders//x)', () => commerce.post('orders//x', {}));
+    await expectBlankRejected('put(products/)', () => commerce.put('products/', {}));
+    await expectBlankRejected('delete(products/)', () => commerce.delete('products/'));
+    assert.strictEqual(commerce.blankPathSegment('orders/1'), false);
+    assert.strictEqual(commerce.blankPathSegment('/orders/1?keyword=a//b'), false, 'query 는 검사하지 않는다');
+
     console.log(`commerce route contract: ${requests.length} requests verified (uri · method · role · payload)`);
 })().catch((error) => {
     console.error(error);

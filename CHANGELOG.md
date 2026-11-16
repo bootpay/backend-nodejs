@@ -1,5 +1,11 @@
 ### Unreleased
 
+#### 빈 id 경로 조각 요청 차단 (`79594ea5`)
+
+- `order.detail('')` 처럼 id 가 비어 경로가 `orders/`(끝이 `/`) 나 `orders//purchases`(`//` 포함)가 되면 서버가 목록·다른 endpoint 로 라우팅해 오류 없이 엉뚱한 응답이 왔다.
+  → `get`·`getRaw`·`post`·`postWithBasicAuth`·`put`·`delete` 가 요청을 보내지 않고 `{ success: false, message: '요청 경로에 빈 id 가 있습니다: …' }` 로 reject 한다(query 는 검사하지 않는다).
+- 테스트: `commerceRouteContract.js` 에 빈 경로 조각 차단을 고정했다.
+
 #### 발송 정보 조회·발송처리 role 고정
 
 - `order.purchases` / `order.updatePurchases` 가 인스턴스 역할(asManager 등)을 그대로 실어 401 API_ROLE_NOT_SUPPORT 가 날 수 있었다 → BOOTPAY-ROLE user + Idempotency-Key(선택 인자, 미지정시 자동 생성)로 고정.

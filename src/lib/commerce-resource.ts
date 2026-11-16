@@ -206,8 +206,29 @@ export class BootpayCommerceResource {
         return [this.apiBaseUrl(url), url].join('/')
     }
 
+    /**
+     * 경로 조각이 빈 요청을 막는다.
+     * 빈 id 로 상세 메서드를 부르면 "orders/" 처럼 / 로 끝나거나 "orders//purchases" 처럼 // 가 생겨
+     * 서버가 목록이나 다른 endpoint 로 라우팅한다(오류 없이 엉뚱한 응답). 이런 요청은 보내지 않고 실패 응답으로 reject 한다.
+     */
+    blankPathSegment(url: string): boolean {
+        const path = String(url ?? '').split('?')[0].replace(/^\//, '')
+        return path === '' || path.endsWith('/') || path.includes('//')
+    }
+
+    private rejectBlankPath(url: string): void {
+        if (this.blankPathSegment(url)) {
+            throw {
+                success: false,
+                message: `요청 경로에 빈 id 가 있습니다: ${url}`
+            }
+        }
+    }
+
     async get<T = any, D = any>(url: string, config?: AxiosRequestConfig<D>): Promise<BootpayCommerceResponse<T>> {
         try {
+            // 경로 id 가 비면 요청하지 않는다(blankPathSegment 참고).
+            this.rejectBlankPath(url)
             this.requireCommerceCredentials()
             const response = await this.$http.get(this.entrypoints(url), config)
             return Promise.resolve(response as unknown as BootpayCommerceResponse<T>)
@@ -224,6 +245,8 @@ export class BootpayCommerceResource {
      */
     async getRaw(url: string, config?: AxiosRequestConfig): Promise<BootpayCommerceRawResponse> {
         try {
+            // 경로 id 가 비면 요청하지 않는다(blankPathSegment 참고).
+            this.rejectBlankPath(url)
             this.requireCommerceCredentials()
             const response = await this.$http.get(this.entrypoints(url), {
                 ...config,
@@ -243,6 +266,8 @@ export class BootpayCommerceResource {
         config?: AxiosRequestConfig<D>
     ): Promise<BootpayCommerceResponse<T>> {
         try {
+            // 경로 id 가 비면 요청하지 않는다(blankPathSegment 참고).
+            this.rejectBlankPath(url)
             this.requireCommerceCredentials()
             const response = await this.$http.post(this.entrypoints(url), data, config)
             return Promise.resolve(response as unknown as BootpayCommerceResponse<T>)
@@ -283,6 +308,8 @@ export class BootpayCommerceResource {
         config?: AxiosRequestConfig<D>
     ): Promise<BootpayCommerceResponse<T>> {
         try {
+            // 경로 id 가 비면 요청하지 않는다(blankPathSegment 참고).
+            this.rejectBlankPath(url)
             this.requireCommerceCredentials()
             const authConfig: AxiosRequestConfig = {
                 ...config,
@@ -304,6 +331,8 @@ export class BootpayCommerceResource {
         config?: AxiosRequestConfig<D>
     ): Promise<BootpayCommerceResponse<T>> {
         try {
+            // 경로 id 가 비면 요청하지 않는다(blankPathSegment 참고).
+            this.rejectBlankPath(url)
             this.requireCommerceCredentials()
             const response = await this.$http.put(this.entrypoints(url), data, config)
             return Promise.resolve(response as unknown as BootpayCommerceResponse<T>)
@@ -314,6 +343,8 @@ export class BootpayCommerceResource {
 
     async delete<T = any, D = any>(url: string, config?: AxiosRequestConfig<D>): Promise<BootpayCommerceResponse<T>> {
         try {
+            // 경로 id 가 비면 요청하지 않는다(blankPathSegment 참고).
+            this.rejectBlankPath(url)
             this.requireCommerceCredentials()
             const response = await this.$http.delete(this.entrypoints(url), config)
             return Promise.resolve(response as unknown as BootpayCommerceResponse<T>)
