@@ -1,5 +1,6 @@
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, InternalAxiosRequestConfig } from 'axios'
 import FormData from 'form-data'
+import { SDK_VERSION } from './version'
 
 export interface BootpayCommerceRestApiErrorResponse<T = any> {
     error_code?: number
@@ -42,7 +43,7 @@ export class BootpayCommerceResource {
     API_ENTRYPOINTS: CommerceEntrypoints
     MESSAGE_API_ENTRYPOINTS: CommerceEntrypoints
     apiVersion: string = '1.0.0'
-    sdkVersion: string = '1.0.0'
+    sdkVersion: string = SDK_VERSION
 
     constructor() {
         this.mode = 'production'

@@ -1,4 +1,5 @@
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios'
+import { SDK_VERSION } from './version'
 
 export interface BootpayRestApiErrorResponse<T = any> {
     error_code?: number
@@ -27,7 +28,7 @@ export class BootpayBackendNodejsResource {
     bootpayConfiguration: BootpayConfiguration
     API_ENTRYPOINTS: BootpayEntrypoints
     apiVersion: string = '5.0.0'
-    sdkVersion: string = '2.3.0'
+    sdkVersion: string = SDK_VERSION
 
     constructor() {
         this.mode                 = 'production'

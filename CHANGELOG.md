@@ -18,6 +18,11 @@
 - 기존 `authenticationData(standId)` 는 `userAuthenticate` 로 위임하는 호환용 별칭이 됐다(deprecated) — 이제 `BOOTPAY-ROLE: user`·`Idempotency-Key` 를 함께 보낸다.
 - 테스트: `commerceRouteContract.js` 에 경로·동사·role·query 를 고정했고, 실행 스크립트 `userAuthenticate.js` 를 추가했다.
 
+#### SDK 버전 헤더를 package.json 버전으로
+
+- `BOOTPAY-SDK-VERSION` 이 commerce `1.0.0`, PG `2.3.0` 으로 낡아 있었다 → `src/lib/version.ts` 가 `package.json` 의 `version` 을 읽어 둘 다 기본값으로 쓴다(`sdkVersion` 속성명 유지).
+- 테스트: 헤더가 `package.json` 버전과 같은지 고정했다.
+
 #### 입금대기 `accounts()`·`detail()` Idempotency-Key
 
 - `deposit.accounts(idempotencyKey?)`, `deposit.detail(depositId, idempotencyKey?)` — 선택 인자. 미지정시 자동 생성, supervisor role 은 그대로.
