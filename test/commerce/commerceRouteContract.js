@@ -1064,6 +1064,13 @@ function relative(config) {
     assert.strictEqual(header(depositCancel, 'BOOTPAY-ROLE'), 'supervisor');
     const depositCancelKeyed = await expect('deposit.cancel(key)', () => commerce.deposit.cancel('m-1', 'idem-cancel'), 'delete', 'sdk/deposits/m-1');
     assert.strictEqual(header(depositCancelKeyed, 'Idempotency-Key'), 'idem-cancel');
+    // accounts · detail 도 Idempotency-Key 를 받는다(명시값 존중)
+    const depositAccountsKeyed = await expect('deposit.accounts(key)', () => commerce.deposit.accounts('idem-accounts'), 'get', 'sdk/deposits/accounts');
+    assert.strictEqual(header(depositAccountsKeyed, 'Idempotency-Key'), 'idem-accounts');
+    assert.strictEqual(header(depositAccountsKeyed, 'BOOTPAY-ROLE'), 'supervisor');
+    const depositDetailKeyed = await expect('deposit.detail(key)', () => commerce.deposit.detail('m-1', 'idem-detail'), 'get', 'sdk/deposits/m-1');
+    assert.strictEqual(header(depositDetailKeyed, 'Idempotency-Key'), 'idem-detail');
+    assert.strictEqual(header(depositDetailKeyed, 'BOOTPAY-ROLE'), 'supervisor');
     // Idempotency-Key 미지정시 호출마다 새로 만든다
     const autoKeys = [depositAccounts, depositSecret, depositDetail, depositCancel].map((config) => header(config, 'Idempotency-Key'));
     autoKeys.forEach((key) => assert.ok(key, 'deposit: Idempotency-Key 자동 생성'));

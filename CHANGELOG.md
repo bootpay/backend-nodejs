@@ -18,6 +18,10 @@
 - 기존 `authenticationData(standId)` 는 `userAuthenticate` 로 위임하는 호환용 별칭이 됐다(deprecated) — 이제 `BOOTPAY-ROLE: user`·`Idempotency-Key` 를 함께 보낸다.
 - 테스트: `commerceRouteContract.js` 에 경로·동사·role·query 를 고정했고, 실행 스크립트 `userAuthenticate.js` 를 추가했다.
 
+#### 입금대기 `accounts()`·`detail()` Idempotency-Key
+
+- `deposit.accounts(idempotencyKey?)`, `deposit.detail(depositId, idempotencyKey?)` — 선택 인자. 미지정시 자동 생성, supervisor role 은 그대로.
+
 ### 2.15.1
 
 #### 청구서 생성 `BOOTPAY-ROLE` 을 user 로 고정 (`40b5d45`)
