@@ -23,8 +23,26 @@ export interface CommerceConfiguration {
  * 응답 본문 타입.
  * 응답 인터셉터가 `response.data`(서버 원문 본문)를 그대로 돌려주므로 { success, data } 래퍼는 없다.
  * 서버가 주는 JSON 자체가 T 다 (목록은 { list, count } 등).
+ *
+ * 하위 호환: 예전 선언({ success, data, error })으로 짠 코드가 업그레이드 뒤에도 컴파일되도록
+ * T 에 없는 옛 필드를 deprecated optional 로 덧붙인다. 런타임 값은 예전과 같이 undefined 다.
  */
-export type BootpayCommerceResponse<T = any> = T
+export type BootpayCommerceResponse<T = any> = [T] extends [null | undefined | void]
+    ? BootpayCommerceLegacyResponseFields
+    : T & Omit<BootpayCommerceLegacyResponseFields, keyof T>
+
+/**
+ * @deprecated 서버 본문에 없는 필드 — 예전 타입 선언과의 컴파일 호환용이다. 값은 항상 undefined 다.
+ * 목록은 `res.list` · `res.count`, 단건은 `res` 자체를 쓴다.
+ */
+export interface BootpayCommerceLegacyResponseFields {
+    /** @deprecated 서버 본문에 없다 (항상 undefined) */
+    success?: boolean
+    /** @deprecated 서버 본문에 없다 (항상 undefined) — 본문은 응답 자체다 */
+    data?: any
+    /** @deprecated 서버 본문에 없다 (항상 undefined) */
+    error?: string
+}
 
 /**
  * JSON 이 아닌 본문(CSV 등)을 파싱하지 않고 그대로 담아 돌려주는 응답.

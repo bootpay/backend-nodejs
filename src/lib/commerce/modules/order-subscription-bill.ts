@@ -28,7 +28,7 @@ export class OrderSubscriptionBillModule {
         }
         return this.bootpay.get<{ list: CommerceOrderSubscriptionBill[]; count: number }>(
             `order_subscription_bills?${queryParams.toString()}`,
-            { headers: this.userOrSupervisorHeaders(idempotency_key) }
+            { headers: this.userHeaders(idempotency_key) }
         )
     }
 
@@ -61,10 +61,10 @@ export class OrderSubscriptionBillModule {
      * 빌 조회 요청 헤더
      * Idempotency-Key 는 미지정시 매 호출마다 생성된다.
      */
-    private userOrSupervisorHeaders(idempotencyKey?: string): Record<string, string> {
+    private userHeaders(idempotencyKey?: string): Record<string, string> {
         return {
             'Idempotency-Key': idempotencyKey || randomUUID(),
-            'BOOTPAY-ROLE': this.bootpay.userOrSupervisorRole()
+            'BOOTPAY-ROLE': 'user'
         }
     }
 }

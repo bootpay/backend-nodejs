@@ -1,4 +1,7 @@
-### Unreleased
+### 2.16.0
+
+> **TypeScript 사용자** — 응답 타입을 실제 서버 본문에 맞췄다(목록은 `res.list` · `res.count`). 예전 선언으로 짠 코드(`res.success` · `res.data.items` 등)도
+> 그대로 컴파일되도록 옛 필드를 deprecated optional 로 남겼다 — 값은 예전과 같이 undefined 다. 런타임 동작은 바뀌지 않았다.
 
 #### 빈 id 경로 조각 요청 차단 (`79594ea5`)
 
@@ -23,9 +26,11 @@
 - 서버가 `"<role>:<scope>"` 를 정확히 비교하므로, role 헤더를 안 넘기던 메서드가 `asManager()` 뒤 401 `API_ROLE_NOT_SUPPORT(-50)` 가 날 수 있었다.
   → 서버 규칙표대로 모든 commerce 메서드가 인스턴스 role 과 무관하게 `user` / `supervisor` / `manager` 를 명시한다
   (`order_subscription_bills.update` 는 supervisor 로 고정, `order_subscriptions/{}` 수정은 supervisor).
-- `user_or_supervisor` 엔드포인트(`coupon.list/available`, `faq·notice.detail`, `orderCancel.request`, `orderSubscriptionBill.list/detail`,
-  `orderSubscriptionRequest.list/detail`, `productQna.delete`)는 인스턴스가 supervisor 일 때만 supervisor, 그 밖(manager 등)은 user 로 보낸다.
-  `BootpayCommerceResource.userOrSupervisorRole()` 을 추가했다. 기존 supervisor 호출자는 그대로 동작한다.
+- `user_or_supervisor` 엔드포인트(`coupon.list/available`, `orderCancel.request`, `orderSubscriptionBill.detail`)는 인스턴스가 supervisor 일 때만
+  supervisor, 그 밖(manager 등)은 user 로 보낸다. `BootpayCommerceResource.userOrSupervisorRole()` 을 추가했다. 기존 supervisor 호출자는 그대로 동작한다.
+- 이미 role 을 명시하던 엔드포인트는 기존 동작을 그대로 둔다 — supervisor 인스턴스여도 바뀌지 않는다.
+  `faq·notice.detail`·`productQna.delete` 는 `supervisor: true` 일 때만 supervisor(그 외 user),
+  `orderSubscriptionBill.list` 는 user, `orderSubscriptionRequest.list/detail` 은 `project_id` 가 있을 때만 supervisor(그 외 user).
 - 테스트: `commerceRouteContract.js` 에 규칙표 기반 점검을 넣었다(manager 모드 → supervisor 모드).
 
 #### SDK 버전 헤더를 package.json 버전으로
@@ -39,7 +44,7 @@
 
 #### 응답 타입을 실제 응답에 맞춤 (⚠️ 타입만 변경)
 
-- ⚠️ 타입만 바뀌고 런타임 동작은 같다 — `.data`/`.items`/`.total` 을 쓰던 TS 코드는 원래 런타임에서 undefined 였고 이제 컴파일 오류로 드러난다.
+- 타입만 바뀌고 런타임 동작은 같다. `.data`/`.items`/`.total` 은 원래 런타임에서 undefined 였다 — 컴파일 호환을 위해 `success` · `data` · `error` 를 deprecated optional(`BootpayCommerceLegacyResponseFields`)로 남겨 기존 코드가 깨지지 않는다. 새 코드는 `res.list` · `res.count` 를 쓴다.
 - `BootpayCommerceResponse<T>` 는 `{ success, data }` 래퍼가 아니라 서버 본문 자체(`= T`)다(응답 인터셉터가 `response.data` 를 돌려준다).
 - 목록 응답 타입을 `{ items, total }` → `{ list, count }` 로 고쳤다: `user.list`, `userGroup.list`, `product.list/products`(+ `page`·`limit`·`server_now`),
   `order.list`, `orderCancel.list`, `orderSubscription.list`(+ 합계 키), `orderSubscriptionBill.list`, `orderSubscriptionRequest.list`(+ 합계 키).

@@ -45,7 +45,7 @@ export class FaqModule {
     async detail(faqId: string, params?: FaqDetailParams): Promise<BootpayCommerceResponse<CommerceFaq>> {
         const { supervisor, idempotency_key } = params || {}
         return this.bootpay.get<CommerceFaq>(`faqs/${faqId}`, {
-            headers: this.boardHeaders(supervisor || this.bootpay.userOrSupervisorRole() === 'supervisor', idempotency_key)
+            headers: this.boardHeaders(supervisor, idempotency_key)
         })
     }
 

@@ -105,7 +105,7 @@ export class OrderSubscriptionRequestModule {
     private requestHeaders(projectId?: string, idempotencyKey?: string): Record<string, string> {
         return {
             'Idempotency-Key': idempotencyKey || randomUUID(),
-            'BOOTPAY-ROLE': projectId ? 'supervisor' : this.bootpay.userOrSupervisorRole()
+            'BOOTPAY-ROLE': projectId ? 'supervisor' : 'user'
         }
     }
 

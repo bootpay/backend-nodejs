@@ -1145,7 +1145,7 @@ function relative(config) {
         ['deposit.cancel', () => commerce.deposit.cancel('d1'), 'delete', 'sdk/deposits/d1', 'supervisor'],
         ['faq.create', () => commerce.faq.create({ title: 't', content: 'c' }), 'post', 'faqs', 'supervisor'],
         ['faq.delete', () => commerce.faq.delete('f1'), 'delete', 'faqs/f1', 'supervisor'],
-        ['faq.detail', () => commerce.faq.detail('f1'), 'get', 'faqs/f1', 'user_or_supervisor'],
+        ['faq.detail', () => commerce.faq.detail('f1'), 'get', 'faqs/f1', 'user'],
         ['faq.update', () => commerce.faq.update('f1', { title: 't' }), 'put', 'faqs/f1', 'supervisor'],
         ['inquiry.create', () => commerce.inquiry.create({ title: 't', content: 'c' }), 'post', 'inquiries', 'user'],
         ['inquiry.update', () => commerce.inquiry.update('i1', { title: 't' }), 'put', 'inquiries/i1', 'user'],
@@ -1157,7 +1157,7 @@ function relative(config) {
         ['mallSetting.getMallSetting', () => commerce.mallSetting.getMallSetting(), 'get', 'mall-setting', 'supervisor'],
         ['mallSetting.updateMallSetting', () => commerce.mallSetting.updateMallSetting({}), 'put', 'mall-setting', 'supervisor'],
         ['notice.create', () => commerce.notice.create({ title: 't', content: 'c' }), 'post', 'notices', 'supervisor'],
-        ['notice.detail', () => commerce.notice.detail('n1'), 'get', 'notices/n1', 'user_or_supervisor'],
+        ['notice.detail', () => commerce.notice.detail('n1'), 'get', 'notices/n1', 'user'],
         ['notice.delete', () => commerce.notice.delete('n1'), 'delete', 'notices/n1', 'supervisor'],
         ['notice.update', () => commerce.notice.update('n1', { title: 't' }), 'put', 'notices/n1', 'supervisor'],
         ['orderCancel.request', () => commerce.orderCancel.request({ order_number: 'o1' }), 'post', 'order/cancel', 'user_or_supervisor'],
@@ -1168,11 +1168,11 @@ function relative(config) {
         ['orderSubscriptionAdjustment.create', () => commerce.orderSubscriptionAdjustment.create('s1', { name: '할인' }), 'post', 'order_subscriptions/s1/adjustments', 'supervisor'],
         ['orderSubscriptionAdjustment.delete', () => commerce.orderSubscriptionAdjustment.delete('s1', 'a1'), 'delete', 'order_subscriptions/s1/adjustments', 'supervisor'],
         ['orderSubscriptionAdjustment.update', () => commerce.orderSubscriptionAdjustment.update({ order_subscription_id: 's1', order_subscription_adjustment_id: 'a1' }), 'put', 'order_subscriptions/s1/adjustments', 'supervisor'],
-        ['orderSubscriptionBill.list', () => commerce.orderSubscriptionBill.list(), 'get', 'order_subscription_bills', 'user_or_supervisor'],
+        ['orderSubscriptionBill.list', () => commerce.orderSubscriptionBill.list(), 'get', 'order_subscription_bills', 'user'],
         ['orderSubscriptionBill.detail', () => commerce.orderSubscriptionBill.detail('b1'), 'get', 'order_subscription_bills/b1', 'user_or_supervisor'],
         ['orderSubscriptionBill.update', () => commerce.orderSubscriptionBill.update({ order_subscription_bill_id: 'b1' }), 'put', 'order_subscription_bills/b1', 'supervisor'],
-        ['orderSubscriptionRequest.list', () => commerce.orderSubscriptionRequest.list(), 'get', 'order-subscription-requests', 'user_or_supervisor'],
-        ['orderSubscriptionRequest.detail', () => commerce.orderSubscriptionRequest.detail('r1'), 'get', 'order-subscription-requests/r1', 'user_or_supervisor'],
+        ['orderSubscriptionRequest.list', () => commerce.orderSubscriptionRequest.list(), 'get', 'order-subscription-requests', 'user'],
+        ['orderSubscriptionRequest.detail', () => commerce.orderSubscriptionRequest.detail('r1'), 'get', 'order-subscription-requests/r1', 'user'],
         ['orderSubscriptionRequest.update', () => commerce.orderSubscriptionRequest.update({ order_subscription_request_history_id: 'r1' }), 'put', 'order-subscription-requests/r1', 'supervisor'],
         ['orderSubscription.list', () => commerce.orderSubscription.list(), 'get', 'order_subscriptions', 'user'],
         ['orderSubscription.supervisorChargeRevoke', () => commerce.orderSubscription.supervisorChargeRevoke({ order_subscription_id: 's1' }), 'delete', 'order_subscriptions/charge', 'supervisor'],
@@ -1200,7 +1200,7 @@ function relative(config) {
         ['point.balance', () => commerce.point.balance(), 'get', 'point/balance', 'user'],
         ['point.transactions', () => commerce.point.transactions(), 'get', 'point/transactions', 'user'],
         ['productQna.create', () => commerce.productQna.create({ product_id: 'p1', content: 'c' }), 'post', 'product-qnas', 'user'],
-        ['productQna.delete', () => commerce.productQna.delete('q1'), 'delete', 'product-qnas/q1', 'user_or_supervisor'],
+        ['productQna.delete', () => commerce.productQna.delete('q1'), 'delete', 'product-qnas/q1', 'user'],
         ['productQna.update', () => commerce.productQna.update('q1', { content: 'c' }), 'put', 'product-qnas/q1', 'user'],
         ['productQna.answer', () => commerce.productQna.answer('q1', '답변'), 'put', 'product-qnas/q1/answer', 'supervisor'],
         ['productReview.create', () => commerce.productReview.create({ product_id: 'p1', content: 'c' }), 'post', 'reviews', 'user'],
@@ -1251,6 +1251,16 @@ function relative(config) {
     // 게시판 detail 의 supervisor: true 는 인스턴스 role 과 무관하게 supervisor
     commerce.asManager();
     assert.strictEqual(header(await expect('faq.detail(supervisor)', () => commerce.faq.detail('f1', { supervisor: true }), 'get', 'faqs/f1'), 'BOOTPAY-ROLE'), 'supervisor');
+    // 반대로 supervisor: false 는 asSupervisor() 여도 user 다 (명시값이 인스턴스 role 보다 우선)
+    commerce.asSupervisor();
+    for (const [label, call, uri] of [
+        ['faq.detail', () => commerce.faq.detail('f1', { supervisor: false }), 'faqs/f1'],
+        ['notice.detail', () => commerce.notice.detail('n1', { supervisor: false }), 'notices/n1'],
+        ['productQna.delete', () => commerce.productQna.delete('q1', { supervisor: false }), 'product-qnas/q1']
+    ]) {
+        const method = label === 'productQna.delete' ? 'delete' : 'get';
+        assert.strictEqual(header(await expect(`${label}(supervisor:false, asSupervisor)`, call, method, uri), 'BOOTPAY-ROLE'), 'user', `${label}: supervisor:false 는 asSupervisor() 여도 user`);
+    }
     commerce.clearRole();
 
     // ── SDK 버전 헤더는 package.json 의 version 이다 ──

@@ -45,7 +45,7 @@ export class NoticeModule {
     async detail(noticeId: string, params?: NoticeDetailParams): Promise<BootpayCommerceResponse<CommerceNotice>> {
         const { supervisor, idempotency_key } = params || {}
         return this.bootpay.get<CommerceNotice>(`notices/${noticeId}`, {
-            headers: this.boardHeaders(supervisor || this.bootpay.userOrSupervisorRole() === 'supervisor', idempotency_key)
+            headers: this.boardHeaders(supervisor, idempotency_key)
         })
     }
 
